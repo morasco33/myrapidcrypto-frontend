@@ -1,0 +1,29 @@
+<!-- frontend/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidCrypto Prices</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        h1 { color: #0056b3; }
+        #crypto-container { margin-top: 20px; background-color: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .crypto-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+        .crypto-item:last-child { border-bottom: none; }
+        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #error-message { color: red; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to RapidCrypto!</h1>
+    <button id="fetchDataBtn">Fetch Crypto Data</button>
+    <div id="crypto-container">
+        <!-- Crypto data will be displayed here -->
+    </div>
+    <div id="error-message"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
