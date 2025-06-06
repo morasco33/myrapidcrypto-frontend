@@ -43,13 +43,7 @@
       <aside class="sidebar">
         <h3>Your Account</h3>
         <p>Available Balance: <span class="balance" id="availableBalance">$0.00</span></p>
-        <!-- Optional: Dedicated container for user's active investments, if you add this, uncomment relevant JS -->
-        <!-- 
-        <div id="userActiveInvestments" style="margin-top: 20px;">
-            <h4>My Investments</h4>
-            <p>Loading investments...</p>
-        </div>
-        -->
+        <!-- Optional: Dedicated container for user's active investments -->
       </aside>
 
       <div class="dashboard-grid">
@@ -75,9 +69,6 @@
           </div>
         </div>
 
-        <!-- ================================================== -->
-        <!-- >>>>>>>>>>>> ADD THIS BLOCK BACK IN <<<<<<<<<<<<<< -->
-        <!-- ================================================== -->
         <div class="card quick-actions">
           <h3>Quick Actions</h3>
           <button id="mainDepositBtn" class="action-btn deposit-btn">
@@ -87,10 +78,6 @@
             <i class="fas fa-arrow-up action-icon"></i> Withdraw Funds
           </button>
         </div>
-        <!-- ================================================== -->
-        <!--            END OF ADDED QUICK ACTIONS BLOCK        -->
-        <!-- ================================================== -->
-
 
         <!-- Investment Plans -->
         <div class="card investment-options silver-plan" data-plan-id="silver">
@@ -196,13 +183,15 @@
   </div>
   
   <script>
-    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
+    window.APP_KEYS = {
+      API_BASE_URL: "https://rapidcrypto-backend.onrender.com"
+    };
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="auth.js"></script>    <!-- Ensure correct path e.g., js/auth.js -->
-  <script src="script.js"></script>   <!-- Ensure correct path -->
-  <script src="uiUtils.js"></script> <!-- Ensure correct path -->
-  <script src="dashboard.js"></script> <!-- Ensure correct path -->
+  <script src="auth.js"></script>
+  <script src="uiUtils.js"></script>
+  <script src="script.js"></script>
+  <script src="dashboard.js"></script>
 </body>
 </html>
