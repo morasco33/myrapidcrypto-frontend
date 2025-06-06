@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // IMPORTANT: This URL will be your DEPLOYED Railway backend URL
     // For now, we can use the local one if you're testing locally.
     // We will update this to the Railway URL once it's deployed.
-    const API_URL = 'https://myrapidcrypto-backend-production.up.railway.app/'; // Placeholder, will change
+const API_URL = 'https://rapidcrypto-backend.onrender.com/api/crypto-data'; // <<-- YOUR ACTUAL LIVE URL
+// ...'; // Placeholder, will change
 
     fetchDataBtn.addEventListener('click', async () => {
         cryptoContainer.innerHTML = 'Loading...';
