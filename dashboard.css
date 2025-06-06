@@ -1,0 +1,630 @@
+/* ==================== */
+/* MODERN DASHBOARD STYLES */
+/* ==================== */
+
+:root {
+  --primary: #6c5ce7;
+  --primary-light: #a29bfe;
+  --secondary: #00b894;
+  --secondary-light: #55efc4;
+  --accent: #0984e3; /* Used for Quick Action Withdraw in original CSS */
+  --accent-light: #74b9ff;
+  --dark: #2d3436;
+  --light: #f5f6fa;
+  --success: #00b894;
+  --success-light: #55efc4;
+  --danger: #d63031;
+  --danger-light: #ff7675;
+  --warning: #fdcb6e;
+  --warning-light: #ffeaa7;
+  --neutral: #636e72;
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --card-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --card-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.15);
+  --text-dark: #2d3436;
+  --text-light: #f5f6fa;
+}
+
+/* Base Styles */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+  color: var(--dark);
+  line-height: 1.6;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* Prevent horizontal scroll often caused by full-width elements on mobile */
+}
+
+/* Header Styles */
+header {
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* Ensure it's above other content */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.5px;
+}
+
+nav ul {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+nav a {
+  color: var(--dark);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+nav a:hover {
+  color: var(--primary);
+}
+
+nav a.active {
+  color: var(--primary);
+  background: rgba(108, 92, 231, 0.1);
+  font-weight: 600;
+}
+
+/* General Button Styles (used by logout, etc.) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary { /* Example if you need a primary styled .btn */
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+}
+
+/* Main Content */
+main {
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.dashboard h1 {
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+  color: var(--dark);
+  font-weight: 700;
+}
+.dashboard h1 span {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Card Styles */
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1.8rem;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--glass-border);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden; /* Good for containing absolute positioned elements if any */
+}
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--card-shadow-hover);
+}
+.card h3 {
+  font-size: 1.3rem;
+  margin-top: 0; /* Remove default top margin */
+  margin-bottom: 1.5rem;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.card h3 i { /* Icon styling within h3 */
+  color: var(--primary);
+}
+
+/* Portfolio Card Specifics */
+.portfolio #portfolioValue {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.portfolio #portfolioChange {
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+/* Utility classes for portfolio change, can be applied via JS */
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-neutral { color: var(--neutral); }
+
+
+/* Assets Card - Placeholder for future detailed asset list */
+.assets #assetsList ul {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 0;
+}
+.assets #assetsList li {
+    padding: 0.6rem 0.2rem;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+.assets #assetsList li:last-child {
+    border-bottom: none;
+}
+/* If you use the detailed asset grid from your original CSS, ensure dashboard.js populates it correctly */
+/* .assets-header, .assets-grid, .asset-item styles from your original CSS can go here */
+
+
+/* Quick Actions Card */
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Action Button Base (for Deposit, Withdraw Quick Actions, Invest Plan) */
+.action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: none;
+  font-size: 1rem;
+  color: white;
+  text-decoration: none;
+  text-align: center;
+}
+.action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+.action-btn:active {
+  transform: translateY(0);
+}
+.action-icon {
+  margin-right: 0.8rem;
+  font-size: 1.1rem;
+}
+
+/* Specific Quick Action Button Styles */
+.deposit-btn { /* For Quick Action Deposit */
+  background: linear-gradient(135deg, var(--success), var(--success-light));
+  box-shadow: 0 4px 12px rgba(0, 184, 148, 0.3);
+}
+.main-withdraw-action-btn { /* For Quick Action Withdraw (ID #mainWithdrawBtn) */
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  box-shadow: 0 4px 12px rgba(9, 132, 227, 0.3);
+}
+
+/* Investment Plan "Invest" Button */
+.invest-btn { /* For plan investment buttons */
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+  width: 100%; /* Make invest button full width within card padding */
+  margin-top: 1rem;
+}
+
+/* Chart Containers */
+.chart-container {
+  position: relative;
+  height: 200px; /* Default height, can be overridden */
+  width: 100%;
+  margin-top: 1.5rem;
+}
+.market-trends .chart-container { /* Specific height for market trends */
+  height: 250px;
+}
+
+/* Investment Plans Cards */
+.investment-options { /* Base for all plan cards */
+  /* padding: 1.5rem; already handled by .card */
+  color: white; /* Text color for content inside these cards */
+}
+.investment-options h3 { /* Already has .card h3 styles, this is for specific overrides if needed */
+  color: white; /* Ensure h3 text is white on gradient backgrounds */
+}
+.investment-options h3 i { /* Make icons white too */
+    color: rgba(255,255,255,0.8);
+}
+.investment-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1rem 0;
+  font-size: 0.95rem;
+}
+.investment-table td {
+  padding: 0.5rem 0;
+  vertical-align: top;
+}
+.investment-table td:first-child {
+  width: 30px; /* For the checkmark icon */
+  color: var(--success-light); /* Light green checkmark on dark backgrounds */
+}
+.investment-note {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin: 0.5rem 0;
+}
+.small-text { /* For additional smaller notes */
+    font-size: 0.85em;
+    opacity: 0.8;
+}
+
+/* Plan-specific Backgrounds */
+.silver-plan { background: linear-gradient(135deg, #bdc3c7, #2c3e50); }
+.gold-plan { background: linear-gradient(135deg, #FFD700, #B78727); } /* Adjusted gold */
+.premium-plan { background: linear-gradient(135deg, #7b4397, #dc2430); }
+.platinum-plan { background: linear-gradient(135deg, #3B3B98, #8E44AD); }
+
+
+/* Dynamically Added Investment Details (from JS) */
+.investment-details {
+  margin-top: 20px; /* More space */
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2); /* Lighter border for dark cards */
+  font-size: 0.9em;
+  /* Removed redundant border/padding here as it's now on each entry if multiple from HTML's inline style */
+}
+.investment-details p {
+  margin: 6px 0;
+  color: var(--text-light); /* Ensure text is light on dark plan cards */
+}
+/* This styles the buttons dynamically added by dashboard.js for withdrawing from a PLAN */
+.investment-details .withdraw-btn-plan {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.7rem 1.2rem;
+  margin-top: 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  
+  background: var(--danger); /* Red for withdrawal */
+  color: white;
+  box-shadow: 0 4px 10px rgba(214, 48, 49, 0.25);
+}
+.investment-details .withdraw-btn-plan:hover {
+  background: var(--danger-light);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(214, 48, 49, 0.35);
+}
+
+/* Loading and Error States (General - can be used by JS) */
+.loading-message, .no-data-message, .error-message-general {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  color: var(--neutral);
+  border-radius: 8px;
+  background: rgba(0,0,0,0.02);
+}
+.loading-message i {
+  font-size: 2rem; margin-bottom: 1rem; color: var(--primary); animation: pulse 1.5s infinite;
+}
+.no-data-message i, .error-message-general i {
+  font-size: 2rem; margin-bottom: 1rem; color: var(--primary-light);
+}
+.error-message-general {
+  color: var(--danger); background: rgba(214, 48, 49, 0.1);
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; }
+}
+
+/* Responsive Design - Consolidated */
+@media (max-width: 1200px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Adjust minmax for smaller screens */
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    /* padding: 0 10px; Consider if dashboard sections need full width */
+    font-size: 15px; /* Slightly smaller base font */
+  }
+  header {
+    padding: 1rem; /* Less padding on mobile header */
+  }
+  nav {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  nav ul {
+    /* width: 100%; */ /* Let it wrap naturally or use flex-wrap */
+    justify-content: center; /* Center nav items */
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  nav a {
+    padding: 0.5rem 0.8rem; /* Smaller padding for nav links */
+    font-size: 0.9rem;
+  }
+
+  main {
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+  .dashboard h1 {
+    font-size: 1.8rem; /* Smaller main heading */
+    text-align: center;
+  }
+  .dashboard-grid {
+    grid-template-columns: 1fr; /* Stack cards on mobile */
+    gap: 1rem;
+  }
+  .card {
+    padding: 1.2rem; /* Less padding in cards */
+  }
+  .card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 1rem;
+  }
+  .portfolio #portfolioValue { font-size: 2rem; }
+  .portfolio #portfolioChange { font-size: 1rem; }
+  
+  .action-btn { /* Make action buttons slightly smaller */
+    padding: 0.8rem 1.2rem;
+    font-size: 0.95rem;
+  }
+  .investment-note { font-size: 0.85rem; }
+
+  .sidebar { display: none; } /* Example: Hide sidebar on mobile */
+  
+  /* Asset list specific mobile adjustments (if using detailed structure) */
+  .assets-header { display: none; }
+  .asset-item {
+    grid-template-columns: auto 1fr 1fr; /* Simpler grid for mobile */
+    gap: 0.5rem;
+    padding: 0.8rem;
+  }
+  .asset-symbol { display: none; } /* Hide symbol on mobile to save space */
+  .asset-amount, .asset-value, .asset-change { text-align: left; font-size: 0.9rem; }
+  .asset-change { padding: 0.1rem 0.3rem; }
+
+  .chart-container { height: 180px; }
+  .market-trends .chart-container { height: 220px; }
+}
+
+@media (max-width: 480px) {
+  /* Further fine-tuning for very small screens */
+  .logo { font-size: 1.5rem; }
+  nav ul { gap: 0.2rem; }
+  nav a { font-size: 0.85rem; padding: 0.4rem 0.6rem; }
+  .dashboard h1 { font-size: 1.6rem; }
+  .card { padding: 1rem; }
+  .card h3 { font-size: 1.05rem; }
+
+  .action-btn { font-size: 0.9rem; padding: 0.7rem 1rem; }
+  .investment-details .withdraw-btn-plan { font-size: 0.85rem; padding: 0.6rem 1rem; }
+
+  /* Asset item stacking for very small screens if needed */
+  .asset-item {
+    grid-template-columns: 1fr; /* Stack all asset info */
+    text-align: center;
+  }
+  .asset-info { justify-content: center; }
+  .asset-amount, .asset-value, .asset-change { text-align: center; margin-top: 0.3rem;}
+}
+
+/* Styles from your original .investment-status and my-investments, consolidated if needed */
+/* .card.my-investments, .investment-entry, .investment-status (pulse-glow) */
+/* It seems .investment-status was for maturity. You can integrate this into .investment-details if needed */
+.investment-status-text { /* Generic class for status text within .investment-details */
+  font-size: 0.85rem;
+  margin-top: 0.8rem;
+  color: var(--text-light); /* Assuming it's on a dark plan card */
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1); /* Subtle background */
+}
+.mature-status-glow { /* Apply this class via JS when mature */
+  animation: pulse-glow 2s infinite;
+  font-weight: 600;
+}
+@keyframes pulse-glow {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; text-shadow: 0 0 6px rgba(255, 255, 255, 0.4); }
+  100% { opacity: 0.8; }
+}
+/* dashboard.css or global.css */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050; /* Ensure it's on top */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 25px 30px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 450px; /* Adjust as needed */
+  position: relative;
+  transform: translateY(-20px);
+  transition: transform 0.3s ease-out;
+}
+
+.modal-overlay.active .modal-content {
+    transform: translateY(0);
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.8em;
+  color: #888;
+  cursor: pointer;
+  line-height: 1;
+}
+.modal-close-btn:hover {
+  color: #333;
+}
+
+#modalTitle {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.5em;
+  color: #333;
+}
+
+#modalBody p {
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+#modalBody input[type="text"],
+#modalBody input[type="number"],
+#modalBody input[type="password"] { /* Style for input fields in modal */
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.modal-actions {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  margin-left: 10px;
+}
+
+.modal-actions .confirm-btn {
+  background-color: #007bff; /* Example: Primary button color */
+  color: white;
+}
+.modal-actions .confirm-btn:hover {
+  background-color: #0056b3;
+}
+
+.modal-actions .cancel-btn {
+  background-color: #6c757d; /* Example: Secondary/cancel button color */
+  color: white;
+}
+.modal-actions .cancel-btn:hover {
+  background-color: #545b62;
+}
+.premium-plan .investment-note.small-text,
+.platinum-plan .investment-note.small-text {
+    color: #FFFFFF; /* White text */
+    /* Add a background to the card if it's not dark, e.g., */
+    /* background-color: #333; (on the .premium-plan / .platinum-plan card itself) */
+}

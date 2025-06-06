@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidWealthHub - Transfer</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="transfer.css">
+</head>
+<body>
+<header>
+    <nav>
+        <div class="logo">RapidWealthHub</div>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="wallet.html" class="active">Wallet</a></li>
+            <li><a href="transactions.html">Transactions</a></li>
+            <li><a href="#" id="logoutBtn" class="btn btn-outline">Logout</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main>
+<section class="transfer">
+    <h1>Transfer Crypto</h1>
+    <div class="transfer-container">
+        <div class="transfer-form-container">
+            <div class="card">
+                <h3><i class="fas fa-exchange-alt"></i> Transfer Details</h3>
+
+                <div class="form-group">
+                    <label for="transferType">Transfer Type</label>
+                    <select id="transferType" class="form-control">
+                        <option value="send">Send to another wallet</option>
+                        <option value="withdraw">Transfer to self</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Select Asset</label>
+                    <div class="asset-selector">
+                        <div class="asset-option active" data-asset="btc">
+                            <img src="https://cryptologos.cc/logos/bitcoin-btc-logo.png" alt="Bitcoin" class="asset-icon">
+                            BTC
+                        </div>
+                        <div class="asset-option" data-asset="eth">
+                            <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png" alt="Ethereum" class="asset-icon">
+                            ETH
+                        </div>
+                        <div class="asset-option" data-asset="usdt">
+                            <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" alt="Tether" class="asset-icon">
+                            USDT
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="recipientAddress">Recipient Address</label>
+                    <input type="text" id="recipientAddress" class="form-control" placeholder="Enter wallet address">
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Amount</label>
+                    <div class="amount-input-group">
+                        <input type="number" id="amount" class="form-control" placeholder="0.00">
+                        <select id="amountType" class="form-control">
+                            <option value="crypto">Crypto</option>
+                            <option value="fiat">USD</option>
+                        </select>
+                    </div>
+                    <div class="network-fee">
+                        <i class="fas fa-info-circle"></i> Available: 0.00 (Asset)
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="network">Network</label>
+                    <select id="network" class="form-control">
+                        <option value="mainnet">Bitcoin Mainnet</option>
+                        <option value="lightning">Lightning Network</option>
+                        <option value="erc20">Ethereum (ERC-20)</option>
+                        <option value="bep20">Binance Smart Chain (BEP-20)</option>
+                        <option value="trc20">Tron (TRC-20)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="note">Note (Optional)</label>
+                    <textarea id="note" class="form-control" rows="3" placeholder="Add a note to this transaction"></textarea>
+                </div>
+
+                <button class="btn btn-primary" id="sendTransactionBtn">
+                    <i class="fas fa-paper-plane"></i> Send Transaction
+                </button>
+            </div>
+        </div>
+
+        <div class="transfer-summary">
+            <h3><i class="fas fa-receipt"></i> Transaction Summary</h3>
+            <div class="summary-item">
+                <span class="summary-label">You send</span>
+                <span class="summary-value" id="sendAmount">0.00 BTC</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Recipient gets</span>
+                <span class="summary-value" id="receiveAmount">≈ 0.00 BTC</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Network fee</span>
+                <span class="summary-value" id="networkFee">0.0005 BTC ($25.00)</span>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Total</span>
+                <span class="summary-value total-amount" id="totalAmount">0.0005 BTC ($25.00)</span>
+            </div>
+            <div class="transaction-info">
+                <p><i class="fas fa-shield-alt"></i> Transactions typically complete in 10–30 minutes</p>
+            </div>
+        </div>
+    </div>
+</section>
+</main>
+    
+<script>
+  window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
+</script>
+
+
+<script src="auth.js"></script>
+<script src="transfer.js"></script>
+<script>
+  

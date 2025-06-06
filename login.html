@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" /> <!-- Added .0 for consistency -->
+  <title>RapidWealthHub - Login</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- Adjust path if login.css is in a 'css' subfolder: href="css/login.css" -->
+  <link rel="stylesheet" href="login.css" />
+
+  <!-- Define API_BASE_URL *before* any scripts that might use it -->
+  <script>
+    // FOR PRODUCTION (Netlify pointing to Render backend):
+    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com"; // REPLACE with your actual Render URL
+
+    // FOR LOCAL DEVELOPMENT (frontend pointing to local backend on port 3001):
+    // Ensure this is uncommented for local testing and the production one is commented out.
+    // if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    //   window.API_BASE_URL = "http://localhost:3001";
+    // }
+  </script>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">RapidWealthHub</div>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="register.html">Register</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h2>Welcome Back</h2>
+        <p>Sign in to access your RapidWealthHub account</p>
+      </div>
+
+      <form id="loginForm" class="login-form" novalidate>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Enter your email"
+            required
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+
+        <!-- OTP Section: This is for a potential future 2FA or OTP-based verification. -->
+        <!-- The current backend flow for "needsVerification" implies an email link, not an OTP here. -->
+        <!-- So, this section will remain hidden unless login.js specifically shows it for a different reason. -->
+        <div id="otpSection" class="form-group" style="display:none;">
+          <label for="otpCode">Enter Verification Code</label>
+          <input
+            type="text"
+            id="otpCode"
+            name="otpCode"
+            placeholder="Enter 2FA code or code from email"
+            inputmode="numeric" 
+            pattern="[0-9]*"
+            autocomplete="one-time-code"
+          />
+        </div>
+
+        <div id="loginMessage" class="form-message" aria-live="assertive" style="min-height:1.5em; margin-bottom:1rem;"></div>
+
+        <div
+          id="resendVerificationSection"
+          style="display:none; margin-top:10px; margin-bottom:15px; text-align:center;"
+        >
+          <p style="margin-bottom:5px; font-size:0.9em;">
+            Your email address needs to be verified to log in.
+          </p>
+          <button type="button" id="resendVerificationBtn" class="link-button">
+            Resend Verification Link
+          </button>
+          <div
+            id="resendMessage"
+            class="form-message"
+            aria-live="polite"
+            style="font-size:0.9em; margin-top:5px; min-height:1.2em;"
+          ></div>
+        </div>
+
+        <div class="login-actions">
+          <button type="submit" class="login-btn" id="submitBtn">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </button>
+        </div>
+      </form>
+
+      <div class="login-footer">
+        <p>
+          Don't have an account?
+          <a href="register.html">Create one</a>
+        </p>
+        <p>
+          <a href="forgot-password.html">Forgot password?</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Adjust path if scripts are in a 'js' subfolder: src="js/auth.js" -->
+  <!-- <script src="auth.js" defer></script> --> <!-- Load only if login.js depends on it or if it handles global auth UI for this page -->
+  <script src="login.js" defer></script> <!-- Main script for this page's functionality -->
+</body>
+</html>

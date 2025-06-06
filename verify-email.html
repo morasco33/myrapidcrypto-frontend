@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Verifying Email - RapidWealthHub</title>
+    
+    <!-- Optional: Link to a minimal shared stylesheet if you have one for consistent branding -->
+    <!-- <link rel="stylesheet" href="css/minimal-style.css">  -->
+    
+    <style>
+        body { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            font-family: 'Inter', Arial, sans-serif; /* Using Inter font */
+            margin: 0; 
+            background-color: #f4f7f6; /* Slightly different background */
+            color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container { 
+            text-align: center; 
+            padding: 30px 40px; 
+            background-color: #fff; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 { 
+            margin-top: 0; 
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+        p {
+            font-size: 1em;
+            line-height: 1.6;
+        }
+        .success { 
+            color: #28a745; /* Bootstrap success green */
+            font-weight: bold;
+        }
+        .error { 
+            color: #dc3545; /* Bootstrap danger red */
+            font-weight: bold;
+        }
+        a.button { 
+            display: inline-block; 
+            margin-top: 25px; 
+            padding: 12px 25px; 
+            background-color: #007bff; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 5px; 
+            font-weight: 500;
+            transition: background-color 0.2s ease-in-out;
+        }
+        a.button:hover { 
+            background-color: #0056b3; 
+        }
+        /* Spinner for loading state */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #007bff;
+            animation: spin 1s ease infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <!-- Global Configuration - Place this EARLY in <head> -->
+    <script>
+        // --- IMPORTANT: CONFIGURE THESE BASED ON YOUR ENVIRONMENT ---
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            // LOCAL DEVELOPMENT SETTINGS
+            window.GLOBAL_KEYS = {
+                API_BASE_URL: "http://localhost:3001"   // Your local backend server port (NO /api suffix)
+            };
+        } else {
+            // PRODUCTION SETTINGS (Netlify, Render)
+            window.GLOBAL_KEYS = {
+                API_BASE_URL: "https://rapidcrypto-backend.onrender.com" // Your live Render backend (NO /api suffix)
+            };
+        }
+        console.log("VERIFY EMAIL PAGE - GLOBAL_KEYS Initialized:", JSON.stringify(window.GLOBAL_KEYS, null, 2));
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div id="spinner" class="spinner"></div> <!-- Spinner element -->
+        <h1 id="message">Verifying your email...</h1>
+        <p id="details"></p>
+        <a href="login.html" id="loginLink" class="button" style="display:none;">Proceed to Login</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const messageElement = document.getElementById('message');
+            const detailsElement = document.getElementById('details');
+            const loginLink = document.getElementById('loginLink');
+            const spinnerElement = document.getElementById('spinner');
+
+            // Ensure GLOBAL_KEYS and API_BASE_URL are available
+            if (!window.GLOBAL_KEYS || !window.GLOBAL_KEYS.API_BASE_URL) {
+                console.error("CRITICAL: GLOBAL_KEYS.API_BASE_URL is not defined. Email verification will fail.");
+                if (spinnerElement) spinnerElement.style.display = 'none';
+                messageElement.textContent = 'Configuration Error!';
+                detailsElement.textContent = 'The application is not configured correctly. Please contact support.';
+                messageElement.className = 'error'; // Use class for styling
+                loginLink.style.display = 'inline-block';
+                return;
+            }
+            const API_BASE_URL = window.GLOBAL_KEYS.API_BASE_URL;
+
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+            const email = params.get('email'); // Email is needed by backend to find the user along with token
+
+            if (!token || !email) {
+                if (spinnerElement) spinnerElement.style.display = 'none';
+                messageElement.textContent = 'Verification Failed!';
+                detailsElement.textContent = 'The verification link is incomplete. Please ensure you copied the full link from your email, or try registering again.';
+                messageElement.className = 'error';
+                loginLink.style.display = 'inline-block';
+                return;
+            }
+
+            try {
+                // --- Construct the full API URL ---
+                // API_BASE_URL should be like "https://your-backend.onrender.com" (NO /api)
+                // Backend endpoint is "/api/verify-email"
+                const apiUrl = `${API_BASE_URL}/api/verify-email?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
+                
+                console.log("Attempting to verify with URL:", apiUrl);
+
+                const response = await fetch(apiUrl, { method: 'GET' }); // Method is GET for this endpoint
+                
+                // Try to parse JSON regardless of status, as backend sends JSON errors
+                let data;
+                try {
+                    data = await response.json();
+                } catch (jsonError) {
+                    // If response is not JSON (e.g., HTML error page from server/proxy, or empty response)
+                    console.error('Failed to parse JSON response:', jsonError);
+                    const responseText = await response.text(); // Get raw text for debugging
+                    throw new Error(`Server sent a non-JSON response (Status: ${response.status}). Response: ${responseText.substring(0, 200)}...`);
+                }
+
+                if (spinnerElement) spinnerElement.style.display = 'none'; // Hide spinner after fetch
+
+                if (response.ok && data.success) { // Backend sends { success: true, message: "..." }
+                    messageElement.textContent = 'Email Verification Successful!';
+                    detailsElement.textContent = data.message || 'Your email has been verified. You can now log in.';
+                    messageElement.className = 'success';
+                } else { // Handle errors where response was received but not ok, or success:false
+                    messageElement.textContent = 'Email Verification Failed!';
+                    detailsElement.textContent = data.message || 'The verification link may be invalid, expired, or already used. Please try registering again or contact support.';
+                    messageElement.className = 'error';
+                }
+            } catch (error) { // Catches network errors or errors thrown from above
+                console.error('Verification process error:', error);
+                if (spinnerElement) spinnerElement.style.display = 'none';
+                messageElement.textContent = 'Verification Error!';
+                detailsElement.textContent = error.message || 'An unexpected error occurred while trying to verify your email. Please try again or contact support.';
+                messageElement.className = 'error';
+            } finally {
+                loginLink.style.display = 'inline-block'; // Always show login link after attempt
+            }
+        });
+    </script>
+</body>
+</html>

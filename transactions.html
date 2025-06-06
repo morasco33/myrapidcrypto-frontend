@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RapidWealthHub - Transactions</title>
+    <link rel="stylesheet" href="transactions.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">RapidWealthHub</div>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="wallet.html">Wallet</a></li>
+                <li><a href="transactions.html" class="active">Transactions</a></li>
+                <li><a href="#" id="logoutBtn" class="btn">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="transactions">
+            <h1>Transaction History</h1>
+            
+            <div class="transaction-filters">
+                <select id="transactionFilter">
+                    <option value="all">All Transactions</option>
+                    <option value="sent">Sent</option>
+                    <option value="received">Received</option>
+                    <option value="buy">Deposit</option>
+                    <option value="sell">Withdraw</option>
+                </select>
+                <input type="text" id="transactionSearch" placeholder="Search transactions...">
+            </div>
+            
+            <table id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Asset</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Transactions will be loaded here -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+      window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
+    </script>
+
+    <script src="auth.js"></script>
+    <script src="transactions.js"></script>
+</body>
+</html>

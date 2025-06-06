@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Crypto Investments</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #4a6baf;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+        .crypto-icon {
+            font-size: 24px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="crypto-icon">₿</span> Contact Our Crypto Team</h1>
+        
+        <form id="cryptoContactForm">
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number (Optional)</label>
+                <input type="tel" id="phone" name="phone">
+            </div>
+            
+            <div class="form-group">
+                <label for="subject">Subject</label>
+                <select id="subject" name="subject" required>
+                    <option value="">Select a topic</option>
+                    <option value="investment">Investment Inquiry</option>
+                    <option value="withdrawal">Withdrawal Issue</option>
+                    <option value="verification">Account Verification</option>
+                    <option value="other">Other Question</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="plan">Investment Plan (if applicable)</label>
+                <select id="plan" name="plan">
+                    <option value="">Not applicable</option>
+                    <option value="silver">Silver Plan (2% in 48h)</option>
+                    <option value="gold">Gold Plan (5% in 48h)</option>
+                    <option value="premium">Premium Plan (10% in 48h)</option>
+                    <option value="vip">VIP Plan (20% in 48h)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="wallet">Your Crypto Wallet Address (Optional)</label>
+                <input type="text" id="wallet" name="wallet" placeholder="e.g., 0x71C... or bc1q...">
+            </div>
+            
+            <div class="form-group">
+                <label for="message">Your Message</label>
+                <textarea id="message" name="message" rows="5" required></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn">Send Message</button>
+        </form>
+    </div>
+
+    <script>
+        // Script for form submission
+        document.getElementById('cryptoContactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Here you would typically send the form data to your server
+            // For demonstration, we'll just show an alert
+            alert('Thank you for your message! Our crypto team will respond within 24 hours.');
+            
+            // Reset the form
+            this.reset();
+        });
+    </script> {/* This closes the first script block */}
+
+    <script>
+      // Script for setting global API_BASE_URL
+      window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
+    </script> {/* This is a separate script block */}
+    
+    {/* The extra closing </script> tag has been removed here */}
+    <script src="auth.js"></script>       <!-- THIS MUST BE FIRST -->
+    <script src="uiUtils.js"></script>
+</body>
+</html>

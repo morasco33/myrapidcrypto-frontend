@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #ddd;
+    }
+    .user-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 15px;
+      margin-bottom: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+    .user-card:hover {
+      transform: translateY(-2px);
+    }
+    .user-info {
+      flex: 1;
+    }
+    .user-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn {
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+    }
+    .btn-approve {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .btn-logout {
+      background-color: #f44336;
+      color: white;
+    }
+    .notification {
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+      display: none;
+    }
+    .success {
+      background-color: #dff0d8;
+      color: #3c763d;
+      border: 1px solid #d6e9c6;
+    }
+    .error {
+      background-color: #f2dede;
+      color: #a94442;
+      border: 1px solid #ebccd1;
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    .admin-bar {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Admin Dashboard</h1>
+    <button class="btn btn-logout" onclick="logout()">Logout</button>
+  </header>
+
+  <div id="notification" class="notification"></div>
+  
+  <div class="admin-bar">
+    Logged in as: <span id="email"></span>
+  </div>
+
+  <div id="pendingUsers">
+    <h2>Pending User Approvals</h2>
+    <div id="userList" class="loading">Loading pending users...</div>
+  </div>
+
+  <script>
+    // Global admin state
+    let adminData = null;
+
+    // DOM Elements
+    const elements = {
+      notification: document.getElementById('notification'),
+      userList: document.getElementById('userList'),
+      adminEmail: document.getElementById('adminEmail')
+    };
+
+    // Notification system
+    function showNotification(message, isSuccess) {
+      elements.notification.textContent = message;
+      elements.notification.className = `notification ${isSuccess ? 'success' : 'error'}`;
+      elements.notification.style.display = 'block';
+      
+      setTimeout(() => {
+        elements.notification.style.display = 'none';
+      }, 5000);
+    }
+
+    // Verify admin status and load data
+    async function verifyAdmin() {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        redirectToLogin();
+        return false;
+      }
+
+      try {
+        // First verify the user is actually an admin
+        const profileResponse = await fetch('/api/profile', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        const profileData = await profileResponse.json();
+        
+        if (!profileData.success || !profileData.user.isAdmin) {
+          showNotification('Admin access required', false);
+          setTimeout(redirectToLogin, 1500);
+          return false;
+        }
+
+        // Store admin data
+        adminData = profileData.user;
+        elements.adminEmail.textContent = adminData.email;
+        return true;
+
+      } catch (error) {
+        console.error('Admin verification failed:', error);
+        showNotification('Failed to verify admin status', false);
+        return false;
+      }
+    }
+
+    // Load pending users
+    async function loadPendingUsers() {
+      elements.userList.innerHTML = '<div class="loading">Loading pending users...</div>';
+
+      try {
+        const response = await fetch('/api/users/pending', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+        });
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+        const data = await response.json();
+
+        if (data.success) {
+          if (data.users.length === 0) {
+            elements.userList.innerHTML = '<div class="loading">No pending users at this time.</div>';
+            return;
+          }
+
+          elements.userList.innerHTML = '';
+          data.users.forEach(user => {
+            const userCard = document.createElement('div');
+            userCard.className = 'user-card';
+            userCard.innerHTML = `
+              <div class="user-info">
+                <strong>${user.username}</strong>
+                <div>${user.email}</div>
+                <small>Registered: ${new Date(user.createdAt).toLocaleString()}</small>
+              </div>
+              <div class="user-actions">
+                <button class="btn btn-approve" onclick="approveUser('${user._id}')">Approve</button>
+              </div>
+            `;
+            elements.userList.appendChild(userCard);
+          });
+        } else {
+          throw new Error(data.message || 'Failed to load users');
+        }
+      } catch (error) {
+        console.error('Error loading pending users:', error);
+        showNotification(error.message, false);
+        elements.userList.innerHTML = '<div class="loading">Error loading users. Please try again.</div>';
+      }
+    }
+
+    // Approve user function
+    async function approveUser(userId) {
+      try {
+        const response = await fetch(`/api/users/${userId}/approve`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+          }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.message || 'Approval failed');
+
+        showNotification(`User ${data.success ? 'approved' : 'not approved'}`, data.success);
+        if (data.success) {
+          setTimeout(loadPendingUsers, 1000);
+        }
+      } catch (error) {
+        console.error('Approval error:', error);
+        showNotification(error.message, false);
+      }
+    }
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('authToken');
+      redirectToLogin();
+    }
+
+    function redirectToLogin() {
+    //window.location.href = 'login.html';
+    }
+
+    // Initialize admin dashboard
+    async function initAdminDashboard() {
+      const isAdmin = await verifyAdmin();
+      if (isAdmin) {
+        loadPendingUsers();
+        
+        // Refresh every 60 seconds
+        setInterval(loadPendingUsers, 60000);
+      }
+    }
+
+    // Start the admin dashboard when page loads
+    document.addEventListener('DOMContentLoaded', initAdminDashboard);
+
+    // Make functions available globally
+    window.approveUser = approveUser;
+    window.logout = logout;
+  </script>
+  
+  <script>
+  window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
+</script>
+
+</body>
+</html>

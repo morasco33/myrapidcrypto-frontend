@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RapidWealthHub - Create Account</title>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- Adjust path if register.css is in a 'css' subfolder: href="css/register.css" -->
+  <!-- Consider a shared base.css or theme.css for common styles -->
+  <link rel="stylesheet" href="register.css">
+
+  <!-- Global Configuration - Place this EARLY in <head> or just before your first script that needs it -->
+  <script>
+    // --- IMPORTANT: CONFIGURE THESE BASED ON YOUR ENVIRONMENT ---
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      // LOCAL DEVELOPMENT SETTINGS
+      window.GLOBAL_KEYS = {
+        APP_NAME: "RapidWealthHub (Dev)",
+        FRONTEND_URL: "http://localhost:5500", // Or your local frontend dev server port
+        API_BASE_URL: "http://localhost:3001"   // Your local backend server port (NO /api suffix)
+      };
+    } else {
+      // PRODUCTION SETTINGS (Netlify, Render)
+      window.GLOBAL_KEYS = {
+        APP_NAME: "RapidWealthHub",
+        FRONTEND_URL: "https://rapidcrypto.org",           // Your live Netlify domain
+        API_BASE_URL: "https://rapidcrypto-backend.onrender.com" // Your live Render backend (NO /api suffix)
+      };
+    }
+    // Log for verification
+    console.log("GLOBAL_KEYS Initialized:", JSON.stringify(window.GLOBAL_KEYS, null, 2));
+  </script>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">RapidWealthHub</div>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="login.html">Login</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="auth-container">
+    <div class="auth-card"> <!-- Changed class for consistency if styling login/register similarly -->
+      <div class="auth-header">
+        <h1 id="registerHeading">Create Your Account</h1>
+        <p>Join RapidWealthHub and start your crypto journey today!</p>
+      </div>
+
+      <form id="registerForm" class="auth-form-fields" aria-labelledby="registerHeading" novalidate>
+        <!-- Assuming backend will be updated to handle firstname and lastname -->
+        <div class="form-group">
+          <label for="firstname">First Name</label>
+          <input type="text" id="firstname" name="firstname" placeholder="Enter your first name" required autocomplete="given-name">
+        </div>
+
+        <div class="form-group">
+          <label for="lastname">Last Name</label>
+          <input type="text" id="lastname" name="lastname" placeholder="Enter your last name" required autocomplete="family-name">
+        </div>
+
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" placeholder="Choose a username" required minlength="3" autocomplete="username">
+          <small class="form-text">Minimum 3 characters.</small>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="Enter your email" required autocomplete="email">
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="Create a strong password" required minlength="6" autocomplete="new-password">
+          <small class="form-text">Minimum 6 characters.</small>
+          <!-- Optional: Password strength indicator could go here -->
+        </div>
+        
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm your password" required autocomplete="new-password">
+        </div>
+
+        <!-- Optional: Terms and Conditions -->
+        <div class="form-group terms-group">
+            <input type="checkbox" id="terms" name="terms" required>
+            <label for="terms" class="checkbox-label">I agree to the <a href="legal-agreement.html#terms" target="_blank">Terms and Conditions</a></label>
+        </div>
+        
+        <button type="submit" id="registerBtn" class="btn primary auth-button">
+            <i class="fas fa-user-plus"></i> Create Account
+        </button>
+        <div id="message" class="form-message" role="alert" aria-live="assertive" style="min-height: 1.5em; margin-top: 1rem;"></div>
+      </form>
+      <div class="auth-footer">
+        <p>Already have an account? <a href="login.html">Login here</a></p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Adjust paths if scripts are in a 'js' subfolder -->
+  <script src="uiUtils.js" defer></script> <!-- If it contains utilities needed by other scripts -->
+  <script src="auth.js" defer></script>   <!-- If it handles global auth state or utilities -->
+  <script src="register.js" defer></script> <!-- Main script for this page's registration logic -->
+
+</body>
+</html>

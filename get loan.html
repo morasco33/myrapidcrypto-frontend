@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5-Year Loan Investment Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px 30px; /* Added more horizontal padding */
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .info-text {
+            text-align: center;
+            color: #555;
+            background-color: #eef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #ccd;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px; /* Increased padding */
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* Important for width 100% */
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 12px 18px; /* Increased padding */
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block; /* Make button block to center it easily */
+            width: auto; /* Or specific width if needed */
+            margin: 20px auto 0 auto; /* Center button */
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            text-align: center; /* Center result text */
+        }
+        #result p {
+            margin: 0;
+            font-size: 18px;
+            color: #004085; /* Darker blue for result text */
+        }
+        .error-message {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>5-Year Loan Investment Calculator</h1>
+        <p class="info-text">To qualify for an actual loan, please go to your dashboard and ensure you have an active investment in a Premium or Platinum plan.</p>
+
+        <div class="form-group">
+            <label for="loanAmount">Loan Amount ($):</label>
+            <input type="number" id="loanAmount" placeholder="e.g., 10000">
+        </div>
+        <div class="form-group">
+            <label for="interestRate">Annual Interest Rate (%):</label>
+            <input type="number" id="interestRate" placeholder="e.g., 5.5">
+        </div>
+        <button id="calculateBtn">Calculate Monthly Payment</button>
+        <div id="result" style="display: none;"></div> <!-- Initially hidden -->
+        <div id="errorMessage" class="error-message" style="display: none;"></div> <!-- For error messages -->
+    </div>
+
+    <script>
+        // Define API_BASE_URL here IF this page will EVER make API calls.
+        // If it's purely client-side, this line is not strictly needed for THIS page's current functionality.
+        // const API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const calculateBtn = document.getElementById('calculateBtn');
+            const resultDiv = document.getElementById('result');
+            const errorMessageDiv = document.getElementById('errorMessage');
+
+            if (calculateBtn) {
+                calculateBtn.addEventListener('click', () => {
+                    const loanAmountInput = document.getElementById('loanAmount');
+                    const interestRateInput = document.getElementById('interestRate');
+
+                    resultDiv.style.display = 'none'; // Hide previous result
+                    errorMessageDiv.style.display = 'none'; // Hide previous error
+
+                    const loanAmount = parseFloat(loanAmountInput.value);
+                    const annualInterestRate = parseFloat(interestRateInput.value);
+
+                    if (isNaN(loanAmount) || loanAmount <= 0) {
+                        errorMessageDiv.textContent = "Please enter a valid positive number for the loan amount.";
+                        errorMessageDiv.style.display = 'block';
+                        loanAmountInput.focus();
+                        return;
+                    }
+
+                    if (isNaN(annualInterestRate) || annualInterestRate <= 0) {
+                        errorMessageDiv.textContent = "Please enter a valid positive number for the interest rate.";
+                        errorMessageDiv.style.display = 'block';
+                        interestRateInput.focus();
+                        return;
+                    }
+
+                    const monthlyInterestRate = annualInterestRate / 100 / 12;
+                    const numberOfPayments = 5 * 12; // 5 years in months
+
+                    // Standard loan payment formula (PMT)
+                    const monthlyPayment = (loanAmount * monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments)) /
+                                          (Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1);
+
+                    if (isFinite(monthlyPayment)) {
+                        resultDiv.innerHTML = `<p>Your estimated monthly payment for a 5-year loan will be: <strong>$${monthlyPayment.toFixed(2)}</strong></p>`;
+                        resultDiv.style.display = 'block';
+                    } else {
+                        errorMessageDiv.textContent = "Could not calculate payment. Please check your inputs (e.g., interest rate cannot be 0 if loan amount > 0).";
+                        errorMessageDiv.style.display = 'block';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

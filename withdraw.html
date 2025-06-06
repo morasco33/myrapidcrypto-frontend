@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RapidWealthHub - Withdraw Funds</title>
+  <!-- External Fonts and Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <!-- Your Custom Stylesheets -->
+  <link rel="stylesheet" href="withdraw.css" /> <!-- Assuming you have styles for this page -->
+  <!--<link rel="stylesheet" href="dashboard.css" /> <!-- If you reuse some dashboard styles -->
+  <style>
+    /* Basic Modal Styling - Move to CSS file for better organization */
+    .modal {
+      display: none; /* Hidden by default */
+      position: fixed;
+      z-index: 1050;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5); /* Dim background */
+      justify-content: center; /* Align H */
+      align-items: center; /* Align V */
+    }
+    .modal-content {
+      background-color: #fff;
+      padding: 25px 30px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      width: auto;
+      min-width: 320px;
+      max-width: 500px;
+      position: relative; /* For close button positioning */
+    }
+    .modal-content h3 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      color: #333;
+    }
+    .confirmation-details p { margin: 8px 0; line-height: 1.6; }
+    .confirmation-details strong { color: #333; }
+    .highlight { font-weight: bold; color: #007bff; /* Or your theme's primary color */ }
+    .modal-actions {
+      margin-top: 25px;
+      text-align: right;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px; /* Space between buttons */
+    }
+    /* Assuming .btn, .btn-primary, .btn-outline are defined in your main CSS */
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">RapidWealthHub</div>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="wallet.html">Wallet</a></li>
+        <li><a href="withdraw.html" class="active">Withdraw</a></li>
+        <li><a href="#" id="logoutBtn" class="btn btn-outline">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="withdraw-page-section"> <!-- Use a more specific class for the page section -->
+      <h1><i class="fas fa-money-bill-wave"></i> Withdraw Funds</h1>
+
+      <div class="withdraw-container">
+        <!-- Withdrawal Form (assuming an outer form tag for reset functionality) -->
+        <form id="withdrawalForm" class="withdraw-form" onsubmit="return false;"> <!-- Prevent default HTML form submission -->
+          <div class="card">
+            <h3><i class="fas fa-exchange-alt"></i> Withdrawal Details</h3>
+
+            <div class="form-group">
+              <label for="withdrawMethod">Withdrawal Method</label>
+              <select id="withdrawMethod" class="form-control">
+                <option value="crypto">Cryptocurrency</option>
+                <option value="bank">Bank Transfer</option>
+                <option value="paypal">PayPal</option>
+              </select>
+            </div>
+
+            <!-- Crypto Specific Fields -->
+            <div class="method-fields" id="cryptoFields" style="display: block;"> <!-- Default display for crypto -->
+              <div class="form-group">
+                <label for="cryptoAsset">Select Asset</label>
+                <select id="cryptoAsset" class="form-control">
+                  <!-- Options populated by withdraw.js -->
+                  <option value="">Loading assets...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="withdrawAddress">Destination Address</label>
+                <input type="text" id="withdrawAddress" class="form-control" placeholder="Enter recipient wallet address" />
+              </div>
+              <div class="form-group">
+                <label for="cryptoNetwork">Network</label>
+                <select id="cryptoNetwork" class="form-control">
+                  <!-- Options populated by withdraw.js based on selected asset -->
+                  <option value="">Select asset first</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Bank Specific Fields -->
+            <div class="method-fields" id="bankFields" style="display: none;">
+              <div class="form-group">
+                <label for="bankName">Bank Name</label>
+                <input type="text" id="bankName" class="form-control" placeholder="E.g., Chase, Bank of America" />
+              </div>
+              <div class="form-group">
+                <label for="accountNumber">Account Number</label>
+                <input type="text" id="accountNumber" class="form-control" placeholder="Enter your bank account number" />
+              </div>
+              <div class="form-group">
+                <label for="routingNumber">Routing Number (ABA)</label>
+                <input type="text" id="routingNumber" class="form-control" placeholder="Enter bank routing number" />
+              </div>
+            </div>
+
+            <!-- PayPal Specific Fields -->
+            <div class="method-fields" id="paypalFields" style="display: none;">
+              <div class="form-group">
+                <label for="paypalEmail">PayPal Email</label>
+                <input type="email" id="paypalEmail" class.form-control" placeholder="Enter your PayPal email address" />
+              </div>
+            </div>
+
+            <!-- Amount to Withdraw -->
+            <div class="form-group">
+              <label for="withdrawAmount">Amount to Withdraw</label>
+              <div class="amount-input-group">
+                <input type="number" id="withdrawAmount" class="form-control" placeholder="0.00" step="any" /> <!-- step="any" for crypto -->
+                <span class="amount-currency" id="amountCurrency">USD</span> <!-- Default, updated by JS -->
+              </div>
+              <div class="balance-info">
+                <!-- ID changed here for clarity with withdraw.js -->
+                <span>Available: <span id="availableBalanceDisplay">Loading...</span></span>
+                <button type="button" class="btn-link" id="maxAmountBtn">Max</button>
+              </div>
+            </div>
+
+            <!-- Optional Note -->
+            <div class="form-group">
+              <label for="withdrawNote">Note (Optional)</label>
+              <textarea id="withdrawNote" class="form-control" rows="2" placeholder="E.g., For personal use"></textarea>
+            </div>
+
+            <!-- Withdrawal Summary -->
+            <div class="withdraw-summary">
+              <div class="summary-item">
+                <span class="summary-label">Network/Transaction Fee:</span>
+                <span class="summary-value" id="networkFee">Calculating...</span>
+              </div>
+              <div class="summary-item">
+                <span class="summary-label">You Will Receive (approx.):</span>
+                <span class="summary-value highlight" id="receiveAmount">Calculating...</span>
+              </div>
+            </div>
+            
+            <button type="button" class="btn btn-primary btn-block" id="submitWithdrawalBtn"> <!-- Changed to type="button" to prevent form submit -->
+              <i class="fas fa-paper-plane"></i> Review Withdrawal
+            </button>
+          </div> <!-- End of card -->
+        </form> <!-- End of withdrawalForm -->
+      </div> <!-- End of withdraw-form container -->
+
+      <!-- Informational Side Panel -->
+      <div class="withdraw-info">
+        <div class="card">
+          <h3><i class="fas fa-info-circle"></i> Withdrawal Information</h3>
+          <div class="info-content">
+            <div class="info-item">
+              <i class="fas fa-clock fa-fw"></i> <!-- Added fa-fw for fixed width -->
+              <div>
+                <h4>Processing Time</h4>
+                <p>Crypto: Typically 1-3 hours (varies by network congestion).<br />Bank Transfer: 1-3 business days.<br />PayPal: Usually instant to 24 hours.</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-tags fa-fw"></i> <!-- Changed icon -->
+              <div>
+                <h4>Withdrawal Fees</h4>
+                <p>Crypto: Network fees apply (dynamic).<br />Bank Transfer: Approx. $25.00 USD.<br />PayPal: Approx. 2% of the amount.</p>
+              </div>
+            </div>
+            <div class="info-item">
+              <i class="fas fa-shield-alt fa-fw"></i> <!-- Changed icon -->
+              <div>
+                <h4>Security</h4>
+                <p>For your security, large withdrawals or changes to withdrawal methods may require additional verification.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> <!-- End of withdraw-info -->
+
+    </div> <!-- End of withdraw-container -->
+    </section> <!-- End of withdraw-page-section -->
+
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmationModal"> <!-- Initial display should be none, handled by JS -->
+      <div class="modal-content">
+        <h3><i class="fas fa-shield-alt"></i> Confirm Your Withdrawal</h3>
+        <div class="confirmation-details" id="confirmationDetails">
+          <!-- Withdrawal summary will be injected here by JavaScript -->
+          <p>Loading details...</p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" id="cancelWithdrawalBtn">Cancel</button>
+          <button type="button" class="btn btn-primary" id="confirmWithdrawalBtn">Confirm & Process</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
+  </script>
+  <!-- JavaScript Files: Load auth.js first, then general utilities, then page-specific logic -->
+  <script src="auth.js"></script>    <!-- Handles global authentication checks and UI updates -->
+  <script src="uiUtils.js"></script> <!-- If you have shared UI functions like showAlert -->
+  <script src="withdraw.js"></script><!-- Page-specific logic for this withdrawal form -->
+</body>
+</html>
