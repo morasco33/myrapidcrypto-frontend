@@ -1,64 +1,47 @@
-// auth.js (Safe, Hardened V2.2 - Corrected API_BASE_URL)
+// auth.js (Safe, Hardened V2.2 - Corrected API_BASE_URL - with enhanced catch logging)
 
 // 1. DEFINE GLOBAL APP_KEYS FOR OTHER SCRIPTS
-// These are the actual string values for localStorage/sessionStorage keys and the API base.
-// This definition will be used by other scripts.
 (function defineGlobalAppKeys() {
     let determinedApiBaseUrl;
-    let determinedFrontendUrl; // For potential use by other scripts if backend needs it
+    let determinedFrontendUrl;
 
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        // LOCAL DEVELOPMENT
-        determinedApiBaseUrl = "http://localhost:3001/api"; // Local backend runs on 3001, AND path includes /api
-        determinedFrontendUrl = "http://localhost:5500";    // Example local frontend server port
+        determinedApiBaseUrl = "http://localhost:3001/api";
+        determinedFrontendUrl = "http://localhost:5500";
     } else {
-        // PRODUCTION (Netlify frontend, Render backend)
-        determinedApiBaseUrl = "https://rapidcrypto-backend.onrender.com/api"; // Render URL WITH /api
-        determinedFrontendUrl = "https://rapidcrypto.org";                   // Live frontend URL
+        determinedApiBaseUrl = "https://rapidcrypto-backend.onrender.com/api";
+        determinedFrontendUrl = "https://rapidcrypto.org";
     }
 
     window.APP_KEYS = {
-        USER_INFO_KEY: 'rapidcrypto_user_info_v1',    // Standardized key name
-        AUTH_TOKEN_KEY: 'rapidcrypto_auth_token_v1', // Standardized key name
-        API_BASE_URL: determinedApiBaseUrl,          // Correctly determined API base URL with /api
-        FRONTEND_URL: determinedFrontendUrl          // For email links, etc.
-        // Add other global keys if needed by other scripts
+        USER_INFO_KEY: 'rapidcrypto_user_info_v1',
+        AUTH_TOKEN_KEY: 'rapidcrypto_auth_token_v1',
+        API_BASE_URL: determinedApiBaseUrl,
+        FRONTEND_URL: determinedFrontendUrl
     };
-
-    // Log to confirm APP_KEYS is set when auth.js executes
     console.log('DEBUG [auth.js]: window.APP_KEYS defined:', JSON.parse(JSON.stringify(window.APP_KEYS)));
 })();
 
-
 // 2. CONSTANTS FOR INTERNAL USE WITHIN AUTH.JS
-// These can now directly reference the globally defined keys for consistency.
-const API_BASE_URL = window.APP_KEYS.API_BASE_URL; // This will now be correct (e.g., http://localhost:3001/api)
+const API_BASE_URL = window.APP_KEYS.API_BASE_URL;
 const AUTH_TOKEN_KEY = window.APP_KEYS.AUTH_TOKEN_KEY;
 const USER_INFO_KEY = window.APP_KEYS.USER_INFO_KEY;
-
-// These keys are specific to dashboard data, potentially cleared on logout.
 const DASHBOARD_AVAILABLE_BALANCE_KEY = 'availableBalance_cs_v2';
 const DASHBOARD_ACTIVE_INVESTMENTS_KEY = 'activeInvestments_cs_v2';
-// Add other specific cache keys if this script manages them
-const TRANSACTIONS_CACHE_KEY = 'rapidcrypto_transactions_cache_v1'; // From transactions.js
-
+const TRANSACTIONS_CACHE_KEY = 'rapidcrypto_transactions_cache_v1';
 
 document.addEventListener('DOMContentLoaded', () => {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     console.log(`DEBUG [auth.js]: DOMContentLoaded on ${currentPage}`);
 
-    // This check is a safeguard; APP_KEYS should be defined by the IIFE above before DOMContentLoaded.
     if (!window.APP_KEYS || !window.APP_KEYS.API_BASE_URL) {
         console.error("CRITICAL [auth.js]: window.APP_KEYS or API_BASE_URL did not initialize correctly. This is a bug.");
         showAlert('Application configuration error. Please try again later or contact support.', 'error');
-        return; // Halt further auth processing if config is broken
+        return;
     }
 
-    // Specific event listeners for login/register forms if auth.js is handling them
-    // If login.js and register.js are separate and handle their own forms, this section can be removed from auth.js.
-    // Assuming for now that auth.js might be the SOLE handler for these forms if other scripts are not present.
     const registerForm = document.getElementById('registerForm');
-    if (registerForm && currentPage === 'register.html') { // Ensure we are on the register page
+    if (registerForm && currentPage === 'register.html') {
         if (!registerForm.dataset.listenerAttachedByAuthJs) {
             registerForm.addEventListener('submit', handleAuthJsRegister);
             registerForm.dataset.listenerAttachedByAuthJs = 'true';
@@ -67,20 +50,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const loginForm = document.getElementById('loginForm');
-    if (loginForm && currentPage === 'login.html') { // Ensure we are on the login page
+    if (loginForm && currentPage === 'login.html') {
         if (!loginForm.dataset.listenerAttachedByAuthJs) {
             loginForm.addEventListener('submit', handleAuthJsLogin);
             loginForm.dataset.listenerAttachedByAuthJs = 'true';
             console.log("DEBUG [auth.js]: Attached loginForm listener.");
         }
     }
-    // --- End of form-specific listeners ---
 
-    checkAuthState(); // Check auth state on all pages
-    updateNavFooterBasedOnAuth(); // Update UI on all pages
+    checkAuthState();
+    updateNavFooterBasedOnAuth();
 
     const logoutButton = document.getElementById('logoutBtn');
-    const footerLogoutButton = document.getElementById('footerLogoutBtn'); // From index.html
+    const footerLogoutButton = document.getElementById('footerLogoutBtn');
 
     if (logoutButton && !logoutButton.dataset.listenerAttachedByAuthJs) {
         logoutButton.addEventListener('click', handleLogout);
@@ -88,25 +70,20 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("DEBUG [auth.js]: Attached logoutBtn listener.");
     }
     if (footerLogoutButton && !footerLogoutButton.dataset.listenerAttachedByAuthJs) {
-        footerLogoutButton.addEventListener('click', handleLogout); // Same handler
+        footerLogoutButton.addEventListener('click', handleLogout);
         footerLogoutButton.dataset.listenerAttachedByAuthJs = 'true';
         console.log("DEBUG [auth.js]: Attached footerLogoutBtn listener.");
     }
 });
 
-// --- Form Handlers (handleAuthJsRegister, handleAuthJsLogin) ---
-// These will use the API_BASE_URL defined at the top of this script, which now includes /api.
-// So, the fetch URLs should be `${API_BASE_URL}/register` and `${API_BASE_URL}/login`.
-
 async function handleAuthJsRegister(e) {
     e.preventDefault();
     const form = e.target;
     const btn = form.querySelector('button[type="submit"]');
-    const originalBtnHtml = btn ? btn.innerHTML : 'Create Account'; // Match button text
-    const messageContainer = document.getElementById('message') || form.querySelector('.form-message') || form; // More robust message element finding
+    const originalBtnHtml = btn ? btn.innerHTML : 'Create Account';
+    const messageContainer = document.getElementById('message') || form.querySelector('.form-message') || form;
 
     try {
-        // --- Collect all fields from register.html ---
         const firstname = form.querySelector('#firstname')?.value.trim();
         const lastname = form.querySelector('#lastname')?.value.trim();
         const username = form.querySelector('#username')?.value.trim();
@@ -115,14 +92,13 @@ async function handleAuthJsRegister(e) {
         const confirmPassword = form.querySelector('#confirmPassword')?.value;
         const termsCheckbox = form.querySelector('#terms');
 
-        // --- Validations (from register.js) ---
         if (!firstname || !lastname || !username || !email || !password || !confirmPassword) {
             showAlert('Please fill in all required fields.', 'error', messageContainer); return;
         }
         if (password !== confirmPassword) {
             showAlert('Passwords do not match.', 'error', messageContainer); return;
         }
-        if (password.length < 6) { // Match your backend's requirement
+        if (password.length < 6) {
             showAlert('Password must be at least 6 characters.', 'error', messageContainer); return;
         }
         if (username.length < 3) {
@@ -134,35 +110,32 @@ async function handleAuthJsRegister(e) {
         if (termsCheckbox && !termsCheckbox.checked) {
             showAlert('You must agree to the Terms and Conditions.', 'error', messageContainer); return;
         }
-        // --- End Validations ---
 
         if (btn) {
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
         }
 
-        // API_BASE_URL already includes /api, so just append /register
         const response = await fetch(`${API_BASE_URL}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // Send all necessary fields including firstname and lastname
             body: JSON.stringify({ firstname, lastname, username, email, password }),
         });
 
         const data = await response.json();
-        if (!response.ok || !data.success) { // Backend sends {success: false, message: "..."}
+        if (!response.ok || !data.success) {
             throw new Error(data.message || 'Registration failed. Please try again.');
         }
 
-        // Backend sends {success: true, message: "Registered! Verification email sent."}
         showAlert(data.message || 'Registration successful! Please check your email to verify.', 'success', messageContainer);
-        form.reset(); // Clear form on success
+        form.reset();
     } catch (error) {
         const msg = error.message && error.message.includes('Failed to fetch')
             ? 'Cannot connect to the registration server. Please check your internet connection.'
             : error.message;
+        // ENHANCED LOGGING
+        console.error("ERROR [auth.js handleAuthJsRegister - CAUGHT]:", error.message, error);
         showAlert(msg, 'error', messageContainer);
-        console.error("ERROR [auth.js handleAuthJsRegister]:", error);
     } finally {
         if (btn) {
             btn.disabled = false;
@@ -173,16 +146,34 @@ async function handleAuthJsRegister(e) {
 
 async function handleAuthJsLogin(e) {
     e.preventDefault();
+    console.log("DEBUG [auth.js]: handleAuthJsLogin triggered."); // Confirm function entry
+
     const form = e.target;
-    const btn = form.querySelector('button[type="submit"]');
-    const originalBtnHtml = btn ? btn.innerHTML : 'Login'; // Match button text
+    const btn = form.querySelector('button[type="submit"]'); // Assuming this is your #submitBtn
+    const originalBtnHtml = btn ? btn.innerHTML : 'Login';
     const messageContainer = document.getElementById('loginMessage') || form.querySelector('.form-message') || form;
-    const resendVerificationSection = document.getElementById('resendVerificationSection'); // From login.html
+    const resendVerificationSection = document.getElementById('resendVerificationSection');
+
+    if (!form || !btn || !messageContainer) {
+        console.error("CRITICAL [auth.js handleAuthJsLogin]: Could not find essential form elements (form, submit button, or message container).");
+        return; // Stop if basic elements are missing
+    }
 
     try {
-        // Use 'email' and 'password' IDs as per login.html
-        const email = form.querySelector('#email')?.value.trim();
-        const password = form.querySelector('#password')?.value;
+        const emailInput = form.querySelector('#email');
+        const passwordInput = form.querySelector('#password');
+
+        if (!emailInput || !passwordInput) {
+            console.error("CRITICAL [auth.js handleAuthJsLogin]: Email or password input field not found.");
+            showAlert('Internal error: Form fields missing.', 'error', messageContainer);
+            return;
+        }
+
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        console.log(`DEBUG [auth.js handleAuthJsLogin]: Email='${email}', Password present='${!!password}'`);
+
 
         if (!email || !password) {
             showAlert('Please enter both email and password.', 'error', messageContainer); return;
@@ -191,69 +182,70 @@ async function handleAuthJsLogin(e) {
             showAlert('Please enter a valid email address.', 'error', messageContainer); return;
         }
 
-        if (btn) {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-        }
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
 
-        // API_BASE_URL already includes /api, so just append /login
+        console.log(`DEBUG [auth.js handleAuthJsLogin]: Sending login request to ${API_BASE_URL}/login`);
         const response = await fetch(`${API_BASE_URL}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password }),
         });
+        console.log(`DEBUG [auth.js handleAuthJsLogin]: Response status: ${response.status}`);
 
-        const data = await response.json(); // Parse JSON regardless of status
+        const data = await response.json();
+        console.log("DEBUG [auth.js handleAuthJsLogin]: Response data:", data);
 
-        if (!response.ok) { // Handle 4xx, 5xx errors
+
+        if (!response.ok) {
             if (response.status === 403 && data.needsVerification) {
                 showAlert(data.message || 'Email not verified. Please check your email or resend verification.', 'error', messageContainer);
                 if (resendVerificationSection) resendVerificationSection.style.display = 'block';
-                 // Setup resend button listener if not already (or ensure login.js handles it)
                 const resendBtn = document.getElementById('resendVerificationBtn');
                 if(resendBtn && !resendBtn.dataset.authJsListener) {
                     resendBtn.addEventListener('click', () => handleResendVerificationEmail(email));
                     resendBtn.dataset.authJsListener = 'true';
                 }
             } else {
-                throw new Error(data.message || 'Login failed. Please check your credentials.');
+                throw new Error(data.message || `Login failed. Server responded with status ${response.status}.`);
             }
-            return; // Stop further processing on error
+            return;
         }
 
-        // If response.ok (e.g., 200) and backend sends {success: true, token, user}
         if (data.success && data.token && data.user) {
-            // --- ALIGNMENT: Use sessionStorage for token, localStorage for user info if preferred by other scripts ---
-            sessionStorage.setItem(AUTH_TOKEN_KEY, data.token); // Store token in sessionStorage
-            localStorage.setItem(USER_INFO_KEY, JSON.stringify(data.user)); // User info for display
-
+            sessionStorage.setItem(AUTH_TOKEN_KEY, data.token);
+            localStorage.setItem(USER_INFO_KEY, JSON.stringify(data.user));
             showAlert('Login successful! Redirecting to your dashboard...', 'success', messageContainer);
             setTimeout(() => {
-                window.location.href = 'dashboard.html'; // Or use a redirect parameter if available
+                window.location.href = 'dashboard.html';
             }, 1500);
         } else {
-            // Should not happen if backend sends correct 200 success response
             throw new Error(data.message || 'Login successful, but server response was incomplete.');
         }
 
     } catch (error) {
+        // ENHANCED LOGGING
+        console.error("ERROR [auth.js handleAuthJsLogin - CAUGHT]:", error.message, error);
         const msg = error.message && error.message.includes('Failed to fetch')
-            ? 'Cannot connect to the login server. Please check your internet connection.'
-            : error.message;
+            ? 'Cannot connect to the login server. Please check your internet connection or API URL.'
+            : error.message || "An unexpected error occurred during login.";
         showAlert(msg, 'error', messageContainer);
-        console.error("ERROR [auth.js handleAuthJsLogin]:", error);
     } finally {
-        if (btn && !(messageContainer.className.includes('success'))) { // Don't reset button if redirecting
-            btn.disabled = false;
-            btn.innerHTML = originalBtnHtml;
+        // Only re-enable button if not a success (which leads to redirect)
+        if (btn && !(messageContainer && messageContainer.textContent && messageContainer.textContent.toLowerCase().includes('successful'))) {
+             if (btn.disabled) { // Check if it was actually disabled
+                btn.disabled = false;
+                btn.innerHTML = originalBtnHtml;
+            }
         }
     }
 }
 
+
 async function handleResendVerificationEmail(emailForResend) {
     const resendMessageEl = document.getElementById('resendMessage');
     const resendBtn = document.getElementById('resendVerificationBtn');
-    if (!emailForResend && document.getElementById('email')) { // Get email from input if not passed
+    if (!emailForResend && document.getElementById('email')) {
         emailForResend = document.getElementById('email').value.trim();
     }
 
@@ -278,34 +270,29 @@ async function handleResendVerificationEmail(emailForResend) {
         if (resendMessageEl) resendMessageEl.textContent = data.message || 'Verification email resent successfully.';
     } catch (error) {
         if (resendMessageEl) resendMessageEl.textContent = error.message || 'Error resending verification.';
-        console.error("Error resending verification:", error);
+        console.error("ERROR [auth.js handleResendVerificationEmail - CAUGHT]:", error.message, error);
     } finally {
         if (resendBtn) resendBtn.disabled = false;
     }
 }
 
-
-// --- Auth State Management (checkAuthState, updateNavFooterBasedOnAuth, handleLogout) ---
 function checkAuthState() {
-    const protectedPages = ['dashboard.html', 'wallet.html', 'transactions.html', 'transfer.html', 'deposit.html', 'withdraw.html', /* add other protected pages */];
+    const protectedPages = ['dashboard.html', 'wallet.html', 'transactions.html', 'transfer.html', 'deposit.html', 'withdraw.html'];
     const authFlowPages = ['login.html', 'register.html', 'forgot-password.html', 'reset-password.html', 'verify-email.html'];
-
     let currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    // --- ALIGNMENT: Use sessionStorage for token check ---
     const token = sessionStorage.getItem(AUTH_TOKEN_KEY);
-    const validToken = token && token !== 'undefined' && token !== 'null'; // Basic check
+    const validToken = token && token !== 'undefined' && token !== 'null';
 
     console.log(`DEBUG [auth.js checkAuthState]: Page='${currentPage}' | Token in sessionStorage=${!!validToken}`);
 
     if (protectedPages.includes(currentPage)) {
         if (!validToken) {
             console.warn(`Redirecting from protected page '${currentPage}' to login due to missing/invalid token.`);
-            // Clear any potentially stale user info if token is bad
             localStorage.removeItem(USER_INFO_KEY);
             window.location.href = `login.html?redirectTo=${encodeURIComponent(currentPage)}&reason=auth_required`;
         }
     } else if (authFlowPages.includes(currentPage)) {
-        if (validToken && currentPage !== 'verify-email.html') { // Allow verify-email even if logged in, though unusual
+        if (validToken && currentPage !== 'verify-email.html') {
             console.log(`User already authenticated, redirecting from auth page '${currentPage}' to dashboard.`);
             window.location.href = 'dashboard.html?reason=already_authenticated';
         }
@@ -313,24 +300,25 @@ function checkAuthState() {
 }
 
 function updateNavFooterBasedOnAuth() {
-    // --- ALIGNMENT: Use sessionStorage for token check ---
     const token = sessionStorage.getItem(AUTH_TOKEN_KEY);
     const validToken = token && token !== 'undefined' && token !== 'null';
-    const navUl = document.getElementById('mainNavUl'); // Assuming ID on main nav UL from index.html
+    const navUl = document.getElementById('mainNavUl');
 
-    if (!navUl) {
+    if (!navUl && window.location.pathname.includes('login.html')) {
+        // On login page, specific nav might not exist, this is fine.
+    } else if (!navUl) {
         // console.log("DEBUG [auth.js updateNav]: Main navigation <ul> (id: mainNavUl) not found, skipping nav update.");
         return;
     }
 
-    // More robust selectors for nav items, assuming they have consistent classes or structure
+
     const navLoginLink = document.getElementById('navLoginLink');
     const navRegisterLink = document.getElementById('navRegisterLink');
-    const navDashboardLink = navUl.querySelector('a[href="dashboard.html"]')?.closest('li');
-    const navWalletLink = navUl.querySelector('a[href="wallet.html"]')?.closest('li');
-    const navTransactionsLink = navUl.querySelector('a[href="transactions.html"]')?.closest('li');
-    const navLogoutItem = document.getElementById('logoutNavItem'); // The <li> containing the logout button
-    const footerLogoutLi = document.getElementById('footerLogoutLi'); // From index.html
+    const navDashboardLink = navUl ? navUl.querySelector('a[href="dashboard.html"]')?.closest('li') : null;
+    const navWalletLink = navUl ? navUl.querySelector('a[href="wallet.html"]')?.closest('li') : null;
+    const navTransactionsLink = navUl ? navUl.querySelector('a[href="transactions.html"]')?.closest('li') : null;
+    const navLogoutItem = document.getElementById('logoutNavItem');
+    const footerLogoutLi = document.getElementById('footerLogoutLi');
 
     if (navLoginLink) navLoginLink.style.display = validToken ? 'none' : '';
     if (navRegisterLink) navRegisterLink.style.display = validToken ? 'none' : '';
@@ -340,35 +328,26 @@ function updateNavFooterBasedOnAuth() {
     if (navLogoutItem) navLogoutItem.style.display = validToken ? '' : 'none';
     if (footerLogoutLi) footerLogoutLi.style.display = validToken ? '' : 'none';
 
-    console.log(`DEBUG [auth.js updateNav]: Navigation updated. LoggedIn=${validToken}`);
+    // console.log(`DEBUG [auth.js updateNav]: Navigation updated. LoggedIn=${validToken}`);
 }
 
 function handleLogout() {
     console.log("DEBUG [auth.js]: Logging out...");
-    // --- ALIGNMENT: Clear from sessionStorage ---
     sessionStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(USER_INFO_KEY); // User display info can remain in localStorage if preferred
-    
-    // Clear other cached data
+    localStorage.removeItem(USER_INFO_KEY);
     localStorage.removeItem(DASHBOARD_AVAILABLE_BALANCE_KEY);
     localStorage.removeItem(DASHBOARD_ACTIVE_INVESTMENTS_KEY);
-    localStorage.removeItem(TRANSACTIONS_CACHE_KEY); // Clear transactions cache
-
-    // Optionally, call a backend logout endpoint if you implement one (e.g., to invalidate refresh tokens)
-    // fetch(`${API_BASE_URL}/logout`, { method: 'POST', headers: {'Authorization': `Bearer ${tokenFromBeforeClear}`}}).catch(err => console.warn("Backend logout call failed", err));
-
-    updateNavFooterBasedOnAuth(); // Update UI immediately
-    window.location.href = 'login.html?logout=success'; // Redirect to login or home after logout
+    localStorage.removeItem(TRANSACTIONS_CACHE_KEY);
+    updateNavFooterBasedOnAuth();
+    window.location.href = 'login.html?logout=success';
 }
 
-// --- showAlert Utility --- (Generally good, ensure CSS classes .alert-success, .alert-error etc. are defined)
 function showAlert(message, type = 'info', targetElement = null) {
-    // Remove any existing alert first
     const existingAlert = document.querySelector('.app-global-alert');
     if (existingAlert) existingAlert.remove();
 
     const alertDiv = document.createElement('div');
-    alertDiv.className = `app-global-alert alert-${type}`; // e.g., alert-success, alert-error
+    alertDiv.className = `app-global-alert alert-${type}`;
 
     const icons = {
         success: 'fa-check-circle', error: 'fa-exclamation-circle',
@@ -376,7 +355,6 @@ function showAlert(message, type = 'info', targetElement = null) {
     };
     alertDiv.innerHTML = `<i class="fas ${icons[type] || icons.info}" style="margin-right: 8px;"></i> <span>${message}</span>`;
 
-    // Basic inline styles for visibility, can be enhanced with CSS classes
     const typeStyles = {
         error: { color: '#721c24', backgroundColor: '#f8d7da', borderColor: '#f5c6cb' },
         success: { color: '#155724', backgroundColor: '#d4edda', borderColor: '#c3e6cb' },
@@ -388,15 +366,44 @@ function showAlert(message, type = 'info', targetElement = null) {
         borderRadius: '5px', textAlign: 'left', fontSize: '0.95em', wordWrap: 'break-word',
         ...typeStyles[type],
     });
+    
+    // Try to find the message container in login.html or register.html specifically
+    let specificMessageContainer = null;
+    if (document.getElementById('loginMessage') && document.getElementById('loginForm').contains(document.getElementById('loginMessage'))) {
+        specificMessageContainer = document.getElementById('loginMessage');
+    } else if (document.getElementById('message') && document.getElementById('registerForm') && document.getElementById('registerForm').contains(document.getElementById('message'))) {
+        specificMessageContainer = document.getElementById('message');
+    }
 
-    if (targetElement && targetElement.offsetParent !== null) { // Check if targetElement is visible and in DOM
-        // Insert before the targetElement if it's a form, or as its first child
-        if (targetElement.tagName === 'FORM') {
+
+    if (targetElement && targetElement.offsetParent !== null) {
+        if (targetElement.id === 'loginMessage' || targetElement.id === 'message') { // If target is the designated message div
+            targetElement.innerHTML = ''; // Clear it first
+            targetElement.appendChild(alertDiv);
+            targetElement.style.display = 'block'; // Make sure it's visible
+            // Remove inline styles from alertDiv as it will be styled by its container or CSS
+            alertDiv.style.padding = '0';
+            alertDiv.style.marginBottom = '0';
+            alertDiv.style.border = 'none';
+            alertDiv.style.borderRadius = '0';
+            alertDiv.style.color = typeStyles[type].color; // Only apply color
+            alertDiv.style.backgroundColor = 'transparent'; // Make transparent
+        } else if (targetElement.tagName === 'FORM') {
             targetElement.parentNode.insertBefore(alertDiv, targetElement);
         } else {
             targetElement.prepend(alertDiv);
         }
-    } else { // Fallback to a fixed global alert
+    } else if (specificMessageContainer) { // Fallback to specific message containers if targetElement is not good
+         specificMessageContainer.innerHTML = ''; // Clear it first
+         specificMessageContainer.appendChild(alertDiv);
+         specificMessageContainer.style.display = 'block';
+         alertDiv.style.padding = '0';
+         alertDiv.style.marginBottom = '0';
+         alertDiv.style.border = 'none';
+         alertDiv.style.borderRadius = '0';
+         alertDiv.style.color = typeStyles[type].color;
+         alertDiv.style.backgroundColor = 'transparent';
+    } else {
         Object.assign(alertDiv.style, {
             position: 'fixed', top: '20px', left: '50%',
             transform: 'translateX(-50%)', zIndex: '10000',
@@ -405,10 +412,11 @@ function showAlert(message, type = 'info', targetElement = null) {
         document.body.insertBefore(alertDiv, document.body.firstChild);
     }
 
-    // Auto-dismiss
-    setTimeout(() => {
-        alertDiv.style.transition = 'opacity 0.5s ease-out';
-        alertDiv.style.opacity = '0';
-        setTimeout(() => alertDiv.remove(), 500);
-    }, 4500);
+    if (!(targetElement && (targetElement.id === 'loginMessage' || targetElement.id === 'message'))) {
+        setTimeout(() => {
+            alertDiv.style.transition = 'opacity 0.5s ease-out';
+            alertDiv.style.opacity = '0';
+            setTimeout(() => alertDiv.remove(), 500);
+        }, 4500);
+    }
 }
