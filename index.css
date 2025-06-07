@@ -232,6 +232,12 @@ nav {
   padding: 1rem;
 }
 
+.hero-chart-container canvas,
+.chart-container canvas { /* ADDED rule for canvases */
+  display: block;
+  max-width: 100%;
+}
+
 .chart-error {
   position: absolute;
   top: 50%;
@@ -317,6 +323,8 @@ nav {
   box-shadow: var(--shadow);
   padding: 1.5rem;
   transition: var(--transition);
+  display: flex; /* ADDED for consistent inner layout */
+  flex-direction: column; /* ADDED for consistent inner layout */
 }
 
 .card:hover {
@@ -348,17 +356,33 @@ nav {
 }
 
 .fa-bolt { /* Top movers icon */
-  color: #ffab00;
+  color: var(--accent-color); /* CHANGED: Using var for consistency */
 }
 
 .chart-container {
   position: relative;
   height: 250px;
   width: 100%;
+  flex-grow: 1; /* ADDED: Allow chart container to fill space if card is flex column */
+  display: flex; /* ADDED: To center error message if canvas fails to render */
+  align-items: center; /* ADDED */
+  justify-content: center; /* ADDED */
 }
+
+#topMoversContainer { /* ADDED rule for topMoversContainer */
+  min-height: 250px; /* Match .chart-container height for visual consistency */
+  box-sizing: border-box;
+  width: 100%; /* Ensure it takes full width within card padding */
+  flex-grow: 1; /* ADDED: Allow container to fill space if card is flex column */
+  display: flex; /* ADDED: To better manage loading/error states or content */
+  flex-direction: column; /* ADDED */
+  /* justify-content: center; */ /* Optional: if you want to center sparse content. Loading text might look better at top. */
+}
+
 
 .table-container {
   overflow-x: auto;
+  flex-grow: 1; /* ADDED: Allow table container to fill space */
 }
 
 table {
@@ -381,6 +405,7 @@ th {
   text-align: center;
   padding: 2rem 0;
   color: var(--gray-color);
+  margin: auto; /* ADDED: To center vertically if #topMoversContainer is flex column */
 }
 
 .error-text {
@@ -540,7 +565,7 @@ footer {
 @media (max-width: 768px) {
   #mainNavUl {
     position: fixed;
-    top: 70px;
+    top: 70px; /* Assuming header height is around 70px */
     left: 0;
     width: 100%;
     background-color: var(--white);
@@ -548,8 +573,9 @@ footer {
     align-items: center;
     padding: 2rem 0;
     box-shadow: var(--shadow);
-    transform: translateY(-150%);
+    transform: translateY(-150%); /* Start off-screen */
     transition: transform 0.3s ease;
+    z-index: 99; /* Below header sticky z-index */
   }
   
   #mainNavUl.active {
@@ -603,7 +629,7 @@ footer {
     font-size: 0.8rem;
   }
   
-  .fa-coins {
+  .fa-coins { /* This specific rule was already here and is fine */
     font-size: 0.85rem !important;
   }
 }
