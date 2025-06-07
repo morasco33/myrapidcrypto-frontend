@@ -4,7 +4,7 @@
  * Specific form submissions (login, register) might be handled by page-specific scripts.
  */
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = 'https://rapidcrypto-backend.onrender.com';
 const AUTH_TOKEN_KEY = 'cryptohub_auth_token';
 const USER_INFO_KEY = 'cryptohub_user_info'; // Standardized key
 
