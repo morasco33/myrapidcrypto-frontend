@@ -1,5 +1,5 @@
 /* ==================== */
-/* MODERN CRYPTOHUB STYLES - REVISED */
+/* MODERN CRYPTOHUB STYLES */
 /* ==================== */
 
 :root {
@@ -234,7 +234,7 @@ main {
   transform: translateY(0);
 }
 
-/* Market Overview - REVISED SECTION */
+/* Market Overview */
 .market-overview {
   padding: 4rem 0;
 }
@@ -251,14 +251,6 @@ main {
 .section-header h2 {
   font-size: 2rem;
   color: var(--dark);
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-
-.section-header h2 i {
-  font-size: 1.1rem;
-  color: var(--primary);
 }
 
 .market-controls {
@@ -302,7 +294,6 @@ main {
   left: 1rem;
   color: var(--dark);
   opacity: 0.5;
-  font-size: 1rem;
 }
 
 .search-box input {
@@ -320,7 +311,7 @@ main {
   box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
 }
 
-/* Market Grid - REVISED */
+/* Market Grid */
 .market-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
@@ -339,7 +330,7 @@ main {
   grid-column: span 3;
 }
 
-/* Card Styles - REVISED ICONS */
+/* Card Styles */
 .card {
   background: var(--glass-bg);
   backdrop-filter: blur(10px);
@@ -367,142 +358,7 @@ main {
 }
 
 .card h3 i {
-  font-size: 1rem; /* Adjusted icon size */
-}
-
-/* Specific icon adjustments */
-.fa-chart-line { /* Market chart icon */
-  color: var(--secondary);
-}
-
-.fa-coins { /* Cryptocurrencies icon */
-  color: var(--accent);
-  font-size: 0.95rem !important; /* Slightly smaller */
-}
-
-/* ===== Top Movers Section Fix ===== */
-.top-movers {
-  background: var(--glass-bg);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: var(--card-shadow);
-  border: 1px solid var(--glass-border);
-}
-
-.top-movers h3 {
-  font-size: 1.25rem;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  color: var(--dark);
-}
-
-.top-movers h3 i {
-  color: var(--warning);
-  font-size: 1rem;
-}
-
-.movers-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  min-height: 200px; /* Ensures consistent height */
-}
-
-.mover {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  background: rgba(245, 245, 245, 0.7);
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.mover:hover {
-  background: rgba(108, 92, 231, 0.05);
-}
-
-.coin-info {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-
-.coin-info img {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  object-fit: contain;
-}
-
-.coin-name {
-  font-weight: 500;
-}
-
-.price-data {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.current-price {
-  font-weight: 600;
-}
-
-.price-change {
-  font-size: 0.85rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  margin-top: 0.2rem;
-}
-
-.positive {
-  color: var(--positive);
-  background: rgba(0, 184, 148, 0.1);
-}
-
-.negative {
-  color: var(--negative);
-  background: rgba(214, 48, 49, 0.1);
-}
-
-.loading-text {
-  text-align: center;
-  padding: 2rem 0;
-  color: var(--neutral);
-  font-style: italic;
-}
-
-.error-text {
-  color: var(--danger);
-  text-align: center;
-  padding: 1rem;
-  background: rgba(214, 48, 49, 0.1);
-  border-radius: 8px;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
-  .movers-container {
-    min-height: 150px;
-  }
-  
-  .mover {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-    padding: 1rem;
-  }
-  
-  .price-data {
-    align-items: flex-start;
-    width: 100%;
-  }
-}
-.fa-bolt { /* Top movers icon */
-  color: var(--warning);
+  color: var(--primary);
 }
 
 /* Chart Containers */
@@ -636,7 +492,7 @@ tr:hover td {
 
 .stat-box h2 {
   font-size: 2rem;
-  color: var(--primary);
+  color: #6c5ce7;
   margin: 0 0 0.5rem;
 }
 
@@ -982,7 +838,6 @@ footer {
     padding: 1.5rem;
   }
 }
-
 /* Colorful and Animated Sentences */
 .persuasive-sentences {
   font-size: 1.5rem;
@@ -1011,26 +866,48 @@ footer {
   50% { opacity: 0.7; }
   100% { opacity: 1; }
 }
-
-/* Market Trends Specific Fixes */
-.market-trends-container {
-  position: relative;
-  height: 100%;
-  width: 100%;
+ /* Colorful and Animated Sentences */
+ .persuasive-sentences {
+  font-size: 1.5rem;
+  color: var(--dark);
+  margin: 2rem auto;
+  text-align: center;
+  max-width: 800px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  animation: colorChange 6s infinite, fadeInOut 3s infinite;
 }
 
+@keyframes colorChange {
+  0% { color: var(--primary); }
+  25% { color: var(--secondary); }
+  50% { color: var(--accent); }
+  75% { color: var(--success); }
+  100% { color: var(--primary); }
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+.is-loading {
+  opacity: 0.5;
+  pointer-events: none; /* Prevent interaction while loading */
+}
 .market-trends-error-message {
-  color: var(--danger);
-  background-color: rgba(214, 48, 49, 0.1);
-  border: 1px solid rgba(214, 48, 49, 0.3);
+  color: #e53e3e; /* Tailwind red-600 */
+  background-color: #fed7d7; /* Tailwind red-200 */
+  border: 1px solid #f56565; /* Tailwind red-400 */
   padding: 0.75rem 1rem;
   margin: 0.5rem 0;
   border-radius: 0.25rem;
   text-align: center;
 }
-
-/* Fallback Styles */
-.fallback-icon, .fallback-icon-small {
+.fallback-icon, .fallback-icon-small { /* Style your image fallbacks */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1039,63 +916,21 @@ footer {
   border-radius: 50%;
   font-weight: bold;
 }
+.fallback-icon { width: 24px; height: 24px; font-size: 12px; }
+.fallback-icon-small { width: 18px; height: 18px; font-size: 10px; }
 
-.fallback-icon { 
-  width: 24px; 
-  height: 24px; 
-  font-size: 12px; 
-}
-
-.fallback-icon-small { 
-  width: 18px; 
-  height: 18px; 
-  font-size: 10px; 
-}
-
-/* Mover Grid Layout */
 .movers-grid-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Example responsive grid */
   gap: 1rem;
+  /* Add max-width or other constraints if needed */
 }
-
 .mover-item {
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  /* Styles for individual mover cards */
+  border: 1px solid #eee;
   padding: 0.75rem;
   border-radius: 4px;
   text-align: center;
-  transition: all 0.3s ease;
 }
-
-.mover-item:hover {
-  background: rgba(108, 92, 231, 0.05);
-}
-
-.mover-coin-image { 
-  width: 32px; 
-  height: 32px; 
-  margin-bottom: 0.5rem; 
-  border-radius: 50%;
-  object-fit: contain;
-}
-
-/* Loading State */
-.is-loading {
-  opacity: 0.5;
-  pointer-events: none;
-  position: relative;
-}
-
-.is-loading::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(108, 92, 231, 0.3);
-  border-radius: 50%;
-  border-top-color: var(--primary);
-  animation: spin 1s linear infinite;
-}
+.mover-coin-image { width: 32px; height: 32px; margin-bottom: 0.5rem; }
+/* ... other mover styles ... */
