@@ -380,6 +380,127 @@ main {
   font-size: 0.95rem !important; /* Slightly smaller */
 }
 
+/* ===== Top Movers Section Fix ===== */
+.top-movers {
+  background: var(--glass-bg);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--card-shadow);
+  border: 1px solid var(--glass-border);
+}
+
+.top-movers h3 {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--dark);
+}
+
+.top-movers h3 i {
+  color: var(--warning);
+  font-size: 1rem;
+}
+
+.movers-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 200px; /* Ensures consistent height */
+}
+
+.mover {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(245, 245, 245, 0.7);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.mover:hover {
+  background: rgba(108, 92, 231, 0.05);
+}
+
+.coin-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.coin-info img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: contain;
+}
+
+.coin-name {
+  font-weight: 500;
+}
+
+.price-data {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.current-price {
+  font-weight: 600;
+}
+
+.price-change {
+  font-size: 0.85rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.2rem;
+}
+
+.positive {
+  color: var(--positive);
+  background: rgba(0, 184, 148, 0.1);
+}
+
+.negative {
+  color: var(--negative);
+  background: rgba(214, 48, 49, 0.1);
+}
+
+.loading-text {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--neutral);
+  font-style: italic;
+}
+
+.error-text {
+  color: var(--danger);
+  text-align: center;
+  padding: 1rem;
+  background: rgba(214, 48, 49, 0.1);
+  border-radius: 8px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .movers-container {
+    min-height: 150px;
+  }
+  
+  .mover {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .price-data {
+    align-items: flex-start;
+    width: 100%;
+  }
+}
 .fa-bolt { /* Top movers icon */
   color: var(--warning);
 }
