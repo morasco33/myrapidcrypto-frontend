@@ -121,7 +121,7 @@
     displayStatus('Verifying credentials...');
 
     try {
-      const response = await fetch(`${CONFIG.API_BASE_URL}/login`, {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login`, {
 
         method: 'POST',
         headers: {
