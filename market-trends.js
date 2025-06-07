@@ -155,8 +155,7 @@ function updateTopMoversMT_v62(data) {
     topMovers.forEach(coin => {
         const priceChange24h = coin.price_change_percentage_24h || 0; const isPositive = priceChange24h >= 0;
         const moverElement = document.createElement('div'); moverElement.className = `mover ${isPositive ? 'positive' : 'negative'}`; 
-        moverElement.innerHTML = `<div class="coin-info"><img src="${coin.image}" alt="${coin.name}" class="coin-logo-small" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span class=\'fallback-icon fallback-mover\'>${coin.symbol ? coin.symbol[0].toUpperCase() : '?'}</span>');"><span>${coin.symbol.toUpperCase()}</span></div><div class="price">$${formatPriceMT_v62(coin.current_price)}</div><div class="change">${isPositive ? '+' : ''}${priceChange24h.toFixed(2)}%</div>`;
-        mtMoversContainer.appendChild(moverElement);
+        moverElement.innerHTML = `<div class="coin-info"><img src="${coin.image}" alt="${coin.name}" class="coin-logo-small" crossorigin="anonymous" onerror="this.style.display='none'; this.insertAdjacentHTML('afterend', '<span class=\'fallback-icon fallback-mover\'>${coin.symbol ? coin.symbol[0].toUpperCase() : '?'}</span>');"><span>${coin.symbol.toUpperCase()}</span></div><div class="price">$${formatPriceMT_v62(coin.current_price)}</div><div class="change">${isPositive ? '+' : ''}${priceChange24h.toFixed(2)}%</div>`;
     });
     console.log("DEBUG [market-trends.js V62_IntervalIdFixed]: Top Movers UI updated.");
 }
