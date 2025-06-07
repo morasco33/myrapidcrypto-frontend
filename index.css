@@ -39,7 +39,6 @@ button, input {
 
 img {
   max-width: 100%;
-  display: block; /* Good default for images */
 }
 
 .sr-only {
@@ -233,12 +232,6 @@ nav {
   padding: 1rem;
 }
 
-.hero-chart-container canvas,
-.chart-container canvas {
-  display: block;
-  max-width: 100%;
-}
-
 .chart-error {
   position: absolute;
   top: 50%;
@@ -324,8 +317,6 @@ nav {
   box-shadow: var(--shadow);
   padding: 1.5rem;
   transition: var(--transition);
-  display: flex;
-  flex-direction: column;
 }
 
 .card:hover {
@@ -357,101 +348,17 @@ nav {
 }
 
 .fa-bolt { /* Top movers icon */
-  color: var(--accent-color);
+  color: #ffab00;
 }
-
-/* --- Top Movers Card Specific Styling --- */
-#topMoversContainer {
-  min-height: 250px; /* Match .chart-container height for visual consistency */
-  box-sizing: border-box;
-  width: 100%;
-  flex-grow: 1; /* Allow container to fill space if card is flex column */
-  display: flex;
-  flex-direction: column; /* Stacks mover items vertically */
-  /* gap: 0.75rem; */ /* Optional: if you want space between mover items controlled here */
-}
-
-/* Style for each individual mover item */
-#topMoversContainer .mover-item {
-  display: flex;
-  align-items: center;
-  padding: 0.8rem 0; /* Vertical padding for each item */
-  border-bottom: 1px solid var(--light-gray);
-}
-
-#topMoversContainer .mover-item:last-child {
-  border-bottom: none; /* No border for the last item */
-}
-
-/* Styles for the mover's logo image */
-#topMoversContainer .mover-logo {
-  width: 36px;       /* Adjust size as needed */
-  height: 36px;      /* Adjust size as needed */
-  margin-right: 1rem; /* Space between logo and text info */
-  object-fit: contain; /* Scales image nicely within bounds */
-  border-radius: 50%;  /* Makes logos circular, common for crypto icons */
-  flex-shrink: 0;      /* Prevents logo from shrinking */
-}
-
-/* Container for all text info (symbol, price, change) */
-#topMoversContainer .mover-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  flex-grow: 1; /* Takes remaining width */
-}
-
-/* Style for the mover's symbol/name */
-#topMoversContainer .mover-symbol {
-  font-weight: 600;
-  color: var(--dark-color);
-  font-size: 0.95rem;
-  margin-bottom: 0.15rem; /* Space below the symbol */
-  line-height: 1.3;
-}
-
-/* Container for price and percentage change */
-#topMoversContainer .mover-stats {
-  display: flex;
-  gap: 0.5rem; /* Space between price and change */
-  align-items: center;
-}
-
-/* Style for the mover's price */
-#topMoversContainer .mover-price {
-  font-size: 0.9rem;
-  color: var(--gray-color);
-}
-
-/* Style for the mover's percentage change */
-#topMoversContainer .mover-change {
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-#topMoversContainer .mover-change.positive {
-  color: var(--secondary-color); /* Green for positive change */
-}
-
-#topMoversContainer .mover-change.negative {
-  color: var(--danger-color);    /* Red for negative change */
-}
-/* --- End Top Movers Card Specific Styling --- */
-
 
 .chart-container {
   position: relative;
   height: 250px;
   width: 100%;
-  flex-grow: 1; /* Allow chart container to fill space */
-  display: flex; /* To center error message */
-  align-items: center;
-  justify-content: center;
 }
 
 .table-container {
   overflow-x: auto;
-  flex-grow: 1; /* Allow table container to fill space */
 }
 
 table {
@@ -474,8 +381,6 @@ th {
   text-align: center;
   padding: 2rem 0;
   color: var(--gray-color);
-  margin: auto; /* Centers vertically within a flex container like #topMoversContainer */
-  width: 100%; /* Ensure it takes full width for text-align to work */
 }
 
 .error-text {
@@ -617,16 +522,16 @@ footer {
   .hero {
     grid-template-columns: 1fr;
   }
-
+  
   .hero-content {
     max-width: 100%;
     text-align: center;
   }
-
+  
   .cta-buttons {
     justify-content: center;
   }
-
+  
   .hero-chart-container {
     height: 250px;
   }
@@ -635,7 +540,7 @@ footer {
 @media (max-width: 768px) {
   #mainNavUl {
     position: fixed;
-    top: 70px; /* Adjust based on your actual header height */
+    top: 70px;
     left: 0;
     width: 100%;
     background-color: var(--white);
@@ -645,90 +550,60 @@ footer {
     box-shadow: var(--shadow);
     transform: translateY(-150%);
     transition: transform 0.3s ease;
-    z-index: 99; /* Below header */
   }
-
+  
   #mainNavUl.active {
     transform: translateY(0);
   }
-
+  
   .mobile-menu-toggle {
     display: block;
   }
-
+  
   .section-header {
     flex-direction: column;
     align-items: flex-start;
   }
-
+  
   .market-controls {
     width: 100%;
     flex-wrap: wrap;
   }
-
+  
   #cryptoSearchInput {
     width: 100%;
   }
-
+  
   /* Adjust icon sizes on mobile */
   .section-header h2 i,
   .card h3 i {
     font-size: 0.9rem;
   }
-
-  /* Top Movers logo on mobile */
-  #topMoversContainer .mover-logo {
-    width: 32px;
-    height: 32px;
-    margin-right: 0.75rem;
-  }
-
-  #topMoversContainer .mover-symbol {
-    font-size: 0.9rem;
-  }
-  #topMoversContainer .mover-price,
-  #topMoversContainer .mover-change {
-    font-size: 0.8rem;
-  }
-
 }
 
 @media (max-width: 576px) {
   h1 { font-size: 2rem; }
   h2 { font-size: 1.75rem; }
-
+  
   .hero h1 {
     font-size: 2.25rem;
   }
-
+  
   .cta-buttons {
     flex-direction: column;
   }
-
+  
   .btn {
     width: 100%;
   }
-
+  
   /* Further reduce icon sizes on very small screens */
   .section-header h2 i,
   .card h3 i {
     font-size: 0.8rem;
   }
-
+  
   .fa-coins {
     font-size: 0.85rem !important;
-  }
-
-  /* Top Movers logo on very small screens */
-  #topMoversContainer .mover-logo {
-    width: 28px;
-    height: 28px;
-  }
-  #topMoversContainer .mover-symbol {
-    font-size: 0.85rem;
-  }
-  #topMoversContainer .mover-price,
-  #topMoversContainer .mover-change {
-    font-size: 0.75rem;
   }
 }
