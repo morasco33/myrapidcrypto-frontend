@@ -26,7 +26,7 @@
     }
     // Fallback if not set, but this indicates an issue in HTML setup
     console.error("CRITICAL: window.API_BASE_URL is not set!");
-    return CONFIG.IS_PRODUCTION ? 'https://rapidcrypto-backend.onrender.com' : 'http://localhost:3001'; // Local backend port is 3001
+    return CONFIG.IS_PRODUCTION ? 'https://rapidcrypto.org' : 'http://localhost:3001'; // Local backend port is 3001
   }
 
 
