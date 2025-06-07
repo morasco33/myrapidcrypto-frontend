@@ -2,24 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>RapidWealthHub - Login</title>
-
-  <!-- Fonts and Icons -->
+  
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-  <!-- Styles -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="login.css" />
-
-  <!-- Define API base URL -->
-  <script>
-    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
-    // Uncomment below for local testing:
-    // if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    //window.API_BASE_URL = "http://localhost:3001";
-    // }
-  </script>
 </head>
 <body>
   <header>
@@ -39,7 +27,7 @@
         <p>Sign in to access your RapidWealthHub account</p>
       </div>
 
-      <form id="loginForm" class="login-form" novalidate method="post">
+      <form id="loginForm" class="login-form" novalidate>
         <div class="form-group">
           <label for="email">Email Address</label>
           <input
@@ -70,21 +58,19 @@
             type="text"
             id="otpCode"
             name="otpCode"
-            placeholder="Enter 2FA code or code from email"
-            inputmode="numeric"
-            pattern="[0-9]*"
+            placeholder="Enter the code sent to your email"
             autocomplete="one-time-code"
           />
         </div>
 
-        <div id="loginMessage" class="form-message" aria-live="assertive" style="min-height:1.5em; margin-bottom:1rem;"></div>
+        <div id="loginMessage" class="form-message" style="min-height:1.5em; margin-bottom:1rem;"></div>
 
         <div
           id="resendVerificationSection"
           style="display:none; margin-top:10px; margin-bottom:15px; text-align:center;"
         >
           <p style="margin-bottom:5px; font-size:0.9em;">
-            Your email address needs to be verified to log in.
+            Your email address appears to be unverified.
           </p>
           <button type="button" id="resendVerificationBtn" class="link-button">
             Resend Verification Link
@@ -92,7 +78,6 @@
           <div
             id="resendMessage"
             class="form-message"
-            aria-live="polite"
             style="font-size:0.9em; margin-top:5px; min-height:1.2em;"
           ></div>
         </div>
@@ -116,8 +101,12 @@
     </div>
   </main>
 
-  <!-- Scripts -->
+  <script>
+    // You can override API_BASE_URL here if needed; adjust as appropriate
+    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
+  </script>
+
   <script src="auth.js"></script>
-  <script src="login.js"></script>
+  <script src="login.js"></script> 
 </body>
 </html>
