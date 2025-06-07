@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Get elements ---
     const loginForm = document.getElementById('loginForm');
-    const emailInput = document.getElementById('loginEmail');
-    const passwordInput = document.getElementById('loginPassword');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
     const submitBtn = document.getElementById('submitBtn'); // Assuming this is your main login/submit button
     const loginMessageDiv = document.getElementById('loginMessage'); // For general messages
     
