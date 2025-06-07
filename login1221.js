@@ -12,7 +12,7 @@
     IS_PRODUCTION: window.location.protocol === 'https:',
     API_BASE_URL: window.API_BASE_URL || (
       window.location.hostname === 'localhost'
-        ? 'https://rapidcrypto-backend.onrender.com/api'
+        ? 'http://localhost:3000'
         : ''
     ),
     AUTH_STORAGE_KEY: 'app_auth_v4',
@@ -121,7 +121,8 @@
     displayStatus('Verifying credentials...');
 
     try {
-      const response = await fetch('http://localhost:3000/auth/login', {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login`, {
+
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -401,4 +402,4 @@
     return Date.now().toString(36) + Math.random().toString(36).slice(2);
   }
 
-})();
+})(); 
