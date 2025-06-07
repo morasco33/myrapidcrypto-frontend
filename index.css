@@ -254,6 +254,13 @@ nav {
   gap: 1rem;
 }
 
+.section-header h2 i {
+  font-size: 1.1rem;
+  margin-right: 0.6rem;
+  vertical-align: middle;
+  color: var(--primary-color);
+}
+
 .market-controls {
   display: flex;
   gap: 1rem;
@@ -322,17 +329,26 @@ nav {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
+  line-height: 1.4;
 }
 
-.feature-icon {
-  font-size: 1.25rem;
+.card h3 i {
+  font-size: 1rem;
   color: var(--primary-color);
 }
 
-.movers-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/* Specific icon adjustments */
+.fa-chart-line { /* Market chart icon */
+  color: var(--secondary-color);
+}
+
+.fa-coins { /* Cryptocurrencies icon */
+  color: var(--accent-color);
+  font-size: 0.95rem !important;
+}
+
+.fa-bolt { /* Top movers icon */
+  color: #ffab00;
 }
 
 .chart-container {
@@ -557,6 +573,12 @@ footer {
   #cryptoSearchInput {
     width: 100%;
   }
+  
+  /* Adjust icon sizes on mobile */
+  .section-header h2 i,
+  .card h3 i {
+    font-size: 0.9rem;
+  }
 }
 
 @media (max-width: 576px) {
@@ -573,5 +595,15 @@ footer {
   
   .btn {
     width: 100%;
+  }
+  
+  /* Further reduce icon sizes on very small screens */
+  .section-header h2 i,
+  .card h3 i {
+    font-size: 0.8rem;
+  }
+  
+  .fa-coins {
+    font-size: 0.85rem !important;
   }
 }
