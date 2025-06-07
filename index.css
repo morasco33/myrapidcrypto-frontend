@@ -575,3 +575,35 @@ footer {
     width: 100%;
   }
 }
+/* ===== Consistent Icon Sizing ===== */
+/* Section header icons */
+.section-header h2 i {
+  font-size: 1.1rem;
+  margin-right: 0.6rem;
+  vertical-align: middle;
+}
+
+/* Card title icons */
+.card h3 i {
+  font-size: 1rem;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+/* Specific icon adjustments */
+.fa-chart-line { /* Market chart icon */
+  color: var(--secondary-color);
+}
+
+.fa-coins { /* Cryptocurrencies icon */
+  color: var(--accent-color);
+}
+
+.fa-bolt { /* Top movers icon */
+  color: #ffab00;
+}
+
+/* Ensure icons don't affect line height */
+.card h3 {
+  line-height: 1.4;
+}
