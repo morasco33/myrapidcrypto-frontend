@@ -665,3 +665,113 @@ footer {
     font-size: 0.85rem !important;
   }
 }
+/* index.css - Add these new styles or modify existing ones */
+
+/* Styles for the text-only mover item */
+.mover-text-only {
+  display: flex; /* Or grid, depending on your layout preference */
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0.5rem; /* Adjust padding */
+  border-bottom: 1px solid var(--light-gray); /* Example separator */
+}
+
+.mover-text-only:last-child {
+  border-bottom: none;
+}
+
+.mover-text-only .coin-info-text {
+  display: flex;
+  flex-direction: column; /* Stack symbol and name */
+  align-items: flex-start;
+  flex-grow: 1; /* Allow it to take available space */
+}
+
+.mover-text-only .coin-symbol-prominent {
+  font-weight: 600; /* Make symbol stand out */
+  font-size: 1.1em; /* Slightly larger */
+  color: var(--primary-color); /* Example color */
+}
+
+.mover-text-only .coin-name-small {
+  font-size: 0.8em;
+  color: var(--gray-color);
+}
+
+.mover-text-only .price {
+  font-weight: 500;
+  min-width: 80px; /* Ensure price column has some width */
+  text-align: right;
+}
+
+.mover-text-only .change {
+  font-weight: 500;
+  min-width: 70px; /* Ensure change column has some width */
+  text-align: right;
+}
+
+/* Keep your .positive and .negative color styles for .change */
+.mover-text-only .change.positive {
+  color: var(--secondary-color); /* Or your green */
+}
+.mover-text-only .change.negative {
+  color: var(--danger-color); /* Or your red */
+}
+/* index.css - Add these new styles or modify existing ones */
+
+/* Styles for the text-only mover item */
+.mover-text-only {
+  display: flex; /* Or grid, depending on your layout preference */
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0.5rem; /* Adjust padding */
+  border-bottom: 1px solid var(--light-gray); /* Example separator */
+}
+
+.mover-text-only:last-child {
+  border-bottom: none;
+}
+
+.mover-text-only .coin-info-text {
+  display: flex;
+  flex-direction: column; /* Stack symbol and name */
+  align-items: flex-start;
+  flex-grow: 1; /* Allow it to take available space */
+  margin-right: 0.5rem; /* Add some space before price */
+}
+
+.mover-text-only .coin-symbol-prominent {
+  font-weight: 600; /* Make symbol stand out */
+  font-size: 1.1em; /* Slightly larger */
+  color: var(--primary-color); /* Example color */
+}
+
+.mover-text-only .coin-name-small {
+  font-size: 0.8em;
+  color: var(--gray-color);
+  white-space: nowrap; /* Prevent name from wrapping too much */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px; /* Adjust as needed */
+}
+
+.mover-text-only .price {
+  font-weight: 500;
+  min-width: 80px; /* Ensure price column has some width */
+  text-align: right;
+  margin-right: 0.5rem; /* Add some space before change % */
+}
+
+.mover-text-only .change {
+  font-weight: 500;
+  min-width: 70px; /* Ensure change column has some width */
+  text-align: right;
+}
+
+/* Keep your .positive and .negative color styles for .change */
+.mover-text-only .change.positive { /* Ensure the class is chained correctly */
+  color: var(--secondary-color); /* Or your green */
+}
+.mover-text-only .change.negative { /* Ensure the class is chained correctly */
+  color: var(--danger-color); /* Or your red */
+}
