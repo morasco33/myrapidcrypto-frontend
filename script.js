@@ -1,14 +1,14 @@
-// --- public/js/script.js (ADAPTED Version for New Setup) ---
+// --- public/js/script.js (ADAPTED Version for New Setup - CORRECTED) ---
 (() => {
     // Define your Render Backend Base URL here
-    const API_URL = 'https://rapidcrypto-backend.onrender.com/api/crypto-data'; // << IMPORTANT: REPLACE WITH YOUR ACTUAL RENDER URL
+    const API_URL = 'https://rapidcrypto-backend.onrender.com'; // << IMPORTANT: ENSURE THIS IS YOUR ACTUAL RENDER URL
 
     // --- DOMContentLoaded Initialization ---
     document.addEventListener('DOMContentLoaded', () => {
         console.log("DEBUG [script.js]: DOM fully loaded.");
 
-        const isHomePage = Boolean(document.getElementById('heroChart'));
-        const isLoginPage = Boolean(document.getElementById('loginForm')); // Assumes login form is on a separate page or section
+        const isHomePage = Boolean(document.getElementById('heroChart')); // Check for an element unique to the homepage
+        const isLoginPage = Boolean(document.getElementById('loginForm')); // Assumes login form has this ID
 
         try {
             handleAuthUIUpdates(); // Call this regardless of page to update nav/footer
@@ -20,10 +20,9 @@
 
             if (isHomePage) {
                 console.log("DEBUG [script.js]: Homepage detected.");
-                initSentenceRotator();
-                initPlatformStats();
+                // initSentenceRotator(); // Uncomment if #sentenceElement exists in your HTML
+                // initPlatformStats();   // Uncomment if stat elements (e.g., #activeUsersStat) exist
             } else {
-                // This log might be noisy if you have many pages without these elements
                 // console.log("DEBUG [script.js]: Not on homepage (or homepage elements not found).");
             }
 
@@ -43,11 +42,11 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
+            const emailInput = document.getElementById('email'); // Assuming input ID is 'email'
+            const passwordInput = document.getElementById('password'); // Assuming input ID is 'password'
 
             if (!emailInput || !passwordInput) {
-                console.error("ERROR [script.js]: Email or password input field not found.");
+                console.error("ERROR [script.js]: Email or password input field not found on login form.");
                 alert('Login form elements are missing. Please contact support.');
                 return;
             }
@@ -56,13 +55,13 @@
             const password = passwordInput.value || '';
 
             // Clear previous error messages for login
-            const errorDisplay = document.getElementById('loginErrorDisplay'); // Assuming you have an element to show login errors
+            const errorDisplay = document.getElementById('loginErrorDisplay'); // You need an element with this ID in your login form HTML
             if (errorDisplay) errorDisplay.textContent = '';
 
 
             try {
-                // *** IMPORTANT: Use the RENDER_BACKEND_BASE_URL ***
-                const res = await fetch(`${RENDER_BACKEND_BASE_URL}/login`, { // Or whatever your login endpoint is, e.g., /api/auth/login
+                // *** CORRECTED: Use the defined API_URL ***
+                const res = await fetch(`${API_URL}/login`, { // Or your specific login endpoint, e.g., /api/v1/auth/login
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password }),
@@ -71,19 +70,22 @@
                 const data = await res.json(); // Try to parse JSON regardless of res.ok for error messages
 
                 if (res.ok) {
-                    alert(data.message || 'Login successful!'); // Or use a more subtle notification
+                    // alert(data.message || 'Login successful!'); // Or use a more subtle notification
                     console.log("DEBUG [script.js]: Login successful, token:", data.token);
 
                     // Save token to localStorage and redirect
                     // Ensure APP_KEYS are defined, or use hardcoded keys directly
-                    const { AUTH_TOKEN_KEY = 'cryptohub_auth_token' } = window.APP_KEYS || {};
+                    const { AUTH_TOKEN_KEY = 'cryptohub_auth_token' } = window.APP_KEYS || { AUTH_TOKEN_KEY: 'cryptohub_auth_token' };
                     if (data.token) {
                         localStorage.setItem(AUTH_TOKEN_KEY, data.token);
                         // Optionally save user info if backend sends it
-                        // const { USER_INFO_KEY = 'cryptohub_user_info' } = window.APP_KEYS || {};
+                        // const { USER_INFO_KEY = 'cryptohub_user_info' } = window.APP_KEYS || { USER_INFO_KEY: 'cryptohub_user_info' };
                         // if(data.user) localStorage.setItem(USER_INFO_KEY, JSON.stringify(data.user));
 
-                        window.location.href = 'dashboard.html'; // Or whatever your target page is
+                        // Redirect based on query param or default to dashboard
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const redirectUrl = urlParams.get('redirect') || 'dashboard.html';
+                        window.location.href = redirectUrl;
                     } else {
                         console.warn("WARN [script.js]: Login successful but no token received.");
                         if (errorDisplay) errorDisplay.textContent = 'Login succeeded but no token was provided.';
@@ -96,8 +98,8 @@
                 }
             } catch (err) {
                 console.error("ERROR [script.js]: Login request failed -", err);
-                if (errorDisplay) errorDisplay.textContent = 'Something went wrong: ' + err.message;
-                else alert('Something went wrong: ' + err.message);
+                if (errorDisplay) errorDisplay.textContent = 'Something went wrong during login: ' + err.message;
+                else alert('Something went wrong during login: ' + err.message);
             }
         });
 
@@ -108,37 +110,61 @@
     function handleAuthUIUpdates() {
         console.log("DEBUG [script.js]: Updating nav/footer for auth.");
 
-        // Ensure APP_KEYS are defined, or use hardcoded keys directly if APP_KEYS is not set elsewhere
-        const { AUTH_TOKEN_KEY = 'cryptohub_auth_token', USER_INFO_KEY = 'cryptohub_user_info' } = window.APP_KEYS || { AUTH_TOKEN_KEY: 'cryptohub_auth_token', USER_INFO_KEY: 'cryptohub_user_info' }; // Provide defaults if APP_KEYS might be undefined
+        const { AUTH_TOKEN_KEY = 'cryptohub_auth_token', USER_INFO_KEY = 'cryptohub_user_info' } = window.APP_KEYS || { AUTH_TOKEN_KEY: 'cryptohub_auth_token', USER_INFO_KEY: 'cryptohub_user_info' };
         const token = localStorage.getItem(AUTH_TOKEN_KEY);
 
-        const navList = document.querySelector('header nav ul');
-        const loginItem = navList?.querySelector('li a[href="login.html"]')?.parentElement;
-        const registerItem = navList?.querySelector('li a[href="register.html"]')?.parentElement;
-        const logoutNavItem = document.getElementById('logoutNavItem'); // Assumes an <li> or <a> with this ID
-        // Let's assume the logout button itself has the ID 'logoutBtn'
-        const logoutBtn = document.getElementById('logoutBtn'); // Could be inside logoutNavItem or standalone
-        const footerLogoutBtn = document.getElementById('footerLogoutBtn');
+        // Navigation Links
+        const navLoginLink = document.getElementById('navLoginLink');
+        const navRegisterLink = document.getElementById('navRegisterLink');
+        const logoutNavItem = document.getElementById('logoutNavItem'); // The <li> element
+        const authRequiredLinks = document.querySelectorAll('.auth-required'); // Links that need auth
+
+        // Footer Logout
+        const footerLogoutLi = document.getElementById('footerLogoutLi'); // The <li> for footer logout
+        
+        // Buttons
+        const heroGetStartedBtn = document.getElementById('heroGetStartedBtn');
+
 
         if (token) {
-            loginItem && (loginItem.style.display = 'none');
-            registerItem && (registerItem.style.display = 'none');
-            
-            if (logoutNavItem) logoutNavItem.style.display = ''; // Show the nav item container
-            if (logoutBtn) logoutBtn.style.display = ''; // Ensure the button itself is visible if separate
-            
-            attachLogoutHandler(logoutBtn, AUTH_TOKEN_KEY, USER_INFO_KEY); // Attach to the actual button
+            // User is logged in
+            if (navLoginLink) navLoginLink.style.display = 'none';
+            if (navRegisterLink) navRegisterLink.style.display = 'none';
+            if (logoutNavItem) logoutNavItem.style.display = ''; // Show nav logout item
+            if (footerLogoutLi) footerLogoutLi.style.display = ''; // Show footer logout item
 
-            if (footerLogoutBtn) footerLogoutBtn.style.display = '';
-            attachLogoutHandler(footerLogoutBtn, AUTH_TOKEN_KEY, USER_INFO_KEY);
+            if (heroGetStartedBtn && heroGetStartedBtn.href.includes('register.html')) {
+                heroGetStartedBtn.href = 'dashboard.html'; // Change "Get Started" to go to dashboard
+                heroGetStartedBtn.textContent = 'Go to Dashboard';
+            }
+
+            // Remove auth protection from links if user is logged in
+            // This part is handled by the inline script in HTML, but good to be aware
         } else {
-            loginItem && (loginItem.style.display = '');
-            registerItem && (registerItem.style.display = '');
-
+            // User is not logged in
+            if (navLoginLink) navLoginLink.style.display = '';
+            if (navRegisterLink) navRegisterLink.style.display = '';
             if (logoutNavItem) logoutNavItem.style.display = 'none';
-            if (logoutBtn) logoutBtn.style.display = 'none';
+            if (footerLogoutLi) footerLogoutLi.style.display = 'none';
 
-            if (footerLogoutBtn) footerLogoutBtn.style.display = 'none';
+            if (heroGetStartedBtn && heroGetStartedBtn.href.includes('dashboard.html')) {
+                 heroGetStartedBtn.href = 'register.html'; // Ensure "Get Started" goes to register
+                 heroGetStartedBtn.textContent = 'Get Started Free';
+            }
+
+            // Auth protection (redirect to login) is handled by the inline script in your HTML
+            // for .auth-required links when clicked by a non-logged-in user.
+        }
+        
+        // Always ensure logout buttons have handlers if they are visible
+        const mainLogoutBtn = document.getElementById('logoutBtn'); // In nav
+        const footerLogoutBtn = document.getElementById('footerLogoutBtn'); // In footer
+        
+        if (mainLogoutBtn && logoutNavItem && logoutNavItem.style.display !== 'none') {
+            attachLogoutHandler(mainLogoutBtn, AUTH_TOKEN_KEY, USER_INFO_KEY);
+        }
+        if (footerLogoutBtn && footerLogoutLi && footerLogoutLi.style.display !== 'none') {
+            attachLogoutHandler(footerLogoutBtn, AUTH_TOKEN_KEY, USER_INFO_KEY);
         }
 
         console.log("DEBUG [script.js]: Auth UI updated based on token:", token ? "Found" : "Not Found");
@@ -150,128 +176,132 @@
             // console.warn("WARN [script.js]: Attempted to attach logout handler to a null button.");
             return;
         }
-        if (button.dataset.listenerAttached === 'true') return; // Already attached
+        // Basic check to prevent multiple listeners if script re-runs or elements are re-evaluated
+        if (button.dataset.logoutListenerAttached === 'true') return;
 
         button.addEventListener('click', (e) => {
             e.preventDefault();
             console.log("DEBUG [script.js]: Logout button clicked.");
-            // Check if a global handleLogout function exists (e.g., from another script for more complex logout)
-            if (typeof window.handleLogout === 'function') {
-                console.log("DEBUG [script.js]: Calling window.handleLogout()");
-                window.handleLogout(); // This function should handle token removal and redirection
-            } else {
-                // Basic logout: remove token and redirect
-                console.log("DEBUG [script.js]: Performing basic logout (removing tokens, redirecting).");
-                localStorage.removeItem(tokenKey);
-                localStorage.removeItem(userKey); // Also remove user info if stored
-                window.location.href = 'login.html'; // Redirect to login page
-            }
+            localStorage.removeItem(tokenKey);
+            localStorage.removeItem(userKey); // Also remove user info if stored
+            // Optional: Call an API endpoint to invalidate session/token on the server
+            // await fetch(`${API_URL}/logout`, { method: 'POST', headers: {'Authorization': `Bearer ${tokenFromSomewhere}` } });
+            window.location.href = 'login.html'; // Redirect to login page
         });
 
-        button.dataset.listenerAttached = 'true'; // Mark as attached
+        button.dataset.logoutListenerAttached = 'true'; // Mark as attached
         console.log(`DEBUG [script.js]: Logout handler attached to button: ${button.id || 'Unnamed button'}`);
     }
 
-    // --- Homepage: Sentence Rotator ---
+    // --- Homepage: Sentence Rotator (Example - uncomment if needed) ---
     function initSentenceRotator() {
-        const el = document.getElementById('sentenceElement');
+        const el = document.querySelector('.rotating-sentence'); // Using class from your HTML
         if (!el) {
-            // console.warn("WARN [script.js]: #sentenceElement not found. Skipping rotator.");
+            // console.warn("WARN [script.js]: .rotating-sentence element not found. Skipping rotator.");
             return;
         }
 
         const sentences = [
-            "Unlock Financial Freedom: RapidWealthHub offers you the unique opportunity to achieve massive income and passive earnings in just 48 hours, with no risk involved.",
-            "Effortless Wealth Generation: Pool your resources and grow your investments exponentially.",
-            "Join a Trusted Community: Collective success is our mission.",
-            "Risk-Free Investments: Minimize risk while maximizing returns.",
-            "Rapid Results: See real results within 48 hours.",
-            "Expert Guidance: Proven strategies and real-time insights.",
-            "Secure Your Future: Grow your wealth efficiently and safely.",
-            "Empower Your Financial Journey: Smart investing made simple.",
-            "Transformative Opportunities: Your gateway to financial breakthroughs.",
-            "Start Today, Benefit Tomorrow: Begin your path to wealth now."
+            "Trade. Track. Thrive. Your crypto journey starts here.",
+            "Real-time market data at your fingertips.",
+            "Securely manage your digital assets with ease.",
+            "Join thousands of users building their crypto portfolio.",
+            "Discover the next big investment opportunity."
         ];
 
         let index = 0;
         const rotate = () => {
-            // Basic fade effect (optional, can be enhanced with CSS transitions)
             el.style.opacity = 0;
             setTimeout(() => {
-                el.innerHTML = `<p>${sentences[index]}</p>`;
+                el.textContent = sentences[index]; // Set textContent directly
                 el.style.opacity = 1;
                 index = (index + 1) % sentences.length;
-            }, 300); // Short delay for fade out
+            }, 300); // Match CSS transition for fade
         };
         
         el.style.transition = 'opacity 0.3s ease-in-out'; // For smooth fade
 
         rotate(); // Initial call
-        setInterval(rotate, 6000); // Rotate every 6 seconds
-        console.log("DEBUG [script.js]: Sentence rotator active.");
+        setInterval(rotate, 5000); // Rotate every 5 seconds
+        console.log("DEBUG [script.js]: Sentence rotator active for .rotating-sentence.");
     }
 
-    // --- Homepage: Static Stats ---
+    // --- Homepage: Static Stats (Example - uncomment if needed and elements exist) ---
     function initPlatformStats() {
-        // console.log("DEBUG [script.js]: Initializing homepage stats.");
-
-        const stats = {
-            activeUsersStat: "3.2K+",
-            totalDepositsStat: "$5.3M+",
-            totalWithdrawalsStat: "$15.2M+",
-            countriesSupportedStat: "150+"
+        // console.log("DEBUG [script.js]: Initializing homepage stats (example).");
+        // This function would populate elements like:
+        // document.getElementById('activeUsersStat').textContent = "10K+";
+        // document.getElementById('totalVolumeStat').textContent = "$1B+";
+        // Ensure these IDs exist in your HTML if you use this.
+        // Example:
+        const statsData = {
+            //  "activeUsersStat": "10,000+", // Example: if you have <span id="activeUsersStat"></span>
+            //  "tradedVolumeStat": "$500M+",
+            //  "supportedCoinsStat": "100+"
         };
 
         let foundAnyStat = false;
-        for (const [id, value] of Object.entries(stats)) {
+        for (const [id, value] of Object.entries(statsData)) {
             const el = document.getElementById(id);
             if (el) {
                 el.textContent = value;
                 foundAnyStat = true;
-            } else {
-                // console.warn(`WARN [script.js]: Stat element #${id} not found.`);
             }
         }
-        if (foundAnyStat) console.log("DEBUG [script.js]: Homepage stats initialized.");
+        if (foundAnyStat) console.log("DEBUG [script.js]: Homepage stats populated.");
     }
 
     // --- Utility: Error Banner ---
     function displayGlobalErrorBanner(message) {
-        // Avoid creating multiple banners
-        if (document.getElementById('globalErrorBannerFromScriptJs')) {
-            document.getElementById('globalErrorBannerFromScriptJs').innerText = message; // Update existing
-            return;
+        let banner = document.getElementById('globalErrorBannerFromScriptJs');
+        if (banner) {
+            banner.innerText = message; // Update existing
+            banner.style.opacity = '1'; // Make sure it's visible again
+        } else {
+            banner = document.createElement('div');
+            banner.id = 'globalErrorBannerFromScriptJs';
+            banner.style.cssText = `
+                background-color: #dc3545; /* Red for error */
+                color: white;
+                padding: 12px 20px;
+                text-align: center;
+                font-size: 0.9em;
+                font-weight: bold;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                z-index: 100000; /* Ensure it's on top */
+                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                opacity: 1; /* Start visible */
+                transition: opacity 0.5s ease-out 6.5s; /* Start fading out after 6.5s */
+            `;
+            banner.innerText = message;
+            document.body.prepend(banner); // Prepend to make it appear at the top
         }
 
-        const banner = document.createElement('div');
-        banner.id = 'globalErrorBannerFromScriptJs';
-        banner.style.cssText = `
-            background-color: #dc3545; /* Red for error */
-            color: white;
-            padding: 12px 20px;
-            text-align: center;
-            font-size: 0.9em;
-            font-weight: bold;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 100000; /* Ensure it's on top */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            opacity: 1; /* Start visible */
-            transition: opacity 0.5s ease-out 6.5s; /* Start fading out after 6.5s */
-        `;
-        banner.innerText = message;
-        document.body.prepend(banner); // Prepend to make it appear at the top
-
         // Auto-remove after some time
-        setTimeout(() => {
+        // Clear any existing timeout to prevent multiple fades if called rapidly
+        if (banner.dataset.hideTimeout) {
+            clearTimeout(parseInt(banner.dataset.hideTimeout));
+        }
+
+        const timeoutId = setTimeout(() => {
             banner.style.opacity = '0'; // Trigger fade out
             setTimeout(() => {
-                if (banner.parentElement) { // Check if still in DOM
+                if (banner && banner.parentElement) { // Check if still in DOM
                     banner.remove();
                 }
             }, 500); // Remove after fade out transition (0.5s)
         }, 7000); // Total visible time including fade out start
+        banner.dataset.hideTimeout = timeoutId.toString();
     }
+
+    // Call init for homepage specific functions if on homepage
+    // This is now handled within DOMContentLoaded based on isHomePage flag
+    if (document.getElementById('heroChart')) { // A more robust check for homepage
+        initSentenceRotator();
+        // initPlatformStats(); // If you have these elements
+    }
+
 })();
