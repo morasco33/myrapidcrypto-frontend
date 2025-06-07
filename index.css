@@ -575,35 +575,33 @@ footer {
     width: 100%;
   }
 }
-/* ===== Consistent Icon Sizing ===== */
-/* Section header icons */
-.section-header h2 i {
-  font-size: 1.1rem;
-  margin-right: 0.6rem;
-  vertical-align: middle;
-}
+/* Add this to your existing CSS */
 
-/* Card title icons */
+/* Adjust icon sizes in section headers */
+.market-overview .section-header h2 i,
 .card h3 i {
-  font-size: 1rem;
+  font-size: 1rem; /* Reduced from default size */
   margin-right: 0.5rem;
-  vertical-align: middle;
+  color: var(--primary-color);
 }
 
-/* Specific icon adjustments */
-.fa-chart-line { /* Market chart icon */
-  color: var(--secondary-color);
+/* Specific adjustment for the coins icon */
+.fa-coins {
+  font-size: 0.9rem !important; /* Slightly smaller for the coins icon */
 }
 
-.fa-coins { /* Cryptocurrencies icon */
-  color: var(--accent-color);
+/* Make sure chart icons are proportional */
+.market-chart-card h3 i {
+  font-size: 1rem;
 }
 
-.fa-bolt { /* Top movers icon */
-  color: #ffab00;
+/* Adjust top movers icon */
+.top-movers h3 i {
+  font-size: 1rem;
+  color: var(--accent-color); /* Different color for distinction */
 }
 
-/* Ensure icons don't affect line height */
-.card h3 {
-  line-height: 1.4;
+/* If you want all icons in cards to be the same size */
+.card h3 i {
+  font-size: 1rem !important;
 }
