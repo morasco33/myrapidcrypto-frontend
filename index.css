@@ -1,4 +1,58 @@
 /* ===== Base Styles ===== */
+/* index.css */
+
+/* ... (other styles remain the same) ... */
+
+/* Specific icon adjustments */
+.fa-chart-line { /* Market chart icon */
+  color: var(--secondary-color);
+}
+
+.fa-coins { /* Cryptocurrencies icon */
+  color: var(--accent-color);
+  font-size: 0.95rem !important;
+}
+
+/* MODIFIED/REPLACED RULE FOR FA-BOLT */
+.card h3 i.fa-bolt { /* Top movers icon, specifically in a card header */
+  color: #ffab00; /* Original color for top movers icon */
+  font-size: 0.95rem !important; /* Adjusted size to match fa-coins */
+}
+
+/* ... (other styles remain the same) ... */
+
+@media (max-width: 576px) {
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.75rem; }
+  
+  .hero h1 {
+    font-size: 2.25rem;
+  }
+  
+  .cta-buttons {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  /* Further reduce icon sizes on very small screens */
+  .section-header h2 i,
+  .card h3 i { /* General rule for card icons on small screens */
+    font-size: 0.8rem;
+  }
+  
+  .fa-coins { /* Specific rule for fa-coins on small screens */
+    font-size: 0.85rem !important;
+  }
+
+  /* ADDED/MODIFIED RULE FOR FA-BOLT ON SMALL SCREENS */
+  .card h3 i.fa-bolt { /* Top movers icon, specifically in a card header, on small screens */
+    font-size: 0.85rem !important; /* Adjusted size to match fa-coins responsive */
+  }
+}
+/* ... (rest of the CSS file) ... */
 :root {
   --primary-color: #2962ff;
   --primary-dark: #0039cb;
