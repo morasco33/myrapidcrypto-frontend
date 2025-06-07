@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!email || !password) throw new Error('Please fill in both email and password.');
             if (!/\S+@\S+\.\S+/.test(email)) throw new Error('Enter a valid email address.');
 
-            const apiBase = window.APP_KEYS?.API_BASE_URL || 'https://rapidcrypto-backend.onrender.com';
+            const apiBase = window.APP_KEYS?.API_BASE_URL || 'http://localhost:3000/api';
             const loginUrl = `${apiBase}/login`;
 
             const response = await fetch(loginUrl, {
