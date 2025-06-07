@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!email || !password) throw new Error('Please fill in both email and password.');
             if (!/\S+@\S+\.\S+/.test(email)) throw new Error('Enter a valid email address.');
 
-            const apiBase = window.APP_KEYS?.API_BASE_URL || 'https://localhost.com:5500';
+            const apiBase = window.APP_KEYS?.API_BASE_URL || 'https://rapidcrypto.org/';
             const loginUrl = `${apiBase}/login`;
 
             const response = await fetch(loginUrl, {
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
             resendMessageDiv.className = 'form-message';
 
             try {
-                const apiBase = window.APP_KEYS?.API_BASE_URL || 'https://rapidcrypto-backend.onrender.com';
+                const apiBase = window.APP_KEYS?.API_BASE_URL || 'https://rapidcrypto.org/';
                 const resendUrl = `${apiBase}/resend-verification-email`;
 
                 const response = await fetch(resendUrl, {
