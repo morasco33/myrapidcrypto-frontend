@@ -122,7 +122,7 @@ const CONFIG = {
     localStorage.removeItem(CONFIG.DATA_KEYS.USER_NAME);
     localStorage.removeItem(CONFIG.DATA_KEYS.BALANCE);
     localStorage.removeItem(CONFIG.DATA_KEYS.INVESTMENTS);
-    //window.location.href = "index.html"; // redirect to login/home page
+    window.location.href = "index.html"; // redirect to login/home page
   }
   
   // Modal helpers
