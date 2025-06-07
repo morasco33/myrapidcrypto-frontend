@@ -12,8 +12,8 @@
     IS_PRODUCTION: window.location.protocol === 'https:',
     API_BASE_URL: window.API_BASE_URL || (
       window.location.hostname === 'localhost'
-        ? 'http://localhost:5550/api'
-        : 'https://rapidcrypto-backend.onrender.com'
+        ? 'http://localhost:5500/api'
+        : 'https://rapidcrypto-backend.onrender.com/api'
     ),
     AUTH_STORAGE_KEY: 'app_auth_v4',
     USER_STORAGE_KEY: 'app_user_v4',
