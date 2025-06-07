@@ -1,5 +1,7 @@
-// login.js
-
+/**
+ * Secure Authentication Module v4.2
+ * Implements OWASP best practices for frontend authentication
+ */
 (function secureAuthModule() {
   'use strict';
 
@@ -8,29 +10,96 @@
   // ======================
   const CONFIG = {
     IS_PRODUCTION: window.location.protocol === 'https:',
-    // API_BASE_URL will be taken directly from window.API_BASE_URL
-    // Ensure window.API_BASE_URL is set in login.html correctly
-    // e.g., <script>window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";</script>
-    AUTH_STORAGE_KEY: 'app_auth_v4', // Consider renaming if it clashes with other scripts
-    USER_STORAGE_KEY: 'app_user_v4', // Consider renaming
+    API_BASE_URL: window.API_BASE_URL || (
+      window.location.hostname === 'localhost'
+        ? 'http://localhost:3000'
+        : ''
+    ),
+    AUTH_STORAGE_KEY: 'app_auth_v4',
+    USER_STORAGE_KEY: 'app_user_v4',
     SESSION_TIMEOUT: 60 * 60 * 1000, // 1 hour
     REQUEST_TIMEOUT: 10000, // 10 seconds
     MAX_RETRIES: 2,
-    MIN_PASSWORD_LENGTH: 6 // This should match backend validation if any
+    MIN_PASSWORD_LENGTH: 6
   };
 
-  // Helper to get the API base URL, ensuring it's defined
-  function getApiBaseUrl() {
-    if (window.API_BASE_URL) {
-      return window.API_BASE_URL;
+  // ======================
+  // STATE
+  // ======================
+  const state = {
+    authToken: null,
+    userData: null,
+    csrfToken: generateCSRFToken(),
+    pendingRequests: new Map()
+  };
+
+  // ======================
+  // DOM ELEMENTS
+  // ======================
+  const elements = {
+    loginForm: document.getElementById('loginForm'),
+    emailInput: document.getElementById('email'),
+    passwordInput: document.getElementById('password'),
+    submitButton: document.getElementById('submitBtn'),
+    loginMessage: document.getElementById('loginMessage'),
+    otpSection: document.getElementById('otpSection'),
+    resendVerificationSection: document.getElementById('resendVerificationSection'),
+    resendVerificationBtn: document.getElementById('resendVerificationBtn'),
+    resendMessage: document.getElementById('resendMessage')
+  };
+
+  // ======================
+  // INITIALIZATION
+  // ======================
+  document.addEventListener('DOMContentLoaded', () => {
+    if (!validateEnvironment()) {
+      displayFatalError('Security violation: Invalid environment');
+      return;
     }
-    // Fallback if not set, but this indicates an issue in HTML setup
-    console.error("CRITICAL: window.API_BASE_URL is not set!");
-    return CONFIG.IS_PRODUCTION ? 'https://rapidcrypto-backend.onrender.com' : 'http://localhost:3001'; // Local backend port is 3001
+    if (!validateElements()) {
+      displayFatalError('Security violation: Critical elements missing');
+      return;
+    }
+    setupEventHandlers();
+    checkExistingSession();
+  });
+
+  // ======================
+  // VALIDATION & ENVIRONMENT CHECK
+  // ======================
+  function validateEnvironment() {
+    try {
+      if (CONFIG.IS_PRODUCTION && window.location.protocol !== 'https:') {
+        throw new Error('Production must use HTTPS');
+      }
+      if (!CONFIG.API_BASE_URL || (CONFIG.IS_PRODUCTION && CONFIG.API_BASE_URL.includes('localhost'))) {
+        throw new Error('Invalid API configuration');
+      }
+      return true;
+    } catch (err) {
+      console.error(err);
+      return false;
+    }
   }
 
+  function validateElements() {
+    return [elements.loginForm, elements.emailInput, elements.passwordInput, elements.submitButton, elements.loginMessage].every(el => el !== null);
+  }
 
-  // ... (rest of your state, elements, initialization) ...
+  // ======================
+  // EVENT HANDLERS SETUP
+  // ======================
+  function setupEventHandlers() {
+    elements.loginForm.addEventListener('submit', handleLogin);
+
+    if (elements.resendVerificationBtn) {
+      elements.resendVerificationBtn.addEventListener('click', handleResendVerification);
+    }
+
+    window.addEventListener('beforeunload', () => {
+      clearPasswordField();
+    });
+  }
 
   // ======================
   // LOGIN HANDLER
@@ -38,6 +107,7 @@
   async function handleLogin(event) {
     event.preventDefault();
     clearMessage();
+
     disableForm();
 
     const email = elements.emailInput.value.trim();
@@ -49,59 +119,40 @@
     }
 
     displayStatus('Verifying credentials...');
-    const API_URL = getApiBaseUrl(); // Get the base URL
 
     try {
-      // ***** MODIFIED FETCH URL *****
-      const response = await fetch(`${API_URL}/api/login`, { // Assuming API_BASE_URL does NOT end with /api
-                                                          // If API_BASE_URL IS like '...onrender.com/api', then use `${API_URL}/login`
+      const response = await fetch(`${CONFIG.API_BASE_URL}/auth/login`, {
+
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
-            // 'X-CSRF-Token': state.csrfToken // If you implement CSRF protection on backend
         },
         body: JSON.stringify({ email, password }),
-        // credentials: 'include' // Keep if CORS on backend is set to credentials: true
-                                // and you intend to use cookies for anything (though JWT is primary here)
-      });
+        credentials: 'include'
+    });
+    
 
-      // const data = await parseResponse(response); // parseResponse already checks response.ok
-      // Let's adjust to align with how backend sends errors for needsVerification
-      const data = await response.json(); // Get JSON regardless of status first
+      const data = await parseResponse(response);
 
-      if (!response.ok) {
-        // Handle specific backend error for 'needsVerification'
-        if (response.status === 403 && data.needsVerification) {
-          displayError(data.message || 'Account requires email verification.');
-          showVerificationUI();
-          enableForm(); // Re-enable form after showing verification UI
-          clearPasswordField();
-          return;
-        }
-        // For other errors
-        throw new Error(data.message || `Request failed with status ${response.status}`);
+      if (data.needsVerification) {
+        displayError('Account requires email verification.');
+        showVerificationUI();
+        return;
       }
 
-      // If response.ok is true, it means login was successful (status 200)
-      // The backend sends {success:true, token, user}
-      if (data.token && data.user) { // Check for token and user explicitly
-        storeSession(data); // data already contains token and user
+      if (data.success) {
+        storeSession(data);
         displayStatus('Authentication successful. Redirecting...');
         redirectToDashboard();
-        // No return needed here as redirectToDashboard navigates away
-      } else {
-        // This case should ideally not happen if backend sends correct 200 response
-        displayError(data.message || 'Authentication successful, but required data missing.');
+        return;
       }
 
+      displayError(data.message || 'Authentication failed.');
     } catch (err) {
-      handleAuthError(err); // This will display the error
+      handleAuthError(err);
     } finally {
-      // Enable form and clear password only if not redirected
-      if (window.location.pathname.endsWith('login.html')) { // Or a more robust check
-         clearPasswordField();
-         enableForm();
-      }
+      clearPasswordField();
+      enableForm();
     }
   }
 
@@ -111,49 +162,35 @@
   async function handleResendVerification() {
     clearResendMessage();
     disableResendButton();
+
     displayResendMessage('Sending verification email...');
-    const API_URL = getApiBaseUrl();
 
     try {
-      // ***** MODIFIED SECUREFETCH URL *****
-      const response = await secureFetch(`${API_URL}/api/resend-verification-email`, {
+      const response = await secureFetch(`${CONFIG.API_BASE_URL}/auth/resend-verification`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-            // 'X-CSRF-Token': state.csrfToken
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: elements.emailInput.value.trim() }),
-        // credentials: 'include'
+        credentials: 'include'
       });
 
-      const data = await parseResponse(response); // parseResponse expects response.ok
+      const data = await parseResponse(response);
 
-      // Backend sends {success:true, message: '...'} on 200
-      // parseResponse will throw if not response.ok, so if we reach here, it's a success from backend perspective
-      displayResendMessage(data.message || 'Verification email sent if account exists and is unverified.');
-
+      if (data.success) {
+        displayResendMessage('Verification email sent.');
+      } else {
+        displayResendMessage(data.message || 'Failed to send verification email.');
+      }
     } catch (err) {
-      // err.message might come from parseResponse or secureFetch itself
-      displayResendMessage(err.message || 'Network error or server issue. Please try again.');
+      displayResendMessage('Network error. Please try again.');
     } finally {
       enableResendButton();
     }
   }
 
-  // ...
-
   // ======================
   // FETCH & RESPONSE UTILS
   // ======================
   async function secureFetch(url, options, retryCount = 0) {
-    // ... your existing secureFetch ...
-    // Ensure Authorization header is added if state.authToken exists and is needed for the request
-    // For resend-verification, it's likely unauthenticated, so no token needed.
-    const fetchOptions = { ...options };
-    // if (state.authToken && !options.headers?.Authorization) { // Example: Add token if not already present
-    //   fetchOptions.headers = { ...fetchOptions.headers, 'Authorization': `Bearer ${state.authToken}` };
-    // }
-
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT);
 
@@ -161,104 +198,208 @@
     state.pendingRequests.set(requestId, controller);
 
     try {
-      const response = await fetch(url, { ...fetchOptions, signal: controller.signal });
+      const response = await fetch(url, { ...options, signal: controller.signal });
 
-      clearTimeout(timeoutId); // Clear timeout as soon as response starts
-      state.pendingRequests.delete(requestId);
-
-
-      // This check might be too broad for 401 if a specific request can return 401 for other reasons
-      // For login/register, a 401 is an expected error, not a session expiry.
-      // if (response.status === 401 && url !== `${getApiBaseUrl()}/api/login`) { // Don't clear session on login 401
-      //   clearSession(); // This would log the user out if any authenticated request gets a 401
-      //   throw new Error('Session expired or unauthorized.');
-      // }
-
-      // Server error check is good
+      if (response.status === 401) {
+        clearSession();
+        throw new Error('Session expired');
+      }
       if (response.status >= 500) {
-        throw new Error(`Server error: ${response.status}`);
+        throw new Error('Server error');
       }
 
-      return response; // Return the raw response for parseResponse to handle
+      return response;
     } catch (err) {
-      clearTimeout(timeoutId); // Ensure timeout is cleared on error too
-      state.pendingRequests.delete(requestId);
-      if ((err.name === 'AbortError' || err.message.includes('NetworkError')) && retryCount < CONFIG.MAX_RETRIES) { // More specific retry
-        console.warn(`Retrying request to ${url}, attempt ${retryCount + 1}`);
-        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
+      if (err.name === 'AbortError' && retryCount < CONFIG.MAX_RETRIES) {
         return secureFetch(url, options, retryCount + 1);
       }
-      throw err; // Re-throw other errors
+      throw err;
+    } finally {
+      clearTimeout(timeoutId);
+      state.pendingRequests.delete(requestId);
     }
   }
 
   async function parseResponse(response) {
     const contentType = response.headers.get('content-type') || '';
     if (!contentType.includes('application/json')) {
-      // For non-JSON error pages from server (e.g. HTML error page for 500)
-      const text = await response.text();
-      throw new Error(`Invalid server response (not JSON): ${response.status}. Body: ${text.substring(0,100)}`);
+      throw new Error('Invalid server response');
     }
 
     const data = await response.json();
 
-    if (!response.ok) { // e.g. 400, 401, 403 from backend sending JSON error
-      throw new Error(data.message || `Request failed with status ${response.status}`);
+    if (!response.ok) {
+      throw new Error(data.message || 'Request failed');
     }
-    // If response.ok, data should be the success payload
     return data;
   }
-
 
   // ======================
   // SESSION MANAGEMENT
   // ======================
-  function storeSession({ token, user }) { // token and user come directly from backend response
-    state.authToken = token; // Store token in JS memory (state)
+  function storeSession({ token, user }) {
+    state.authToken = token;
     state.userData = user;
 
-    // Store minimal, non-sensitive info needed for quick UI updates or session checks in sessionStorage
     sessionStorage.setItem(CONFIG.USER_STORAGE_KEY, JSON.stringify({
-      userId: user._id, // ***** Use user._id from backend *****
+      id: user.id,
       email: user.email,
-      username: user.username, // You might want to store username too
       verified: user.verified,
       expires: Date.now() + CONFIG.SESSION_TIMEOUT
     }));
-
-    // The actual JWT token is NOT stored in sessionStorage/localStorage here, it's in state.authToken.
-    // If you need the token across page loads without re-login, sessionStorage for the token is an option,
-    // but be aware of security implications. In-memory (state.authToken) is more secure but lost on page refresh.
-    // For a Single Page App (SPA) that doesn't do full page reloads, in-memory is fine.
-    // For traditional multi-page apps, you'd typically use HttpOnly cookies for session management or store JWT in sessionStorage.
-    // Given this is `login.js`, it's usually followed by a redirect, so `state.authToken` will be lost
-    // unless other scripts on subsequent pages re-establish it or you use a different token storage strategy.
-    // For now, this script redirects to dashboard, which would likely have its own auth check.
   }
 
   function clearSession() {
     state.authToken = null;
     state.userData = null;
     sessionStorage.removeItem(CONFIG.USER_STORAGE_KEY);
-    // sessionStorage.removeItem(CONFIG.AUTH_STORAGE_KEY); // If you were storing the token itself
 
-    const API_URL = getApiBaseUrl();
-    // Optional: notify backend. This endpoint doesn't exist on your server yet.
-    if (API_URL) { // Check if API_URL is defined before making the call
-        secureFetch(`${API_URL}/api/logout`, { // Path needs to match backend if you implement it
-          method: 'POST',
-          // credentials: 'include'
-        }).catch((err) => {
-            console.warn("Logout notification to backend failed or not implemented:", err.message)
-        });
+    // Optionally notify backend
+    secureFetch(`${CONFIG.API_BASE_URL}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    }).catch(() => {});
+  }
+
+  // ======================
+  // VALIDATION
+  // ======================
+  function validateCredentials(email, password) {
+    if (!email || !password) {
+      displayError('All fields are required.');
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      displayError('Please enter a valid email address.');
+      return false;
+    }
+    if (password.length < CONFIG.MIN_PASSWORD_LENGTH) {
+      displayError(`Password must be at least ${CONFIG.MIN_PASSWORD_LENGTH} characters.`);
+      return false;
+    }
+    return true;
+  }
+
+  // ======================
+  // UI HELPERS
+  // ======================
+  function displayStatus(msg) {
+    if (!elements.loginMessage) return;
+    elements.loginMessage.textContent = msg;
+    elements.loginMessage.classList.remove('error');
+    elements.loginMessage.classList.add('status');
+  }
+
+  function displayError(msg) {
+    if (!elements.loginMessage) return;
+    elements.loginMessage.textContent = msg;
+    elements.loginMessage.classList.remove('status');
+    elements.loginMessage.classList.add('error');
+  }
+
+  function clearMessage() {
+    if (!elements.loginMessage) return;
+    elements.loginMessage.textContent = '';
+    elements.loginMessage.className = '';
+  }
+
+  function disableForm() {
+    if (!elements.submitButton) return;
+    elements.submitButton.disabled = true;
+    elements.submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Securing...`;
+  }
+
+  function enableForm() {
+    if (!elements.submitButton) return;
+    elements.submitButton.disabled = false;
+    elements.submitButton.innerHTML = `<i class="fas fa-sign-in-alt"></i> Login`;
+  }
+
+  function clearPasswordField() {
+    if (elements.passwordInput) {
+      elements.passwordInput.value = '';
     }
   }
 
-
-  // ... (rest of your script: validateCredentials, UI helpers, error handling, session check, security utils) ...
-  // Ensure redirectToDashboard points to the correct path (e.g. 'dashboard.html' if it's a file)
   function redirectToDashboard() {
-    window.location.href = 'dashboard.html'; // Or '/dashboard' if routes are set up for that
+    window.location.href = '/dashboard';
   }
 
-})();
+  function showVerificationUI() {
+    if (elements.otpSection) elements.otpSection.style.display = 'block';
+    if (elements.resendVerificationSection) elements.resendVerificationSection.style.display = 'block';
+  }
+
+  function displayResendMessage(msg) {
+    if (!elements.resendMessage) return;
+    elements.resendMessage.textContent = msg;
+  }
+
+  function clearResendMessage() {
+    if (!elements.resendMessage) return;
+    elements.resendMessage.textContent = '';
+  }
+
+  function disableResendButton() {
+    if (elements.resendVerificationBtn) {
+      elements.resendVerificationBtn.disabled = true;
+    }
+  }
+
+  function enableResendButton() {
+    if (elements.resendVerificationBtn) {
+      elements.resendVerificationBtn.disabled = false;
+    }
+  }
+
+  // ======================
+  // ERROR HANDLING
+  // ======================
+  function handleAuthError(err) {
+    console.error('Authentication error:', err);
+
+    let message = 'Authentication failed. Please check your credentials.';
+    if (err.message.includes('Failed to fetch')) {
+      message = 'Network error. Please check your connection.';
+    } else if (err.message.includes('Server error')) {
+      message = 'Temporary server issue. Please try again later.';
+    }
+    displayError(message);
+  }
+
+  // ======================
+  // SESSION CHECK
+  // ======================
+  function checkExistingSession() {
+    try {
+      const sessionData = sessionStorage.getItem(CONFIG.USER_STORAGE_KEY);
+      if (!sessionData) return;
+
+      const { id, email, verified, expires } = JSON.parse(sessionData);
+      if (expires > Date.now()) {
+        state.userData = { id, email, verified };
+        redirectToDashboard();
+      } else {
+        clearSession();
+      }
+    } catch (err) {
+      console.error('Session check failed:', err);
+      clearSession();
+    }
+  }
+
+  // ======================
+  // SECURITY UTILITIES
+  // ======================
+  function generateCSRFToken() {
+    const array = new Uint32Array(10);
+    window.crypto.getRandomValues(array);
+    return Array.from(array, dec => dec.toString(36)).join('');
+  }
+
+  function generateRequestId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2);
+  }
+
+})(); 
