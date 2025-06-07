@@ -349,6 +349,7 @@ nav {
 
 .fa-bolt { /* Top movers icon */
   color: #ffab00;
+  font-size: 0.95rem !important; /* Adjusted size */
 }
 
 .chart-container {
@@ -604,6 +605,9 @@ footer {
   }
   
   .fa-coins {
+    font-size: 0.85rem !important;
+  }
+  .fa-bolt { /* Adjusted size for very small screens */
     font-size: 0.85rem !important;
   }
 }
