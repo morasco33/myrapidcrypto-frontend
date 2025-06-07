@@ -14,6 +14,22 @@
   </style>
 </head>
 <body>
+  <div id="authMessageBar" style="display:none; background:#ffdddd; color:#900; padding: 10px; text-align:center; font-weight:bold; border-bottom: 1px solid #900;">
+    Please log in to access the dashboard.
+  </div>
+  
+  <script>
+    // Show auth-required message if redirected from dashboard
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('reason') === 'auth_required') {
+        const messageBar = document.getElementById('authMessageBar');
+        if (messageBar) {
+          messageBar.style.display = 'block';
+        }
+      }
+    });
+  </script>  
 
   <h2 style="text-align:center;">CryptoHub Login</h2>
 
