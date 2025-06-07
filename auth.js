@@ -1,151 +1,73 @@
-// auth.js (Safe, Hardened V2.2 - Updated for APP_KEYS)
+/**
+ * CryptoHub Authentication Utilities & State Management
+ * Manages global auth state, logout, and UI updates based on auth.
+ * Specific form submissions (login, register) might be handled by page-specific scripts.
+ */
 
-// 1. DEFINE GLOBAL APP_KEYS FOR OTHER SCRIPTS (LIKE SCRIPT.JS)
-window.APP_KEYS = {
-    USER_INFO_KEY: 'cryptohub_user_info',
-    AUTH_TOKEN_KEY: 'cryptohub_auth_token',
-    API_BASE_URL: 'https://rapidcrypto-backend.onrender.com'
-};
-console.log('DEBUG [auth.js]: window.APP_KEYS defined:', JSON.parse(JSON.stringify(window.APP_KEYS)));
+const API_BASE_URL = 'http://localhost:3000/api';
+const AUTH_TOKEN_KEY = 'cryptohub_auth_token';
+const USER_INFO_KEY = 'cryptohub_user_info'; // Standardized key
 
-// 2. CONSTANTS FOR INTERNAL USE
-const API_BASE_URL = window.APP_KEYS.API_BASE_URL;
-const AUTH_TOKEN_KEY = window.APP_KEYS.AUTH_TOKEN_KEY;
-const USER_INFO_KEY = window.APP_KEYS.USER_INFO_KEY;
-
-const DASHBOARD_AVAILABLE_BALANCE_KEY = 'availableBalance_cs_v2';
-const DASHBOARD_ACTIVE_INVESTMENTS_KEY = 'activeInvestments_cs_v2';
-
-// 3. DOM READY
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    console.log(`DEBUG [auth.js]: DOMContentLoaded on ${currentPage}`);
 
-    if (!window.APP_KEYS || !window.APP_KEYS.USER_INFO_KEY) {
-        console.error("CRITICAL [auth.js]: window.APP_KEYS did not initialize correctly.");
-    }
-
+    // Setup registration form listener IF on register.html AND no other script handles it.
     if (currentPage === 'register.html' && document.getElementById('registerForm')) {
-        const registerForm = document.getElementById('registerForm');
-        if (!registerForm.dataset.listenerAttachedByAuthJs) {
-            registerForm.addEventListener('submit', handleAuthJsRegister);
-            registerForm.dataset.listenerAttachedByAuthJs = 'true';
-            console.log("DEBUG [auth.js]: Attached registerForm listener.");
-        }
+        // This assumes register.html doesn't have its own dedicated register.js
+        // If it does, that script should handle its own form.
+        document.getElementById('registerForm').addEventListener('submit', handleAuthJsRegister);
     }
 
-    if (currentPage === 'login.html') {
-        const loginForm = document.getElementById('loginForm');
-        if (loginForm && !loginForm.dataset.listenerAttachedByAuthJs) {
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
+    // The OTP-specific login.js should handle the loginForm on login.html.
+    // If this auth.js were to handle a *direct* login, the listener would be here:
+    // if (currentPage === 'login.html' && document.getElementById('loginForm') && !isOtpLoginUsed) {
+    //     document.getElementById('loginForm').addEventListener('submit', handleAuthJsDirectLogin);
+    // }
 
-                const loginMessageDiv = document.getElementById('loginMessage');
-                if (loginMessageDiv) loginMessageDiv.textContent = '';
+    checkAuthState(); // Handles page access and redirects
+    updateNavFooterBasedOnAuth(); // Updates UI elements like nav links
 
-                const email = loginForm.email.value.trim();
-                const password = loginForm.password.value;
-
-                if (!email || !password) {
-                    if (loginMessageDiv) loginMessageDiv.textContent = 'Please enter email and password.';
-                    return;
-                }
-
-                const submitBtn = loginForm.querySelector('button[type="submit"]');
-                const originalBtnText = submitBtn ? submitBtn.innerHTML : 'Login';
-                if (submitBtn) {
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
-                }
-
-                try {
-                    const response = await fetch(`${API_BASE_URL}/login`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, password }),
-                    });
-
-                    const data = await response.json();
-                    console.log("DEBUG [auth.js login]: API response:", data);
-
-                    if (!response.ok || !data.success || !data.token) {
-                        const errMsg = data.message || 'Login failed.';
-                        if (loginMessageDiv) loginMessageDiv.textContent = errMsg;
-                        console.warn("WARN [auth.js login]: Login failed with response:", data);
-                        return;
-                    }
-
-                    if (typeof data.token !== 'string' || !data.token.trim()) {
-                        console.error("ERROR [auth.js login]: Invalid token received.");
-                        if (loginMessageDiv) loginMessageDiv.textContent = 'Invalid token received.';
-                        return;
-                    }
-
-                    localStorage.setItem(AUTH_TOKEN_KEY, data.token.trim());
-                    localStorage.setItem(USER_INFO_KEY, JSON.stringify(data.user || {}));
-                    console.log("DEBUG [auth.js login]: Token and user info saved.");
-
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const redirectPage = urlParams.get('redirectedFrom') || 'dashboard.html';
-                    window.location.href = redirectPage;
-
-                } catch (err) {
-                    console.error('Login error:', err);
-                    if (loginMessageDiv) loginMessageDiv.textContent = 'Network error. Please try again later.';
-                } finally {
-                    if (submitBtn) {
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalBtnText;
-                    }
-                }
-            });
-
-            loginForm.dataset.listenerAttachedByAuthJs = 'true';
-            console.log("DEBUG [auth.js]: Attached loginForm listener.");
-        }
-    }
-
-    checkAuthState();
-    updateNavFooterBasedOnAuth();
-
+    // Attach logout event listener if logout button exists on the current page
     const logoutButton = document.getElementById('logoutBtn');
-    if (logoutButton && !logoutButton.dataset.listenerAttachedByAuthJs) {
+    if (logoutButton) {
         logoutButton.addEventListener('click', handleLogout);
-        logoutButton.dataset.listenerAttachedByAuthJs = 'true';
-        console.log("DEBUG [auth.js]: Attached logoutBtn listener.");
     }
 });
 
+// Registration logic (called if registerForm listener is active)
 async function handleAuthJsRegister(e) {
     e.preventDefault();
     const form = e.target;
     const btn = form.querySelector('button[type="submit"]');
     const originalBtnText = btn ? btn.innerHTML : 'Register';
-    const messageContainer = form.querySelector('#registerMessage') || form;
+
+    // Ensure showAlert is available and works with the form context
+    const alertContainer = form.querySelector('.form-message') || form;
+
 
     try {
-        const username = form.querySelector('#username')?.value.trim();
-        const email = form.querySelector('#email')?.value.trim();
-        const password = form.querySelector('#password')?.value;
-        const confirmPassword = form.querySelector('#confirmPassword')?.value;
+        const usernameInput = form.querySelector('#username');
+        const emailInput = form.querySelector('#email');
+        const passwordInput = form.querySelector('#password');
+        const confirmPasswordInput = form.querySelector('#confirmPassword');
 
-        if (!username || !email || !password || !confirmPassword) {
-            showAlert('Please fill in all required fields.', 'error', messageContainer);
+        if(!usernameInput || !emailInput || !passwordInput || !confirmPasswordInput) {
+            console.error("One or more registration form fields are missing.");
+            showAlert("Registration form error. Please contact support.", 'error', alertContainer);
             return;
         }
+
+        const username = usernameInput.value.trim();
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
 
         if (password !== confirmPassword) {
-            showAlert('Passwords do not match.', 'error', messageContainer);
+            showAlert('Passwords do not match.', 'error', alertContainer);
             return;
         }
-
-        if (password.length < 6) {
-            showAlert('Password must be at least 6 characters.', 'error', messageContainer);
-            return;
-        }
-
-        if (!/\S+@\S+\.\S+/.test(email)) {
-            showAlert('Enter a valid email address.', 'error', messageContainer);
+        if (password.length < 6) { // Match backend validation
+            showAlert('Password must be at least 6 characters long.', 'error', alertContainer);
             return;
         }
 
@@ -157,22 +79,28 @@ async function handleAuthJsRegister(e) {
         const response = await fetch(`${API_BASE_URL}/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password }),
+            body: JSON.stringify({ username, email, password })
         });
 
         const data = await response.json();
+
         if (!response.ok || !data.success) {
-            throw new Error(data.message || 'Registration failed.');
+            throw new Error(data.message || 'Registration failed. Please try again.');
         }
 
-        showAlert(data.message || 'Registration successful. Check your email.', 'success', messageContainer);
+        // Backend sends a verification link, does not log in user or return token here.
+        showAlert(data.message || 'Registration successful! Please check your email to verify your account.', 'success', alertContainer);
         form.reset();
+        // No automatic redirect to dashboard. User must verify email first.
+        // Optional: redirect to login page after a delay
+        // setTimeout(() => { window.location.href = `login.html?message=${encodeURIComponent(data.message)}`; }, 3000);
+
     } catch (error) {
-        const msg = error.message === 'Failed to fetch'
-            ? 'Cannot connect to server. Check your connection.'
+        console.error('Registration error in auth.js:', error);
+        const errorMsg = error.message === 'Failed to fetch'
+            ? 'Cannot connect to server. Please check your network.'
             : error.message;
-        showAlert(msg, 'error', messageContainer);
-        console.error("ERROR [auth.js handleAuthJsRegister]:", error);
+        showAlert(errorMsg, 'error', alertContainer);
     } finally {
         if (btn) {
             btn.disabled = false;
@@ -181,93 +109,189 @@ async function handleAuthJsRegister(e) {
     }
 }
 
+// Direct Login function (IF NOT USING OTP FLOW FROM login.js)
+// This would be used if login.js (OTP version) is NOT active for loginForm.
+/*
+async function handleAuthJsDirectLogin(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn = form.querySelector('button[type="submit"]');
+    const originalBtnText = btn ? btn.innerHTML : 'Login';
+    const alertContainer = form.querySelector('.form-message') || form;
+
+    try {
+        const emailInput = form.querySelector('#loginEmail');
+        const passwordInput = form.querySelector('#loginPassword');
+
+        if(!emailInput || !passwordInput){
+            showAlert('Login form error.', 'error', alertContainer);
+            return;
+        }
+        const email = emailInput.value.trim();
+        const password = passwordInput.value;
+
+        if (!email || !password) {
+            showAlert('Please enter both email and password.', 'error', alertContainer);
+            return;
+        }
+
+        if(btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+        }
+
+        const response = await fetch(`${API_BASE_URL}/login`, { // Assumes /api/login handles direct login
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Login failed. Please check your credentials.');
+        }
+
+        localStorage.setItem(AUTH_TOKEN_KEY, data.token);
+        localStorage.setItem(USER_INFO_KEY, JSON.stringify(data.user)); // Use standardized key
+
+        showAlert('Login successful! Redirecting...', 'success', alertContainer);
+        updateNavFooterBasedOnAuth(); // Update UI immediately
+        setTimeout(() => window.location.href = 'dashboard.html', 1000);
+
+    } catch (error) {
+        console.error('Login error in auth.js:', error);
+        const errorMsg = error.message === 'Failed to fetch'
+            ? 'Network error. Please check your connection.'
+            : error.message;
+        showAlert(errorMsg, 'error', alertContainer);
+    } finally {
+        if(btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnText;
+        }
+    }
+}
+*/
+
 function checkAuthState() {
-    const protectedPages = ['dashboard.html', 'wallet.html', 'transactions.html', 'deposit.html', 'withdraw.html'];
-    const authFlowPages = ['login.html', 'register.html', 'forgot-password.html', 'verify-email.html'];
+    const protectedPages = ['dashboard.html', 'wallet.html', 'transactions.html'];
+    const authPages = ['login.html', 'register.html'];
+    // Assuming index.html is public or has its own logic
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
-    let currentPage = window.location.pathname.split('/').pop() || 'index.html';
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
-    const validToken = token && token !== 'undefined' && token !== 'null';
-
-    console.log(`DEBUG [auth.js checkAuthState]: Page='${currentPage}' | Token Exists=${!!validToken}`);
 
     if (protectedPages.includes(currentPage)) {
-        if (!validToken) {
-            console.warn(`Redirecting from '${currentPage}' to login due to missing token.`);
-            window.location.href = `login.html?redirectedFrom=${encodeURIComponent(currentPage)}&reason=auth_required`;
+        if (!token) {
+            // console.log(`Auth check: Not authenticated on protected page ${currentPage}. Redirecting to login.`);
+            window.location.href = 'login.html'; // No alert, direct redirect
         }
-    } else if (authFlowPages.includes(currentPage)) {
-        if (validToken) {
-            console.log(`User already logged in, redirecting from '${currentPage}' to dashboard.`);
-            window.location.href = 'dashboard.html?reason=already_authenticated';
+    } else if (authPages.includes(currentPage)) {
+        if (token) {
+            // console.log(`Auth check: Authenticated on auth page ${currentPage}. Redirecting to dashboard.`);
+            window.location.href = 'dashboard.html';
         }
     }
 }
 
 function updateNavFooterBasedOnAuth() {
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
-    const validToken = token && token !== 'undefined' && token !== 'null';
+    // Query for nav elements (make selectors more specific if needed)
     const navUl = document.querySelector('header nav ul');
+    if (!navUl) return;
 
-    if (!navUl) {
-        console.log("DEBUG [auth.js updateNav]: No <ul> found in <nav>, skipping nav update.");
-        return;
+    const dashboardLink = navUl.querySelector('a[href="dashboard.html"]');
+    const walletLink = navUl.querySelector('a[href="wallet.html"]');
+    const transactionsLink = navUl.querySelector('a[href="transactions.html"]');
+    const logoutLink = navUl.querySelector('#logoutBtn'); // Logout is an <a> with id in your HTML
+
+    const loginLinkNav = navUl.querySelector('a[href="login.html"]');
+    const registerLinkNav = navUl.querySelector('a[href="register.html"]');
+
+    if (token) { // User is LOGGED IN
+        if (dashboardLink) dashboardLink.parentElement.style.display = '';
+        if (walletLink) walletLink.parentElement.style.display = '';
+        if (transactionsLink) transactionsLink.parentElement.style.display = '';
+        if (logoutLink) logoutLink.parentElement.style.display = '';
+
+        if (loginLinkNav) loginLinkNav.parentElement.style.display = 'none';
+        if (registerLinkNav) registerLinkNav.parentElement.style.display = 'none';
+    } else { // User is LOGGED OUT
+        if (dashboardLink) dashboardLink.parentElement.style.display = 'none';
+        if (walletLink) walletLink.parentElement.style.display = 'none';
+        if (transactionsLink) transactionsLink.parentElement.style.display = 'none';
+        if (logoutLink) logoutLink.parentElement.style.display = 'none';
+
+        if (loginLinkNav) loginLinkNav.parentElement.style.display = '';
+        if (registerLinkNav) registerLinkNav.parentElement.style.display = '';
+    }
+    // Add similar logic for footer links if they also need to change based on auth state
+}
+
+
+function showAlert(message, type = 'error', targetElement = null) {
+    const existingAlert = document.querySelector('.app-global-alert');
+    if (existingAlert) existingAlert.remove();
+
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `app-global-alert alert-${type}`; // Use a distinct class
+
+    let iconClass = 'fa-info-circle';
+    if (type === 'success') iconClass = 'fa-check-circle';
+    if (type === 'error') iconClass = 'fa-exclamation-circle';
+    if (type === 'warning') iconClass = 'fa-exclamation-triangle';
+
+    alertDiv.innerHTML = `<i class="fas ${iconClass}"></i> <span>${message}</span>`;
+
+    // Basic default styling (override with CSS for .app-global-alert and .alert-type)
+    alertDiv.style.padding = '10px 15px';
+    alertDiv.style.marginBottom = '15px';
+    alertDiv.style.border = '1px solid transparent';
+    alertDiv.style.borderRadius = '4px';
+    alertDiv.style.textAlign = 'center';
+
+    if (type === 'error') {
+        alertDiv.style.color = '#721c24';
+        alertDiv.style.backgroundColor = '#f8d7da';
+        alertDiv.style.borderColor = '#f5c6cb';
+    } else if (type === 'success') {
+        alertDiv.style.color = '#155724';
+        alertDiv.style.backgroundColor = '#d4edda';
+        alertDiv.style.borderColor = '#c3e6cb';
+    } else { // Info or warning
+        alertDiv.style.color = '#004085';
+        alertDiv.style.backgroundColor = '#cce5ff';
+        alertDiv.style.borderColor = '#b8daff';
+    }
+    
+    if (targetElement && targetElement.prepend) {
+        targetElement.prepend(alertDiv);
+    } else {
+        // Fallback to a global, fixed alert if no target or target can't prepend
+        alertDiv.style.position = 'fixed';
+        alertDiv.style.top = '20px';
+        alertDiv.style.left = '50%';
+        alertDiv.style.transform = 'translateX(-50%)';
+        alertDiv.style.zIndex = '10000';
+        alertDiv.style.boxShadow = '0 2px 10px rgba(0,0,0,0.2)';
+        document.body.insertBefore(alertDiv, document.body.firstChild);
     }
 
-    const toggleDisplay = (selector, show) => {
-        const el = navUl.querySelector(selector);
-        if (!el) return;
-        const parent = el.closest('li') || el;
-        parent.style.display = show ? '' : 'none';
-    };
-
-    const toggleBtnDisplay = (btnId, show) => {
-        const btn = document.getElementById(btnId);
-        if (!btn) return;
-        const parent = btn.closest('li') || btn;
-        parent.style.display = show ? '' : 'none';
-    };
-
-    toggleDisplay('a[href="dashboard.html"]', validToken);
-    toggleDisplay('a[href="wallet.html"]', validToken);
-    toggleDisplay('a[href="transactions.html"]', validToken);
-    toggleDisplay('a[href="deposit.html"]', validToken);
-    toggleDisplay('a[href="withdraw.html"]', validToken);
-
-    toggleDisplay('a[href="login.html"]', !validToken);
-    toggleDisplay('a[href="register.html"]', !validToken);
-
-    toggleBtnDisplay('logoutBtn', validToken);
-
-    console.log(`DEBUG [auth.js updateNav]: Nav updated for ${validToken ? 'logged in' : 'logged out'} user.`);
+    setTimeout(() => {
+        alertDiv.style.transition = 'opacity 0.5s ease-out';
+        alertDiv.style.opacity = '0';
+        setTimeout(() => alertDiv.remove(), 500);
+    }, 4500);
 }
 
 function handleLogout() {
     localStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(USER_INFO_KEY);
-    localStorage.removeItem(DASHBOARD_AVAILABLE_BALANCE_KEY);
-    localStorage.removeItem(DASHBOARD_ACTIVE_INVESTMENTS_KEY);
-    window.location.href = 'login.html?reason=logout_success';
-}
-
-function showAlert(message, type = 'info', container = document.body) {
-    const existingAlert = container.querySelector('.auth-alert');
-    if (existingAlert) existingAlert.remove();
-
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `auth-alert alert-${type}`;
-    alertDiv.textContent = message;
-
-    alertDiv.style.padding = '12px 15px';
-    alertDiv.style.margin = '10px 0';
-    alertDiv.style.borderRadius = '4px';
-    alertDiv.style.color = type === 'error' ? '#a94442' : (type === 'success' ? '#3c763d' : '#31708f');
-    alertDiv.style.backgroundColor = type === 'error' ? '#f2dede' : (type === 'success' ? '#dff0d8' : '#d9edf7');
-    alertDiv.style.border = `1px solid ${type === 'error' ? '#ebccd1' : (type === 'success' ? '#d6e9c6' : '#bce8f1')}`;
-
-    container.prepend(alertDiv);
-
-    setTimeout(() => {
-        alertDiv.remove();
-    }, 5000);
+    localStorage.removeItem(USER_INFO_KEY); // Use standardized key
+    localStorage.removeItem('availableBalance'); // From dashboard.js
+    localStorage.removeItem('activeInvestments'); // From dashboard.js
+    
+    // console.log("Logged out, redirecting to index.html");
+    updateNavFooterBasedOnAuth(); // Update UI immediately before redirect
+    window.location.href = 'index.html'; // Or your preferred public landing page
 }
