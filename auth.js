@@ -109,9 +109,9 @@ async function handleAuthJsRegister(e) {
     }
 }
 
-//Direct Login function (IF NOT USING OTP FLOW FROM login.js)
+// Direct Login function (IF NOT USING OTP FLOW FROM login.js)
 // This would be used if login.js (OTP version) is NOT active for loginForm.
-
+/*
 async function handleAuthJsDirectLogin(e) {
     e.preventDefault();
     const form = e.target;
