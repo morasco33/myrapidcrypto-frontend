@@ -182,10 +182,9 @@
     </div>
   </div>
   
+  <!-- Set API_BASE_URL globally for auth.js -->
   <script>
-    window.APP_KEYS = {
-      API_BASE_URL: "https://rapidcrypto-backend.onrender.com"
-    };
+    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -193,5 +192,32 @@
   <script src="uiUtils.js"></script>
   <script src="script.js"></script>
   <script src="dashboard.js"></script>
+
+  <script>
+    // On DOM ready: update username display and setup logout
+    document.addEventListener('DOMContentLoaded', () => {
+      const userInfoRaw = sessionStorage.getItem('cryptohub_user_info');
+      if (userInfoRaw) {
+        try {
+          const userInfo = JSON.parse(userInfoRaw);
+          const userNameEl = document.getElementById('userName');
+          if (userNameEl) {
+            userNameEl.textContent = userInfo.username || userInfo.email || "User";
+          }
+        } catch (err) {
+          console.warn("Failed to parse user info:", err);
+        }
+      }
+
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (window.clearSession) window.clearSession();
+          window.location.href = 'login.html';
+        });
+      }
+    });
+  </script>
 </body>
 </html>

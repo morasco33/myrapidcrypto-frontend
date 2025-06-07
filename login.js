@@ -1,4 +1,3 @@
-// Combined and fixed login.js and auth.js parts with backend/frontend config
 (function secureAuthModule() {
   'use strict';
 
@@ -6,7 +5,7 @@
     IS_PRODUCTION: window.location.protocol === 'https:',
     AUTH_TOKEN_KEY: 'cryptohub_auth_token',
     USER_INFO_KEY: 'cryptohub_user_info',
-    SESSION_TIMEOUT: 60 * 60 * 1000,
+    SESSION_TIMEOUT: 60 * 60 * 1000, // 1 hour
     REQUEST_TIMEOUT: 10000,
     MAX_RETRIES: 2,
     MIN_PASSWORD_LENGTH: 6
@@ -52,6 +51,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
+
       const data = await response.json();
 
       if (!response.ok) throw new Error(data.message || 'Login failed');
@@ -60,24 +60,18 @@
         storeSession(data);
         window.location.href = 'dashboard.html';
       } else {
-        alert('Login successful but data missing');
+        alert('Login successful but required data missing.');
       }
     } catch (err) {
       alert(err.message);
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-      loginForm.addEventListener('submit', handleLogin);
-    }
-  });
-
-  // On any page load, check auth state
-  document.addEventListener('DOMContentLoaded', () => {
+  // Check auth state on page load to protect dashboard
+  function checkAuthState() {
     const token = sessionStorage.getItem(CONFIG.AUTH_TOKEN_KEY);
     const page = window.location.pathname;
+
     console.debug(`DEBUG [auth.js checkAuthState]: Page='${page}' | Token Exists=${!!token}`);
 
     const navStatus = document.getElementById('nav-status');
@@ -86,14 +80,22 @@
     }
 
     if (!token && page.includes('dashboard')) {
-      // Not logged in and trying to access dashboard
+      // Not logged in but trying to access dashboard
       window.location.href = 'login.html';
     }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Attach login handler if login form exists
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+      loginForm.addEventListener('submit', handleLogin);
+    }
+
+    checkAuthState();
   });
 
-  // Expose for other scripts
+  // Expose clearSession globally for logout or manual clearing
   window.clearSession = clearSession;
-})();
 
-// Set this at the top of your HTML before this script:
-// <script>window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";</script>
+})();

@@ -17,7 +17,7 @@
 
   <h2 style="text-align:center;">CryptoHub Login</h2>
 
-  <form id="login-form" autocomplete="off">
+  <form id="login-form" autocomplete="on">
     <input type="email" id="email" placeholder="Email" required />
     <input type="password" id="password" placeholder="Password" required minlength="6" />
     <button type="submit">Login</button>
@@ -110,6 +110,7 @@
       form.addEventListener('submit', handleLogin);
     })();
   </script>
+  <script src="auth.js"></script>  
 
 </body>
 </html>
