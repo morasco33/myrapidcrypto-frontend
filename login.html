@@ -52,6 +52,8 @@
           />
         </div>
 
+        <!-- This OTP section is in the HTML but not actively used by the current login.js flow,
+             which focuses on email link verification. It's harmless to keep. -->
         <div id="otpSection" class="form-group" style="display:none;">
           <label for="otpCode">Enter Verification Code</label>
           <input
@@ -102,11 +104,19 @@
   </main>
 
   <script>
-    // You can override API_BASE_URL here if needed; adjust as appropriate
-    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
+    // CRITICAL: Ensure API_BASE_URL includes the /api path prefix used by your backend routes.
+    // This value will be picked up by CONFIG.API_BASE_URL in login.js.
+    // For local development, you might set this to 'http://localhost:3001/api' (or your local backend port)
+    // For production, use your live backend URL with /api.
+    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com/api"; 
   </script>
 
-  <script src="auth.js"></script>
-  <script src="login.js"></script> 
+  <!-- 
+    Consider if auth.js is needed on THIS page. 
+    The provided login.js is self-contained for login page session checks.
+    If auth.js has global auth logic, ensure it doesn't conflict here.
+  -->
+  <script src="auth.js" defer></script> 
+  <script src="login.js" defer></script> 
 </body>
 </html>
