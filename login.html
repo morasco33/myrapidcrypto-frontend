@@ -4,10 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>RapidWealthHub - Login</title>
-  
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="login.css" />
+
+  <script>
+    const token = localStorage.getItem('cryptohub_auth_token');
+    if (token) {
+      document.documentElement.style.visibility = 'hidden';
+      document.documentElement.style.opacity = '0';
+      window.location.replace('dashboard.html');
+    }
+  </script>
 </head>
 <body>
   <header>
@@ -30,58 +39,25 @@
       <form id="loginForm" class="login-form" novalidate>
         <div class="form-group">
           <label for="email">Email Address</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder="Enter your email"
-            required
-            autocomplete="email"
-          />
+          <input type="email" id="email" name="email" placeholder="Enter your email" required autocomplete="email" />
         </div>
 
         <div class="form-group">
           <label for="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Enter your password"
-            required
-            autocomplete="current-password"
-          />
+          <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password" />
         </div>
 
-        <!-- This OTP section is in the HTML but not actively used by the current login.js flow,
-             which focuses on email link verification. It's harmless to keep. -->
         <div id="otpSection" class="form-group" style="display:none;">
           <label for="otpCode">Enter Verification Code</label>
-          <input
-            type="text"
-            id="otpCode"
-            name="otpCode"
-            placeholder="Enter the code sent to your email"
-            autocomplete="one-time-code"
-          />
+          <input type="text" id="otpCode" name="otpCode" placeholder="Enter the code sent to your email" autocomplete="one-time-code" />
         </div>
 
         <div id="loginMessage" class="form-message" style="min-height:1.5em; margin-bottom:1rem;"></div>
 
-        <div
-          id="resendVerificationSection"
-          style="display:none; margin-top:10px; margin-bottom:15px; text-align:center;"
-        >
-          <p style="margin-bottom:5px; font-size:0.9em;">
-            Your email address appears to be unverified.
-          </p>
-          <button type="button" id="resendVerificationBtn" class="link-button">
-            Resend Verification Link
-          </button>
-          <div
-            id="resendMessage"
-            class="form-message"
-            style="font-size:0.9em; margin-top:5px; min-height:1.2em;"
-          ></div>
+        <div id="resendVerificationSection" style="display:none; margin-top:10px; margin-bottom:15px; text-align:center;">
+          <p style="margin-bottom:5px; font-size:0.9em;">Your email address appears to be unverified.</p>
+          <button type="button" id="resendVerificationBtn" class="link-button">Resend Verification Link</button>
+          <div id="resendMessage" class="form-message" style="font-size:0.9em; margin-top:5px; min-height:1.2em;"></div>
         </div>
 
         <div class="login-actions">
@@ -92,30 +68,15 @@
       </form>
 
       <div class="login-footer">
-        <p>
-          Don't have an account?
-          <a href="register.html">Create one</a>
-        </p>
-        <p>
-          <a href="forgot-password.html">Forgot password?</a>
-        </p>
+        <p>Don't have an account? <a href="register.html">Create one</a></p>
+        <p><a href="forgot-password.html">Forgot password?</a></p>
       </div>
     </div>
   </main>
 
   <script>
-    // CRITICAL: Ensure API_BASE_URL includes the /api path prefix used by your backend routes.
-    // This value will be picked up by CONFIG.API_BASE_URL in login.js.
-    // For local development, you might set this to 'http://localhost:3001/api' (or your local backend port)
-    // For production, use your live backend URL with /api.
     window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com/api"; 
   </script>
-
-  <!-- 
-    Consider if auth.js is needed on THIS page. 
-    The provided login.js is self-contained for login page session checks.
-    If auth.js has global auth logic, ensure it doesn't conflict here.
-  -->
   <script src="auth.js" defer></script>
   <script src="login.js" defer></script> 
 </body>
