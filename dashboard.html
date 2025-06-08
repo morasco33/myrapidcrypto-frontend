@@ -8,7 +8,38 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
   <link rel="stylesheet" href="dashboard.css" />
   <style>
-    /* ... (Your existing styles - keep them) ... */
+    /* CSS to hide content initially to prevent flash */
+    body.auth-loading main {
+      visibility: hidden; /* Hide content but keep layout */
+      /* or display: none; if you prefer it to not take up space */
+    }
+    body.auth-loading .loading-spinner-overlay { /* Optional: Full page loading spinner */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000; /* Above other content */
+    }
+    /* Basic spinner CSS (if not using Bootstrap's spinner) */
+    .auth-spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border-left-color: #09f; /* Spinner color */
+        animation: spin 1s ease infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Your other existing styles */
     .investment-details { margin-top: 15px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 0.9em; }
     .investment-details p { margin: 6px 0; }
     .investment-details button.withdraw-btn-plan { margin-top: 10px; background-color: #e74c3c; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight: 500; }
@@ -21,7 +52,13 @@
     .modal-actions button.primary { background-color: #007bff; color: white; border-color: #007bff; }
   </style>
 </head>
-<body>
+<body class="auth-loading"> <!-- ADDED class "auth-loading" -->
+
+  <!-- Optional: Full page loading spinner element -->
+  <div class="loading-spinner-overlay">
+      <div class="auth-spinner"></div>
+  </div>
+
   <header>
     <nav>
       <div class="logo">RapidWealthHub</div>
@@ -30,23 +67,21 @@
         <li><a href="dashboard.html" class="active">Dashboard</a></li>
         <li><a href="wallet.html">Wallet</a></li>
         <li><a href="transactions.html">Transactions</a></li>
-        <li><a href="#" id="logoutBtn" class="btn">Logout</a></li> <!-- auth.js handles this -->
+        <li><a href="#" id="logoutBtn" class="btn">Logout</a></li>
       </ul>
     </nav>
   </header>
 
-  <main>
+  <main> <!-- This main content will be hidden by CSS until auth.js confirms login -->
     <section class="dashboard">
-      <h1>Welcome, <span id="userName">User</span></h1> <!-- dashboard.js will fill this -->
+      <h1>Welcome, <span id="userName">User</span></h1>
 
       <aside class="sidebar">
         <h3>Your Account</h3>
-        <p>Available Balance: <span id="availableBalance">$0.00</span></p> <!-- Corrected ID -->
+        <p>Available Balance: <span id="availableBalance">$0.00</span></p>
       </aside>
 
-      <!-- ... (Rest of your dashboard-grid content - keep it) ... -->
       <div class="dashboard-grid">
-
         <div class="card portfolio">
           <h3>Your Portfolio</h3>
           <div id="portfolioValue">$0.00</div>
@@ -120,18 +155,11 @@
   </div>
   
   <script>
-    // Set API_BASE_URL globally. Ensure this is defined BEFORE auth.js and dashboard.js if they rely on it.
-    // It should include the /api path.
     window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com/api";
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="auth.js" defer></script> 
-  <!-- uiUtils.js - make sure its functions are used or remove -->
-  <!-- script.js - ensure its functions are used or remove/integrate -->
   <script src="dashboard.js" defer></script>
-
-  <!-- Removed the inline script that set userName from sessionStorage, as dashboard.js handles it from localStorage now -->
 </body>
 </html>
-// --- END OF REWRITTEN dashboard.html ---

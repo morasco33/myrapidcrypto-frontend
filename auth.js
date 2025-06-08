@@ -4,28 +4,25 @@
  * Manages global auth state, logout, and UI updates based on auth.
  */
 
-// Use API_BASE_URL from window if set by HTML, otherwise default.
-// Ensure this default matches the one potentially used by page-specific scripts if window.API_BASE_URL isn't set.
-const AUTH_API_BASE_URL = window.API_BASE_URL || 'https://rapidcrypto-backend.onrender.com/api'; // Ensure /api
-const AUTH_TOKEN_KEY = 'cryptohub_auth_token'; // Used by login.js to SET
-const USER_INFO_KEY = 'cryptohub_user_info';   // Used by login.js to SET
+const AUTH_API_BASE_URL = window.API_BASE_URL || 'https://rapidcrypto-backend.onrender.com/api';
+const AUTH_TOKEN_KEY = 'cryptohub_auth_token'; 
+const USER_INFO_KEY = 'cryptohub_user_info';   
 
 document.addEventListener('DOMContentLoaded', function() {
     console.log("AUTH.JS: DOMContentLoaded");
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
-    // Registration form on register.html
     if (currentPage === 'register.html' && document.getElementById('registerForm')) {
         document.getElementById('registerForm').addEventListener('submit', handleAuthJsRegister);
     }
 
-    // Call auth state check AFTER other potential initializations
-    // to give login.js a chance to set localStorage if it's a fresh login.
-    // A small timeout can help ensure login.js finishes its redirect logic or storage ops.
-    setTimeout(() => {
-        checkAuthState(); 
-        updateNavFooterBasedOnAuth();
-    }, 0); // Execute in next event loop tick
+    // Run auth check logic. If on a page that uses the 'auth-loading' class,
+    // this function will be responsible for removing it if authenticated.
+    checkAuthStateAndRevealContent(); 
+    
+    // updateNavFooterBasedOnAuth might run before checkAuthState fully decides on redirect.
+    // It's generally okay as it just updates link visibility based on token.
+    updateNavFooterBasedOnAuth();
 
     const logoutButton = document.getElementById('logoutBtn');
     if (logoutButton) {
@@ -34,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function handleAuthJsRegister(e) {
+    // ... (keep your existing handleAuthJsRegister function - no changes needed for this issue)
     e.preventDefault();
     const form = e.target;
     const btn = form.querySelector('button[type="submit"]');
@@ -59,8 +57,7 @@ async function handleAuthJsRegister(e) {
 
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...'; }
 
-        // Using AUTH_API_BASE_URL which should include /api
-        const response = await fetch(`${AUTH_API_BASE_URL}/register`, { // Ensure this endpoint is correct
+        const response = await fetch(`${AUTH_API_BASE_URL}/register`, { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, email, password })
@@ -79,52 +76,77 @@ async function handleAuthJsRegister(e) {
     }
 }
 
-function checkAuthState() {
-    console.log("AUTH.JS: checkAuthState running");
-    const protectedPages = ['dashboard.html', 'wallet.html', 'transactions.html']; // Add all protected pages
+function checkAuthStateAndRevealContent() {
+    console.log("AUTH.JS: checkAuthStateAndRevealContent running");
+    const protectedPages = ['dashboard.html', 'wallet.html', 'transactions.html']; 
     const authPages = ['login.html', 'register.html'];
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    const body = document.body;
+    const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
+
     console.log(`AUTH.JS: Current page: ${currentPage}, Token found: ${!!token}`);
+
+    let isAuthenticatedPage = false;
 
     if (protectedPages.includes(currentPage)) {
         if (!token) {
             console.log(`AUTH.JS: Not authenticated on protected page (${currentPage}). Redirecting to login.html.`);
+            if (loadingSpinnerOverlay) loadingSpinnerOverlay.style.display = 'none'; // Hide spinner before redirect
             window.location.href = 'login.html'; 
+            return; // Stop further execution
         } else {
             console.log(`AUTH.JS: Authenticated on protected page (${currentPage}). Allowing access.`);
+            isAuthenticatedPage = true;
         }
     } else if (authPages.includes(currentPage)) {
         if (token) {
             console.log(`AUTH.JS: Authenticated on auth page (${currentPage}). Redirecting to dashboard.html.`);
+            if (loadingSpinnerOverlay) loadingSpinnerOverlay.style.display = 'none'; // Hide spinner before redirect
             window.location.href = 'dashboard.html';
+            return; // Stop further execution
         } else {
             console.log(`AUTH.JS: Not authenticated on auth page (${currentPage}). Allowing access.`);
+            // No specific auth action needed, but content should be revealed
         }
+    } else {
+        // Public page, or page not in protected/auth lists
+        console.log(`AUTH.JS: Public page or unlisted (${currentPage}). Allowing access.`);
+    }
+
+    // If execution reaches here, the user is allowed to be on the current page.
+    // Reveal content if it was hidden.
+    if (body.classList.contains('auth-loading')) {
+        console.log("AUTH.JS: Removing 'auth-loading' class from body.");
+        body.classList.remove('auth-loading');
+    }
+    if (loadingSpinnerOverlay) {
+        console.log("AUTH.JS: Hiding full page spinner.");
+        loadingSpinnerOverlay.style.display = 'none';
     }
 }
 
 function updateNavFooterBasedOnAuth() {
+    // ... (keep your existing updateNavFooterBasedOnAuth function)
     console.log("AUTH.JS: updateNavFooterBasedOnAuth running");
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
     const navUl = document.querySelector('header nav ul');
     if (!navUl) return;
 
-    // More robust query selectors
     const showWhenLoggedIn = navUl.querySelectorAll('a[href="dashboard.html"], a[href="wallet.html"], a[href="transactions.html"], #logoutBtn');
     const showWhenLoggedOut = navUl.querySelectorAll('a[href="login.html"], a[href="register.html"]');
 
-    if (token) { // User is LOGGED IN
+    if (token) { 
         showWhenLoggedIn.forEach(el => el.parentElement.style.display = '');
         showWhenLoggedOut.forEach(el => el.parentElement.style.display = 'none');
-    } else { // User is LOGGED OUT
+    } else { 
         showWhenLoggedIn.forEach(el => el.parentElement.style.display = 'none');
         showWhenLoggedOut.forEach(el => el.parentElement.style.display = '');
     }
 }
 
-function showAlert(message, type = 'info', targetElement = null) { /* ... (keep your existing showAlert) ... */ 
+function showAlert(message, type = 'info', targetElement = null) { 
+    // ... (keep your existing showAlert function)
     const existingAlert = document.querySelector('.app-global-alert');
     if (existingAlert) existingAlert.remove();
     const alertDiv = document.createElement('div');
@@ -144,13 +166,10 @@ function showAlert(message, type = 'info', targetElement = null) { /* ... (keep 
 }
 
 function handleLogout() {
+    // ... (keep your existing handleLogout function)
     console.log("AUTH.JS: handleLogout running");
     localStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(USER_INFO_KEY);
-    // Clear any other app-specific local/session storage if needed
-    // localStorage.removeItem('availableBalance'); // Example
-    // localStorage.removeItem('activeInvestments'); // Example
-    
+    localStorage.removeItem(USER_INFO_KEY);    
     updateNavFooterBasedOnAuth(); 
     window.location.href = 'index.html'; 
 }
