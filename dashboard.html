@@ -8,49 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
   <link rel="stylesheet" href="dashboard.css" />
   <style>
-    /* CSS to hide content initially to prevent flash */
-    body.auth-loading main {
-      visibility: hidden; /* Hide content but keep layout */
-      /* or display: none; if you prefer it to not take up space */
-    }
-    body.auth-loading .loading-spinner-overlay { /* Optional: Full page loading spinner */
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(255, 255, 255, 0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 2000; /* Above other content */
-    }
-    /* Basic spinner CSS (if not using Bootstrap's spinner) */
-    .auth-spinner {
-        border: 4px solid rgba(0, 0, 0, 0.1);
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        border-left-color: #09f; /* Spinner color */
-        animation: spin 1s ease infinite;
-    }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    /* Your other existing styles */
-    .investment-details { margin-top: 15px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 0.9em; }
-    .investment-details p { margin: 6px 0; }
-    .investment-details button.withdraw-btn-plan { margin-top: 10px; background-color: #e74c3c; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight: 500; }
-    .investment-details button.withdraw-btn-plan:hover { background-color: #c0392b; }
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-    .modal-content { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); min-width: 300px; max-width: 500px; position: relative; }
-    .modal-close-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer; }
-    .modal-actions { margin-top: 20px; text-align: right; }
-    .modal-actions button { margin-left: 10px; padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; }
-    .modal-actions button.primary { background-color: #007bff; color: white; border-color: #007bff; }
-  </style>
+      </style>
 </head>
 <body class="auth-loading"> <!-- ADDED class "auth-loading" -->
 
@@ -61,7 +19,7 @@
 
   <header>
     <nav>
-      <div class="logo">RapidWealthHub</div>
+      <div class="logo">Rapidcrypto</div>
       <ul>
         <li><a href="index.html">Home</a></li>
         <li><a href="dashboard.html" class="active">Dashboard</a></li>
