@@ -1,3 +1,4 @@
+// --- START OF REWRITTEN dashboard.html (Only relevant parts shown, integrate into your full HTML) ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,12 +9,11 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
   <link rel="stylesheet" href="dashboard.css" />
   <style>
-    /* Your styles */
+    /* ... (Your existing styles - keep them) ... */
     .investment-details { margin-top: 15px; padding-top: 10px; border-top: 1px solid #e0e0e0; font-size: 0.9em; }
     .investment-details p { margin: 6px 0; }
     .investment-details button.withdraw-btn-plan { margin-top: 10px; background-color: #e74c3c; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-weight: 500; }
     .investment-details button.withdraw-btn-plan:hover { background-color: #c0392b; }
-    /* ... other styles from your original ... */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
     .modal-content { background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); min-width: 300px; max-width: 500px; position: relative; }
     .modal-close-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 1.5rem; cursor: pointer; }
@@ -31,21 +31,21 @@
         <li><a href="dashboard.html" class="active">Dashboard</a></li>
         <li><a href="wallet.html">Wallet</a></li>
         <li><a href="transactions.html">Transactions</a></li>
-        <li><a href="#" id="logoutBtn" class="btn">Logout</a></li>
+        <li><a href="#" id="logoutBtn" class="btn">Logout</a></li> <!-- auth.js handles this -->
       </ul>
     </nav>
   </header>
 
   <main>
     <section class="dashboard">
-      <h1>Welcome, <span id="userName">User</span></h1>
+      <h1>Welcome, <span id="userName">User</span></h1> <!-- dashboard.js will fill this -->
 
       <aside class="sidebar">
         <h3>Your Account</h3>
-        <p>Available Balance: <span class="balance" id="availableBalance">$0.00</span></p>
-        <!-- Optional: Dedicated container for user's active investments -->
+        <p>Available Balance: <span id="availableBalance">$0.00</span></p> <!-- Corrected ID -->
       </aside>
 
+      <!-- ... (Rest of your dashboard-grid content - keep it) ... -->
       <div class="dashboard-grid">
 
         <div class="card portfolio">
@@ -79,94 +79,32 @@
           </button>
         </div>
 
-        <!-- Investment Plans -->
         <div class="card investment-options silver-plan" data-plan-id="silver">
           <h3>💰 Silver Plan – Safe & Steady Growth</h3>
-          <table class="investment-table">
-            <tbody>
-              <tr><td>✅</td><td>2% Profit in 48 Hours</td></tr>
-              <tr><td>✅</td><td>Low-risk, consistent returns</td></tr>
-            </tbody>
-          </table>
+          <table class="investment-table"><tbody><tr><td>✅</td><td>2% Profit in 48 Hours</td></tr><tr><td>✅</td><td>Low-risk, consistent returns</td></tr></tbody></table>
           <p class="investment-note">Invest: $1,500 - $10,000</p>
-          <button class="action-btn invest-btn"
-                  data-plan="silver" 
-                  data-profit="2" 
-                  data-min="1500" 
-                  data-max="10000"
-                  data-maturity-period-hours="48"  
-                  data-lock-period-hours="48"
-                  data-interest-period-hours="48">
-              Invest in Silver
-          </button>
+          <button class="action-btn invest-btn" data-plan="silver" data-profit="2" data-min="1500" data-max="10000" data-maturity-period-hours="48"  data-lock-period-hours="48" data-interest-period-hours="48">Invest in Silver</button>
           <div class="investment-details-container"></div>
         </div>
-
         <div class="card investment-options gold-plan" data-plan-id="gold">
           <h3>🌟 Gold Plan – Accelerate Your Earnings</h3>
-          <table class="investment-table">
-            <tbody>
-              <tr><td>✅</td><td>5% Profit in 48 Hours</td></tr>
-              <tr><td>✅</td><td>Balanced risk & reward</td></tr>
-            </tbody>
-          </table>
+          <table class="investment-table"><tbody><tr><td>✅</td><td>5% Profit in 48 Hours</td></tr><tr><td>✅</td><td>Balanced risk & reward</td></tr></tbody></table>
           <p class="investment-note">Invest: $2,500 - $25,000</p>
-          <button class="action-btn invest-btn"
-                  data-plan="gold" 
-                  data-profit="5" 
-                  data-min="2500" 
-                  data-max="25000"
-                  data-maturity-period-hours="48"
-                  data-lock-period-hours="48"
-                  data-interest-period-hours="24">
-              Invest in Gold
-          </button>
+          <button class="action-btn invest-btn" data-plan="gold" data-profit="5" data-min="2500" data-max="25000" data-maturity-period-hours="48" data-lock-period-hours="48" data-interest-period-hours="24">Invest in Gold</button>
           <div class="investment-details-container"></div>
         </div>
-
         <div class="card investment-options premium-plan" data-plan-id="premium">
           <h3>💎 Premium Plan – Maximum Profit</h3>
-          <table class="investment-table">
-            <tbody>
-              <tr><td>✅</td><td>10% Profit in 48 Hours</td></tr>
-              <tr><td>✅</td><td>High-yield, premium opportunity</td></tr>
-            </tbody>
-          </table>
-          <p class="investment-note">Invest: $5,000 - $50,000</p>
-          <p class="investment-note small-text">Invest $50k+: borrow $100,000 after 2 weeks (3-year interest-free repayment).</p>
-          <button class="action-btn invest-btn"
-                  data-plan="premium" 
-                  data-profit="10" 
-                  data-min="5000" 
-                  data-max="50000"
-                  data-maturity-period-hours="48" 
-                  data-lock-period-hours="48"
-                  data-interest-period-hours="48">
-              Invest in Premium
-          </button>
+          <table class="investment-table"><tbody><tr><td>✅</td><td>10% Profit in 48 Hours</td></tr><tr><td>✅</td><td>High-yield, premium opportunity</td></tr></tbody></table>
+          <p class="investment-note">Invest: $5,000 - $50,000</p><p class="investment-note small-text">Invest $50k+: borrow $100,000 after 2 weeks (3-year interest-free repayment).</p>
+          <button class="action-btn invest-btn" data-plan="premium" data-profit="10" data-min="5000" data-max="50000" data-maturity-period-hours="48" data-lock-period-hours="48" data-interest-period-hours="48">Invest in Premium</button>
           <div class="investment-details-container"></div>
         </div>
-
         <div class="card investment-options platinum-plan" data-plan-id="platinum">
           <h3>✨ VIP/Platinum Plan – Elite Tier</h3>
-          <table class="investment-table">
-            <tbody>
-              <tr><td>✅</td><td>15–20% Profit in 48 Hours</td></tr>
-              <tr><td>✅</td><td>Priority support & bonuses</td></tr>
-            </tbody>
-          </table>
-          <p class="investment-note">Invest: $10,000 - $100,000</p>
-          <p class="investment-note small-text">Invest $100k+: borrow $300,000 after 2 weeks (5-year interest-free repayment).</p>
-          <button class="action-btn invest-btn"
-                  data-plan="platinum" 
-                  data-profit="20" 
-                  data-min="10000" 
-                  data-max="100000"
-                  data-maturity-period-hours="48"
-                  data-lock-period-hours="48"
-                  data-interest-period-hours="12">
-              Invest in VIP/Platinum
-          </button>
+          <table class="investment-table"><tbody><tr><td>✅</td><td>15–20% Profit in 48 Hours</td></tr><tr><td>✅</td><td>Priority support & bonuses</td></tr></tbody></table>
+          <p class="investment-note">Invest: $10,000 - $100,000</p><p class="investment-note small-text">Invest $100k+: borrow $300,000 after 2 weeks (5-year interest-free repayment).</p>
+          <button class="action-btn invest-btn" data-plan="platinum" data-profit="20" data-min="10000" data-max="100000" data-maturity-period-hours="48" data-lock-period-hours="48" data-interest-period-hours="12">Invest in VIP/Platinum</button>
           <div class="investment-details-container"></div>
         </div>
       </div> 
@@ -182,42 +120,19 @@
     </div>
   </div>
   
-  <!-- Set API_BASE_URL globally for auth.js -->
   <script>
-    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
+    // Set API_BASE_URL globally. Ensure this is defined BEFORE auth.js and dashboard.js if they rely on it.
+    // It should include the /api path.
+    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com/api";
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="auth.js"></script>
-  <script src="uiUtils.js"></script>
-  <script src="script.js"></script>
-  <script src="dashboard.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="auth.js" defer></script> 
+  <!-- uiUtils.js - make sure its functions are used or remove -->
+  <!-- script.js - ensure its functions are used or remove/integrate -->
+  <script src="dashboard.js" defer></script>
 
-  <script>
-    // On DOM ready: update username display and setup logout
-    document.addEventListener('DOMContentLoaded', () => {
-      const userInfoRaw = sessionStorage.getItem('cryptohub_user_info');
-      if (userInfoRaw) {
-        try {
-          const userInfo = JSON.parse(userInfoRaw);
-          const userNameEl = document.getElementById('userName');
-          if (userNameEl) {
-            userNameEl.textContent = userInfo.username || userInfo.email || "User";
-          }
-        } catch (err) {
-          console.warn("Failed to parse user info:", err);
-        }
-      }
-
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          if (window.clearSession) window.clearSession();
-          window.location.href = 'login.html';
-        });
-      }
-    });
-  </script>
+  <!-- Removed the inline script that set userName from sessionStorage, as dashboard.js handles it from localStorage now -->
 </body>
 </html>
+// --- END OF REWRITTEN dashboard.html ---
