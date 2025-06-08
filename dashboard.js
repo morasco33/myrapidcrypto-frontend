@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // For now, using mock:
   const balances = JSON.parse(localStorage.getItem('cryptohub_balances_mock') || '{}');
   if (!balances[user._id]) { 
-    balances[user._id] = { USD: 10000, BTC: 0, ETH: 0, USDT: 0 };
+    balances[user._id] = { USD: 0, BTC: 0, ETH: 0, USDT: 0 };
     localStorage.setItem('cryptohub_balances_mock', JSON.stringify(balances));
   }
   function renderAssets() { 
