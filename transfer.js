@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUserAssetBalance = 0; // To store the balance of the selected asset
 
     // --- Authentication Check ---
-    const authToken = sessionStorage.getItem(AUTH_TOKEN_KEY); // --- ALIGNMENT: Get from sessionStorage ---
+    const authToken = localStorage.getItem(AUTH_TOKEN_KEY); // --- ALIGNMENT: Get from sessionStorage ---
     if (!authToken) {
         console.log("DEBUG [transfer.js]: User not authenticated, redirecting.");
         window.location.href = `login.html?reason=auth_required&redirectTo=${encodeURIComponent(window.location.pathname + window.location.search)}`;
