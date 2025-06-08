@@ -27,7 +27,7 @@ function finalizePageSetupBasedOnAuth() {
     const body = document.body;
     const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
     const currentPagePath = window.location.pathname;
-    const protectedPagesPaths = ['/dashboard.html', '/wallet.html', '/transactions.html'];
+    const protectedPagesPaths = ['/dashboard.html', '/wallet.html', '/transactions.html', '/transfer.html'];
     const authPagePaths = ['/login.html', '/register.html'];
 
     console.log(`AUTH.JS (finalize): Current page: ${currentPagePath}, Token found: ${!!token}`);
