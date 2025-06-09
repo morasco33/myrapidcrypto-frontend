@@ -297,14 +297,14 @@ if (mainWithdrawButton) {
         }
         
         alert(data.message || 'Investment successful!');
-        if(data.newBalance !== undefined) {
-            // Here you would update the displayed balance, e.g., by re-fetching user profile or updating mock balance
-            console.log("New balance from server:", data.newBalance);
+        if (data.newBalance !== undefined) {
+          document.getElementById('availableBalance').textContent = `$${data.newBalance.toFixed(2)}`;
+          document.getElementById('portfolioValue').textContent = `$${data.newBalance.toFixed(2)}`;
+        }        
             // Example for mock balance:
             // balances[user._id].USD = data.newBalance;
             // localStorage.setItem('cryptohub_balances_mock', JSON.stringify(balances));
             // renderAssets();
-        }
         loadActiveInvestments(); 
       } catch(error) {
         hideModal(); 
