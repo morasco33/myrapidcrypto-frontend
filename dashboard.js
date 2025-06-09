@@ -200,14 +200,16 @@ if (mainWithdrawButton) {
                         const el = document.createElement('div');
                         el.className = 'investment-details';
                         el.innerHTML = `
-                            <p><strong>Active: ${inv.planName}</strong></p>
-                            <p>Invested: $${inv.initialAmount.toFixed(2)} | Current Value: $${inv.currentValue.toFixed(2)}</p>
-                            <p>Status: ${inv.status} | Matures: ${new Date(inv.maturityDate).toLocaleDateString()}</p>
-                            ${(inv.status === 'active' || inv.status === 'matured') && new Date() >= new Date(inv.withdrawalUnlockTime)
-                              ? `<button class="withdraw-btn-plan" data-investment-id="${inv._id}">Withdraw</button>`
-                              : `<small>Locked until ${new Date(inv.withdrawalUnlockTime).toLocaleDateString()}</small>`}
-                          `;
-                        container.appendChild(el);
+                        <p><strong>Active: ${inv.planName}</strong></p>
+                        <p>Invested: $${inv.initialAmount.toFixed(2)} | Current Value: $${inv.currentValue.toFixed(2)}</p>
+                        <p>Status: ${inv.status} | Matures: ${new Date(inv.maturityDate).toLocaleDateString()}</p>
+                        ${
+                        (inv.status === 'active' || inv.status === 'matured') && new Date() >= new Date(inv.withdrawalUnlockTime)
+                        ? `<button class="withdraw-btn-plan" data-investment-id="${inv._id}">Withdraw</button>`
+                        : `<small>Locked until ${new Date(inv.withdrawalUnlockTime).toLocaleDateString()}</small>`
+                        }
+                        `;
+                        container.appendChild(el);   
                     }
                 }
             });
