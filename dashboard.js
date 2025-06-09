@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!authToken || !userInfoString) {
     console.error("DASHBOARD.JS: CRITICAL - Auth token or user info missing. Redirecting to login.");
-    // This check is a safeguard; auth.js should ideally handle redirection.
     window.location.href = 'login.html?reason=session_expired';
     return;
   }
@@ -22,7 +21,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error("DASHBOARD.JS: CRITICAL - Failed to parse user info from localStorage.", e);
     const mainContent = document.querySelector('main');
     if (mainContent) mainContent.innerHTML = `<h1>Data Error</h1><p>Could not load user data. Please try <a href="login.html?action=relogin">logging in again</a>.</p>`;
-    // Hide loading indicators, make page visible to show error
     document.body.classList.remove('auth-loading');
     document.documentElement.style.visibility = 'visible';
     document.documentElement.style.opacity = '1';
@@ -49,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const DASH_API_BASE_URL = window.API_BASE_URL || 'https://rapidcrypto-backend.onrender.com/api';
 
-  // --- Modal Functions ---
   const modal = document.getElementById('appModal');
   const modalTitle = document.getElementById('modalTitle');
   const modalBody = document.getElementById('modalBody');
@@ -79,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Event Listeners for Quick Actions ---
   const mainDepositButton = document.getElementById('mainDepositBtn');
   if (mainDepositButton) {
     mainDepositButton.addEventListener('click', () => {
@@ -93,11 +89,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Balance and Asset Rendering ---
   async function fetchRealUserProfileData() {
     console.log("DASHBOARD.JS: Fetching real user profile data...");
     try {
-      const response = await fetch(`${DASH_API_BASE_URL}/profile`, { // Corrected endpoint
+      const response = await fetch(`${DASH_API_BASE_URL}/profile`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
 
@@ -110,50 +105,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const fetchedUser = data.user;
       const balance = fetchedUser.balance || 0;
-      const assets = fetchedUser.assets || [];
+      const assets = fetchedUser.assets || []; // Ensure assets is an array
 
-      // Update UI for Balance
       const balanceEl = document.getElementById('availableBalance');
-      const portfolioValueEl = document.getElementById('portfolioValue'); // Assuming portfolio value is same as main balance for now
+      const portfolioValueEl = document.getElementById('portfolioValue');
       if (balanceEl) balanceEl.textContent = `$${balance.toFixed(2)}`;
       if (portfolioValueEl) portfolioValueEl.textContent = `$${balance.toFixed(2)}`;
 
-      // Update UI for Assets List
       const assetsContainer = document.getElementById('assetsList');
       if (assetsContainer) {
-        assetsContainer.innerHTML = ''; // Clear previous assets
+        assetsContainer.innerHTML = '';
         if (assets.length > 0) {
           assets.forEach((asset) => {
             const div = document.createElement('div');
             div.className = 'asset-item';
-            // Adjust how you want to display asset name vs symbol
-            div.innerHTML = `<strong>${asset.symbol || asset.name}:</strong> ${asset.amount}`;
+            const amount = parseFloat(asset.amount);
+            // Using toFixed(8) for typical crypto precision, adjust if needed
+            div.innerHTML = `<strong>${asset.symbol || asset.name}:</strong> ${isNaN(amount) ? 'N/A' : amount.toFixed(8)}`;
             assetsContainer.appendChild(div);
           });
         } else {
-          assetsContainer.innerHTML = '<p>No other assets held.</p>';
+          assetsContainer.innerHTML = '<p>No other distinct crypto assets held.</p>';
         }
       }
-      // Update user info in localStorage if needed (e.g., balance changes)
-      // Be careful with this, as frequent updates might not be necessary if profile is always fetched
-      // localStorage.setItem(USER_INFO_KEY_FOR_DASH, JSON.stringify(fetchedUser));
-
-
     } catch (err) {
       console.error('DASHBOARD.JS: Error loading user profile data:', err.message);
       const balanceEl = document.getElementById('availableBalance');
       const portfolioValueEl = document.getElementById('portfolioValue');
-      if (balanceEl) balanceEl.textContent = '$?.??'; // Indicate error
+      if (balanceEl) balanceEl.textContent = '$?.??';
       if (portfolioValueEl) portfolioValueEl.textContent = '$?.??';
 
       if (err.message.toLowerCase().includes('auth error') || err.message.toLowerCase().includes('session expired') || err.message.toLowerCase().includes('invalid token')) {
          showModal('Session Expired', 'Your session has expired. Please <a href="login.html?action=relogin">log in again</a>.');
-         // Optionally, redirect after a delay or user action
       }
     }
   }
 
-  // --- Active Investments Fetch ---
   async function loadActiveInvestments() {
     console.log("DASHBOARD.JS: Loading active investments...");
     const investmentDetailsContainers = document.querySelectorAll('.investment-details-container');
@@ -173,13 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (data.success && Array.isArray(data.investments)) {
             console.log("DASHBOARD.JS: Active investments received:", data.investments);
-            // Clear all existing investment details before rendering new ones
             investmentDetailsContainers.forEach(c => c.innerHTML = '');
 
             if (data.investments.length === 0) {
-                // If there are plan cards, but no investments for THIS user, indicate it.
-                // This message might appear in each plan card's detail area if no specific investments match.
-                // Consider a general "No active investments found." message in a dedicated area if more appropriate.
                 investmentDetailsContainers.forEach(c => c.innerHTML = '<p class="info-text">No active investments in this plan.</p>');
             } else {
                 data.investments.forEach(inv => {
@@ -187,12 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (planCard) {
                         const container = planCard.querySelector('.investment-details-container');
                         if (container) {
-                            // If this is the first investment for this plan card, clear the "No active investments" message.
                             if (container.querySelector('.info-text')) {
                                 container.innerHTML = '';
                             }
                             const el = document.createElement('div');
-                            el.className = 'investment-details-item'; // More specific class
+                            el.className = 'investment-details-item';
                             el.innerHTML = `
                             <p><strong>${inv.planName}</strong></p>
                             <p>Invested: $${inv.initialAmount.toFixed(2)} | Current Value: $${inv.currentValue.toFixed(2)}</p>
@@ -210,9 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
-            // Add event listeners to newly created withdraw buttons
             document.querySelectorAll('.withdraw-btn-plan').forEach(btn => {
-                btn.removeEventListener('click', handlePlanWithdrawClick); // Remove old listener if any
+                btn.removeEventListener('click', handlePlanWithdrawClick);
                 btn.addEventListener('click', handlePlanWithdrawClick);
             });
         } else {
@@ -226,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- Handle Investment Button Clicks ---
   document.querySelectorAll('.invest-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const planId = btn.dataset.plan;
@@ -272,7 +252,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         alert(data.message || 'Investment successful!');
-        // Refresh user balance and active investments
         await fetchRealUserProfileData();
         await loadActiveInvestments();
 
@@ -284,7 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- Handle Plan Withdrawal Click ---
   async function handlePlanWithdrawClick(event) {
     const investmentId = event.target.dataset.investmentId;
     console.log(`DASHBOARD.JS: Withdraw button clicked for investment ID: ${investmentId}`);
@@ -318,7 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         alert(data.message || "Withdrawal successful!");
-        // Refresh user balance and active investments
         await fetchRealUserProfileData();
         await loadActiveInvestments();
 
@@ -329,19 +306,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // --- Chart.js Examples (Keep as is or adapt with real data later) ---
   const portfolioCtx = document.getElementById('portfolioChart')?.getContext('2d');
   if (portfolioCtx) { new Chart(portfolioCtx, { type: 'line', data: { labels: ['Jan', 'Feb', 'Mar', 'Apr'], datasets: [{ label: 'Portfolio Value (Sample)', data: [65, 59, 80, 81], tension: 0.1 }] }, options: { responsive: true, maintainAspectRatio: false } }); }
 
   const marketTrendsCtx = document.getElementById('marketTrendsChart')?.getContext('2d');
   if (marketTrendsCtx) { new Chart(marketTrendsCtx, { type: 'bar', data: { labels: ['BTC', 'ETH', 'SOL', 'DOGE'], datasets: [{ label: 'Price Change (24h % Sample)', data: [2.5, -1.2, 5.0, 0.5], backgroundColor:['green','red','green','green'] }] }, options: { responsive: true, maintainAspectRatio: false } });}
 
-  // --- Initial Data Load ---
   async function initializeDashboard() {
-    await fetchRealUserProfileData(); // Fetch balance and assets
-    await loadActiveInvestments(); // Fetch active investment plans
+    await fetchRealUserProfileData();
+    await loadActiveInvestments();
 
-    // Remove loading spinner and show page content once data is loaded or attempted
     const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
     if (loadingSpinnerOverlay) loadingSpinnerOverlay.style.display = 'none';
     document.body.classList.remove('auth-loading');
