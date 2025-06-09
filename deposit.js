@@ -15,7 +15,7 @@
             usdt: {
                 erc20: '0x619e666AFD7ee061bC2A275F494a4540a5E278f9',
                 trc20: '', // Example: 'TYOURTRC20ADDRESSFORUSDT'
-                bep20: ''  // Example: '0xYourBEP20AddressForUSDT'
+                bep20: '0xf5dcce32fe8db5425fe6c683eb176c6bb86e39e7'  // Example: '0xYourBEP20AddressForUSDT'
             },
             usdc: {
                 erc20: '0xB5594fbada5eC1E1E8920946c8E2796348823338', // Fixed typo (removed trailing 's')
