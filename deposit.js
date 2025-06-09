@@ -10,16 +10,16 @@
             btc: { btc: '3FGdY6iVT3iRqBYwJTcJn4AzTTEsJL6r1J' },
             eth: { 
                 erc20: '0x889916Be18bFA95fD05e8b0B0d643265527453B9',
-                bep20: '' // Example: '0xYourBEP20AddressForETHIfWrapped'
+                bep20: '0xf5dcce32fe8db5425fe6c683eb176c6bb86e39e7' // Example: '0xYourBEP20AddressForETHIfWrapped'
             },
             usdt: {
                 erc20: '0x619e666AFD7ee061bC2A275F494a4540a5E278f9',
-                trc20: '', // Example: 'TYOURTRC20ADDRESSFORUSDT'
+                trc20: 'TNiPbQNC4WSaYQ3bADsyCWLDamZuF912iW', // Example: 'TYOURTRC20ADDRESSFORUSDT'
                 bep20: '0xf5dcce32fe8db5425fe6c683eb176c6bb86e39e7'  // Example: '0xYourBEP20AddressForUSDT'
             },
             usdc: {
                 erc20: '0xB5594fbada5eC1E1E8920946c8E2796348823338', // Fixed typo (removed trailing 's')
-                bep20: ''  // Example: '0xYourBEP20AddressForUSDC'
+                bep20: '0xf5dcce32fe8db5425fe6c683eb176c6bb86e39e7'  // Example: '0xYourBEP20AddressForUSDC'
             }
         },
         QR_CODE_SIZE: 180,
