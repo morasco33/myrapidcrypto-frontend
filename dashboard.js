@@ -104,27 +104,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Event Listeners for Quick Actions ---
-  // ... (Keep your quick action button listeners)
   const mainDepositButton = document.getElementById('mainDepositBtn');
-  if (mainDepositButton) {
-    mainDepositButton.addEventListener('click', () => {
-      console.log('DASHBOARD.JS: Main Deposit Button Clicked');
-      showModal('Deposit Funds', '<p>Deposit functionality coming soon. Please use plan investments for now.</p>');
-    });
-  } else {
-    console.warn('DASHBOARD.JS: Main Deposit Button (mainDepositBtn) not found');
-  }
+if (mainDepositButton) {
+  mainDepositButton.addEventListener('click', () => {
+    window.location.href = 'deposit.html'; // or 'wallet.html' if that's your deposit page
+  });
+}
 
-  const mainWithdrawButton = document.getElementById('mainWithdrawBtn');
-  if (mainWithdrawButton) {
-    mainWithdrawButton.addEventListener('click', () => {
-      console.log('DASHBOARD.JS: Main Withdraw Button Clicked');
-      showModal('Withdraw Funds', '<p>Withdrawal functionality for main balance coming soon. Withdraw from matured plans.</p>');
-    });
-  } else {
-    console.warn('DASHBOARD.JS: Main Withdraw Button (mainWithdrawBtn) not found');
-  }
-  
+const mainWithdrawButton = document.getElementById('mainWithdrawBtn');
+if (mainWithdrawButton) {
+  mainWithdrawButton.addEventListener('click', () => {
+    window.location.href = 'withdraw.html'; // or any valid withdraw page
+  });
+}
+
   // --- Balance and Asset Rendering ---
   // ... (Keep your renderAssets function and its call, but consider fetching REAL balance from backend)
   // For now, using mock:
