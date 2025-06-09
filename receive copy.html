@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rapidcrypto - Deposit</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="deposit.css" />
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">Rapidcrypto</div>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="wallet.html">Wallet</a></li>
+        <li><a href="deposit.html" class="active">Deposit</a></li>
+        <li><a href="#" id="logoutBtn" class="btn btn-outline">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="deposit">
+      <h1><i class="fas fa-coins"></i> Receive Funds</h1>
+
+      <div class="deposit-container">
+        <div class="card">
+          <h3><i class="fas fa-wallet"></i> Receive Cryptocurrency</h3>
+
+          <div class="form-group">
+            <label for="cryptoAsset">Select Asset</label>
+            <select id="cryptoAsset" class="form-control">
+              <option value="btc">Bitcoin (BTC)</option>
+              <option value="eth">Ethereum (ETH)</option>
+              <option value="usdt">Tether (USDT)</option>
+              <option value="usdc">USD Coin (USDC)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="networkType">Choose Network</label>
+            <select id="networkType" class="form-control">
+              <option value="btc">Bitcoin</option>
+              <option value="erc20">Ethereum (ERC-20)</option>
+              <option value="bep20">Binance Smart Chain (BEP-20)</option>
+              <option value="trc20">Tron (TRC-20)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Receive Address</label>
+            <div class="address-container">
+              <div class="address-box" id="depositAddress">
+                <i class="fas fa-wallet"></i> <span id="walletDisplay">Generating...</span>
+              </div>
+              <button class="action-btn copy-btn" id="copyAddressBtn">
+                <i class="fas fa-copy"></i> Copy
+              </button>
+            </div>
+            <p class="network-notice">
+              <i class="fas fa-info-circle"></i> Only send <span id="selectedNetwork">Bitcoin (BTC)</span> to this address, 
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label>Scan QR Code</label>
+            <div class="qr-code-container">
+              <canvas id="qrCanvas"></canvas>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Minimum Receive</label>
+            <div class="min-deposit">
+              <span id="minDepositAmount">0.0005 BTC</span>
+              <span id="minDepositValue">(~$25.00)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <script>
+  window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com/api";
+</script>
+
+  <!-- QR Code Library -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <!-- App Logic -->
+  <script src="auth.js"defer></script>       <!-- THIS MUST BE FIRST -->
+  <script src="uiUtils.js"defer></script> 
+  <script src="deposit.js"defer></script>
+</body>
+</html>

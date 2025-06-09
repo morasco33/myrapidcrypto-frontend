@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RapidWealthHub - Create Account</title>
+  <title>rapidcrypto - Create Account</title>
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -34,7 +34,7 @@
 <body>
   <header>
     <nav>
-      <div class="logo">RapidWealthHub</div>
+      <div class="logo">rapidcrypto</div>
       <ul>
         <li><a href="index.html">Home</a></li>
         <li><a href="login.html">Login</a></li>
@@ -44,9 +44,14 @@
 
   <main class="auth-container">
     <form id="registerForm" class="auth-form" aria-labelledby="registerHeading" novalidate>
+      <!-- Added Checkmark SVG (hidden by CSS initially) -->
+      <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+        <path d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+      </svg>
+
       <div class="auth-header">
         <h2 id="registerHeading">Create Your Account</h2>
-        <p>Join RapidWealthHub and start your crypto journey today!</p>
+        <p>Join rapidcrypto and start your crypto journey today!</p>
       </div>
 
       <div class="form-group">
@@ -111,6 +116,10 @@
           autocomplete="new-password"
         />
         <small class="form-text">Minimum 6 characters.</small>
+        <!-- Added Password Strength Indicator -->
+        <div class="password-strength">
+          <div class="strength-meter"></div>
+        </div>
       </div>
 
       <div class="form-group">
@@ -125,9 +134,10 @@
         />
       </div>
 
+      <!-- Restructured Terms and Conditions checkbox and label -->
       <div class="form-group terms-group">
-        <input type="checkbox" id="terms" name="terms" required />
         <label for="terms" class="checkbox-label">
+          <input type="checkbox" id="terms" name="terms" required />
           I agree to the <a href="legal agreement.html#terms" target="_blank">Terms and Conditions</a>
         </label>
       </div>
@@ -143,17 +153,17 @@
         aria-live="assertive"
         style="min-height: 1.5em; margin-top: 1rem;"
       ></div>
-    </form>
 
-    <div class="auth-footer" style="text-align:center; margin-top:1.5rem;">
+      <!-- Relocated "Already have an account?" paragraph inside the form -->
       <p>
         Already have an account? <a href="login.html">Login here</a>
       </p>
-    </div>
+    </form>
+    <!-- Removed auth-footer div from here as its content is now inside the form -->
   </main>
 
-  <script src="uiUtils.js"></script>
-  <script src="auth.js"></script>
-  <script src="register.js"></script>
+  <script src="uiUtils.js"defer></script>
+  <script src="auth.js"defer></script>
+  <script src="register.js"defer></script>
 </body>
 </html>

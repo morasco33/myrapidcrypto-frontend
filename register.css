@@ -66,7 +66,7 @@ nav a:hover {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 6rem 2rem 2rem;
+    padding: 6rem 2rem 2rem; /* Increased top padding to account for fixed header */
 }
 
 .auth-form {
@@ -87,7 +87,30 @@ nav a:hover {
     box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
 }
 
-.auth-form h2 {
+/* Styles for header within the auth form */
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem; /* Added margin for spacing */
+}
+
+.auth-header h2 { /* Styles for h2 if it's within .auth-header */
+    font-size: 2.2rem;
+    background: linear-gradient(135deg, #6c5ce7, #00b894);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 0.5rem; /* Adjusted margin */
+    font-weight: 700;
+}
+
+.auth-header p { /* Styles for p if it's within .auth-header */
+    color: #5a5a5a;
+    font-size: 1rem;
+    margin-bottom: 0; /* Remove default margin if any */
+}
+
+
+.auth-form h2 { /* This targets any h2 inside .auth-form directly */
     font-size: 2.2rem;
     background: linear-gradient(135deg, #6c5ce7, #00b894);
     -webkit-background-clip: text;
@@ -119,6 +142,7 @@ nav a:hover {
     font-size: 1.05rem;
     transition: all 0.3s ease;
     background-color: rgba(245, 245, 245, 0.7);
+    box-sizing: border-box; /* Added for better padding/border behavior */
 }
 
 .form-group input:focus {
@@ -126,6 +150,38 @@ nav a:hover {
     border-color: #6c5ce7;
     background-color: white;
     box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+}
+
+/* NEW: Styling for form helper text (e.g., "Minimum 3 characters.") */
+.form-group .form-text {
+    display: block;
+    font-size: 0.875rem;
+    color: #5a5a5a;
+    margin-top: 0.5rem;
+    line-height: 1.4;
+}
+
+/* NEW: Styling for terms and conditions group */
+.terms-group {
+    margin-bottom: 1.75rem; /* Consistent margin */
+}
+
+.terms-group .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75em; /* Space between checkbox and text */
+    font-weight: 500; /* Slightly less than main labels, or adjust as needed */
+    font-size: 0.95rem;
+    color: #4a4a4a;
+    cursor: pointer; /* Make the whole label clickable */
+}
+
+.terms-group input[type="checkbox"] {
+    margin: 0; /* Remove default browser margins */
+    width: 1.1em; /* Adjust size as needed */
+    height: 1.1em; /* Adjust size as needed */
+    accent-color: #6c5ce7; /* Modern way to color checkbox */
+    flex-shrink: 0; /* Prevent shrinking */
 }
 
 .btn {
@@ -140,6 +196,12 @@ nav a:hover {
     text-align: center;
     width: 100%;
     letter-spacing: 0.5px;
+    box-sizing: border-box; /* Added for better padding/border behavior */
+}
+
+/* NEW: Styling for icon within button */
+.btn i {
+    margin-right: 0.6em; /* Space between icon and text */
 }
 
 .btn.primary {
@@ -153,7 +215,7 @@ nav a:hover {
     background: linear-gradient(135deg, #5d4bdb, #00a884);
 }
 
-.auth-form p {
+.auth-form p { /* This styles the "Already have an account?" paragraph */
     text-align: center;
     margin-top: 1.5rem;
     color: #5a5a5a;
@@ -173,22 +235,22 @@ nav a:hover {
 
 /* Password strength indicator */
 .password-strength {
-    margin-top: 0.5rem;
-    height: 4px;
+    margin-top: 0.75rem; /* Added more space */
+    height: 6px; /* Slightly thicker */
     background: #eee;
-    border-radius: 2px;
+    border-radius: 3px; /* Adjusted border-radius */
     overflow: hidden;
 }
 
 .strength-meter {
     height: 100%;
-    width: 0;
-    transition: width 0.3s ease, background 0.3s ease;
+    width: 0; /* Initial width */
+    transition: width 0.3s ease, background-color 0.3s ease; /* Corrected property name */
 }
 
 /* Animated checkmark for successful registration */
 .checkmark {
-    display: none;
+    display: none; /* Hidden by default, shown by JS */
     width: 80px;
     height: 80px;
     margin: 0 auto 1.5rem;
@@ -201,9 +263,24 @@ nav a:hover {
     stroke-linejoin: round;
     fill: none;
     stroke-dasharray: 1000;
-    stroke-dashoffset: 0;
+    stroke-dashoffset: 0; /* Start as filled for animation */
     animation: dash 1.5s ease-in-out forwards;
 }
+
+/* Form message area */
+.form-message {
+    min-height: 1.5em;
+    margin-top: 1rem;
+    text-align: center;
+    font-weight: 500;
+}
+.form-message.success {
+    color: #00b894;
+}
+.form-message.error {
+    color: #d32f2f; /* A standard error red */
+}
+
 
 /* Animations */
 @keyframes fadeInUp {
@@ -218,6 +295,18 @@ nav a:hover {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    header {
+        padding: 1rem 1.5rem;
+    }
+    nav ul {
+        gap: 1rem;
+    }
+    nav a {
+        padding: 0.4rem 0.8rem;
+    }
+    .logo {
+        font-size: 1.6rem;
+    }
     .auth-container {
         padding: 5rem 1.5rem 1.5rem;
     }
@@ -225,8 +314,49 @@ nav a:hover {
     .auth-form {
         padding: 2.5rem 2rem;
     }
-    
+    .auth-form h2, .auth-header h2 {
+        font-size: 1.8rem;
+    }
+    .form-group input {
+        padding: 1rem 1.1rem;
+        font-size: 1rem;
+    }
+    .btn {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .auth-form {
+        padding: 2rem 1.5rem;
+        border-radius: 16px;
+    }
+    .auth-form h2, .auth-header h2 {
+        font-size: 1.6rem;
+        margin-bottom: 1rem;
+    }
+    .auth-header p {
+        font-size: 0.9rem;
+    }
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    .form-group label {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+    .form-group input {
+        padding: 0.9rem 1rem;
+        border-radius: 12px;
+    }
+    .btn {
+        padding: 0.9rem;
+        border-radius: 12px;
+    }
     nav ul {
-        gap: 1rem;
+        /* Could hide for very small screens or stack them */
+        display: none; /* Example: hide nav links on very small screens */
+        /* Or: flex-direction: column; position: absolute; top: 60px; background: ... etc. for a burger menu */
     }
 }
