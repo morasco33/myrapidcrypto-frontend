@@ -239,7 +239,7 @@ if (mainWithdrawButton) {
         }
     } catch (err) {
         console.error('DASHBOARD.JS: Failed to load active investments:', err);
-        investmentDetailsContainers.forEach(c => c.innerHTML = `<p style="color:red;">Error loading investments: ${err.message}</p>`);
+        investmentDetailsContainers.forEach(c => c.innerHTML = `<p style="color:red;">Insufficient balance please deposit to invest: ${err.message}</p>`);
     }
   }
   loadActiveInvestments();
