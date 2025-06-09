@@ -152,24 +152,42 @@ if (mainWithdrawButton) {
 
   // --- Investment Plan Data Fetch ---
   // ... (Keep your fetchInvestmentPlans function and its call)
-  async function fetchInvestmentPlans() { 
+  async function fetchInvestmentPlans() {
     try {
-        const response = await fetch(`${DASH_API_BASE_URL}/investment-plans`, {
-            headers: { 'Authorization': `Bearer ${authToken}` }
-        });
-        if (!response.ok) throw new Error(`Failed to fetch plans: ${response.statusText} (${response.status})`);
-        const data = await response.json();
-        if (data.success && data.plans) {
-            console.log("DASHBOARD.JS: Fetched investment plans:", data.plans);
-        } else {
-          console.error("DASHBOARD.JS: Failed to parse investment plans:", data.message || "Unknown error");
+      const response = await fetch(`${DASH_API_BASE_URL}/investment-plans`, {
+        headers: { 'Authorization': `Bearer ${authToken}` }
+      });
+  
+      if (!response.ok) {
+        let errorMsg = `Failed to fetch investments: ${response.statusText} (${response.status})`;
+  
+        if (response.status === 401) {
+          alert('Session expired. Redirecting to login...');
+          window.location.href = 'login.html?reason=session_expired';
+          return;
         }
+  
+        try {
+          const errData = await response.json();
+          errorMsg = errData.message || errorMsg;
+        } catch (_) {}
+  
+        throw new Error(errorMsg);
+      }
+  
+      const data = await response.json();
+      if (data.success && data.plans) {
+        console.log("DASHBOARD.JS: Fetched investment plans:", data.plans);
+        // Do something with the plans here if needed
+      } else {
+        console.error("DASHBOARD.JS: Failed to parse investment plans:", data.message || "Unknown error");
+      }
+  
     } catch (error) {
-        console.error("DASHBOARD.JS: Error fetching investment plans:", error);
+      console.error("DASHBOARD.JS: Error fetching investment plans:", error);
     }
   }
-  fetchInvestmentPlans();
-
+  
   // --- Active Investments Fetch ---
   // ... (Keep your loadActiveInvestments function and its call)
   async function loadActiveInvestments() { 
