@@ -10,53 +10,63 @@ body {
     background: linear-gradient(135deg, #6c5ce7, #00b894);
     min-height: 100vh;
     color: #333;
+    line-height: 1.6; /* Added for better text readability */
 }
 
 /* Header/Navigation */
 header {
     position: fixed;
     top: 0;
+    left: 0; /* Added for full width consistency */
+    right: 0; /* Added for full width consistency */
     width: 100%;
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.1); /* Adjusted for more blur effect like register page */
+    backdrop-filter: blur(10px); /* Added for consistency */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Softer shadow */
     z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Added for consistency */
 }
 
 nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2rem;
+    padding: 1.5rem 2rem; /* Adjusted padding for consistency */
     max-width: 1200px;
     margin: 0 auto;
 }
 
 .logo {
-    font-size: 1.5rem;
+    font-size: 1.8rem; /* Adjusted for consistency */
     font-weight: 700;
-    background: linear-gradient(135deg, #6c5ce7, #00b894);
+    background: linear-gradient(135deg, #fff, #e0f7fa); /* Adjusted for consistency */
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+    letter-spacing: -0.5px; /* Added for consistency */
 }
 
 nav ul {
     display: flex;
     list-style: none;
-    gap: 1.5rem;
+    gap: 2rem; /* Adjusted for consistency */
     margin: 0;
     padding: 0;
 }
 
 nav a {
     text-decoration: none;
-    color: #4a4a4a;
+    color: white; /* Adjusted for consistency with header background */
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem; /* Added for consistency */
+    border-radius: 8px; /* Added for consistency */
 }
 
 nav a:hover {
-    color: #6c5ce7;
+    background: rgba(255, 255, 255, 0.2); /* Adjusted for consistency */
+    transform: translateY(-2px); /* Added for consistency */
+    color: white; /* Ensure color remains white on hover */
 }
 
 /* Login Container */
@@ -66,17 +76,18 @@ nav a:hover {
     align-items: center;
     min-height: 100vh;
     padding: 2rem;
-    padding-top: 6rem; /* Account for fixed header */
+    padding-top: 8rem; /* Increased to ensure header doesn't overlap too much */
+    box-sizing: border-box;
 }
 
 /* Login Card */
 .login-card {
-    background-color: rgba(255, 255, 255, 0.95);
+    background-color: rgba(255, 255, 255, 0.97); /* Matched register.css */
     padding: 3rem;
     border-radius: 24px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15); /* Matched register.css */
     width: 100%;
-    max-width: 480px;
+    max-width: 480px; /* Slightly smaller than register form */
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.3);
@@ -84,8 +95,8 @@ nav a:hover {
 }
 
 .login-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px); /* Matched register.css */
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2); /* Matched register.css */
 }
 
 /* Login Header */
@@ -106,14 +117,14 @@ nav a:hover {
 
 .login-header p {
     color: #5a5a5a;
-    font-size: 1.05rem;
-    opacity: 0.9;
+    font-size: 1.05rem; /* Slightly larger than standard p */
     margin: 0;
 }
 
 /* Login Form */
 .login-form .form-group {
     margin-bottom: 1.75rem;
+    position: relative; /* For potential future additions like icons inside inputs */
 }
 
 .login-form label {
@@ -132,6 +143,7 @@ nav a:hover {
     font-size: 1.05rem;
     transition: all 0.3s ease;
     background-color: rgba(245, 245, 245, 0.7);
+    box-sizing: border-box; /* Ensures padding and border are within width/height */
 }
 
 .login-form input:focus {
@@ -141,12 +153,79 @@ nav a:hover {
     box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
 }
 
-/* Login Button */
+/* Form Message Styling (Consolidated and Enhanced) */
+.form-message {
+    min-height: 1.5em; /* Reserve space to prevent layout jumps */
+    margin-bottom: 1rem; /* Default bottom margin */
+    padding: 0.5rem 0.75rem; /* Add some padding */
+    border-radius: 8px; /* Softer radius */
+    font-size: 0.95em;
+    text-align: center;
+    border: 1px solid transparent; /* Base for border consistency */
+    box-sizing: border-box;
+}
+
+.form-message.success {
+    background-color: #e6fffa; /* Lighter success background */
+    color: #00876c; /* Darker success text */
+    border-color: #00b894; /* Success border */
+}
+
+.form-message.error {
+    background-color: #ffebee; /* Lighter error background */
+    color: #c62828; /* Darker error text */
+    border-color: #e57373; /* Error border */
+}
+
+.form-message.warning {
+    background-color: #fff8e1; /* Lighter warning background */
+    color: #8d6e63; /* Darker warning text */
+    border-color: #ffcc80; /* Warning border */
+}
+
+/* Styles for Resend Verification Section */
+/* Apply class="resend-section-wrapper" to the div#resendVerificationSection in HTML */
+.resend-section-wrapper {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Apply class="resend-info-text" to the <p> inside resendVerificationSection */
+.resend-info-text {
+    margin-bottom: 0.5rem;
+    font-size: 0.9em;
+    color: #5a5a5a;
+}
+
+.link-button {
+    background: none;
+    border: none;
+    color: #6c5ce7; /* Match theme color */
+    text-decoration: none; /* No underline by default */
+    cursor: pointer;
+    padding: 0.25rem 0; /* Add some clickable area */
+    font-size: 0.9em;
+    font-weight: 600; /* Make it look more like a link */
+    transition: color 0.2s ease;
+}
+
+.link-button:hover {
+    color: #5d4bdb; /* Darker theme color on hover */
+    text-decoration: underline;
+}
+
+/* For the div#resendMessage, ensure it has class="form-message"
+   and optionally "resend-specific-message" if further distinction is needed */
+.resend-specific-message {
+    font-size: 0.9em;
+    margin-top: 0.5rem;
+}
+
+
+/* Login Actions and Button */
 .login-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    margin-top: 2.5rem;
+    margin-top: 2rem; /* Adjusted from 2.5rem */
 }
 
 .login-btn {
@@ -160,10 +239,16 @@ nav a:hover {
     cursor: pointer;
     transition: all 0.3s ease;
     letter-spacing: 0.5px;
-    display: flex;
+    display: flex; /* Kept for icon alignment */
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.75rem; /* Space between icon and text */
+    width: 100%; /* Ensure it takes full width of its container */
+    box-sizing: border-box;
+}
+
+.login-btn i {
+    /* Styles for icon already handled by gap in .login-btn */
 }
 
 .login-btn:hover {
@@ -172,7 +257,7 @@ nav a:hover {
     background: linear-gradient(135deg, #5d4bdb, #00a884);
 }
 
-/* Social Login */
+/* Social Login (kept for completeness, applies if HTML is present) */
 .social-login {
     margin-top: 2.5rem;
     text-align: center;
@@ -262,54 +347,78 @@ nav a:hover {
     color: #5d4bdb;
 }
 
+/* Animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-    nav {
-        padding: 1rem;
+    header {
+        padding: 1rem 1.5rem;
     }
-    
+    nav ul {
+        gap: 1rem;
+    }
+    nav a {
+        padding: 0.4rem 0.8rem;
+    }
+    .logo {
+        font-size: 1.6rem;
+    }
+
     .login-container {
         padding: 1.5rem;
-        padding-top: 5rem;
+        padding-top: 6rem; /* Adjust for smaller header */
     }
     
     .login-card {
         padding: 2.5rem 2rem;
     }
     
+    .login-header h2 {
+        font-size: 2rem;
+    }
+
     .social-buttons {
         flex-wrap: wrap;
     }
 }
 
-/* Animation */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
 @media (max-width: 480px) {
-    nav ul {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: center;
-    }
+    /* Option: Hide nav links or stack them for very small screens */
+    /* nav ul {
+        display: none; 
+    } */
+    /* Or more complex burger menu logic */
 
     .login-card {
-        padding: 2rem 1.25rem;
+        padding: 2rem 1.5rem;
+        border-radius: 16px; /* Slightly smaller radius for smaller card */
     }
 
     .login-header h2 {
         font-size: 1.75rem;
     }
+    .login-header p {
+        font-size: 1rem;
+    }
+
+    .login-form label {
+        font-size: 0.95rem;
+    }
 
     .login-form input {
         font-size: 1rem;
-        padding: 1rem;
+        padding: 1rem 1.1rem; /* Slightly adjust padding */
+        border-radius: 12px;
     }
 
     .login-btn {
         font-size: 1rem;
         padding: 1rem;
+        border-radius: 12px;
     }
 
     .social-buttons {
@@ -320,96 +429,11 @@ nav a:hover {
         width: 48px;
         height: 48px;
     }
-}
-/* Minimal styling for the resend button if it's a link-button */
-.link-button {
-    background: none;
-    border: none;
-    color: #007bff; /* Or your link color */
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 0;
-    font-size: 0.9em;
-}
-.link-button:hover {
-    color: #0056b3;
-}
-.form-message { /* Ensure this has some base styling if not in login.css */
-    min-height: 1.2em; /* Reserve space to prevent layout jumps */
-    text-align: center;
-}
-/* Example CSS for form messages - add to login.css or global styles */
-.form-message {
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    text-align: center;
-}
-.form-message.success {
-    background-color: #e6ffed;
-    color: #28a745;
-    border: 1px solid #5cb85c;
-}
-.form-message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
-}
-.form-message.warning {
-    background-color: #fff3cd;
-    color: #856404;
-    border: 1px solid #ffeeba;
-}
-/* Add these to your login.css */
+    .social-btn i {
+        font-size: 1.3rem;
+    }
 
-.resend-section-wrapper {
-    margin-top: 10px;
-    margin-bottom: 20px; /* Increased slightly for better spacing */
-    text-align: center;
-}
-
-.resend-info-text {
-    margin-bottom: 8px; /* Adjusted margin */
-    font-size: 0.9em;
-    color: #5a5a5a; /* Consistent with other paragraph text */
-}
-
-/* .link-button is already styled */
-
-.resend-specific-message { /* For specific styling of the resend message if needed */
-    font-size: 0.9em;
-    margin-top: 8px; /* Adjusted margin */
-    min-height: 1.2em; /* Ensures space is reserved */
-}
-
-/* Ensure .form-message base styles are solid.
-   Your login.css has duplicate .form-message. The second one is more complete.
-   It would be good to consolidate them. Example consolidation:
-*/
-/* Consolidated .form-message at the end of login.css */
-/* Remove any other .form-message definitions before this block */
-.form-message {
-    padding: 10px;
-    margin-bottom: 15px; /* Default margin-bottom */
-    border-radius: 4px;
-    font-size: 0.9em;
-    text-align: center;
-    min-height: 1.2em; /* Reserve space */
-    border: 1px solid transparent; /* Base for border consistency */
-}
-.form-message.success {
-    background-color: #e6ffed;
-    color: #28a745;
-    border-color: #5cb85c; /* Use border-color instead of full border */
-}
-.form-message.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb; /* Use border-color */
-}
-.form-message.warning {
-    background-color: #fff3cd;
-    color: #856404;
-    border-color: #ffeeba; /* Use border-color */
+    .login-footer p, .login-footer a {
+        font-size: 0.9rem;
+    }
 }
