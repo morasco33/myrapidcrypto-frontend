@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchRealUserBalance() {
     try {
-      const response = await fetch(`${DASH_API_BASE_URL}/user/profile`, {
+      const response = await fetch(`${DASH_API_BASE_URL}/profile`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
 
@@ -135,6 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
           container.innerHTML = '<p>No assets available.</p>';
         }
       }
+
+      await loadActiveInvestments();
 
     } catch (err) {
       console.error('DASHBOARD.JS: Error loading user balance:', err.message);
@@ -179,12 +181,95 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
+        // Re-bind withdrawal buttons
+        document.querySelectorAll('.withdraw-btn-plan').forEach(btn => {
+          btn.addEventListener('click', handlePlanWithdrawClick);
+        });
+
     } catch (err) {
       console.error('DASHBOARD.JS: Failed to load active investments:', err);
     }
   }
 
+  async function handlePlanWithdrawClick(event) { 
+    const investmentId = event.target.dataset.investmentId;
+    const withdrawalPin = prompt("Enter your 5-digit withdrawal PIN:");
+
+    if (!withdrawalPin || !/^\d{5}$/.test(withdrawalPin)) {
+        alert("Invalid PIN format. Please enter a 5-digit PIN.");
+        return;
+    }
+
+    showModal('Processing Withdrawal...', 'Please wait...');
+    try {
+        const response = await fetch(`${DASH_API_BASE_URL}/investments/${investmentId}/withdraw`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify({ withdrawalPin })
+        });
+        const data = await response.json();
+        hideModal();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Withdrawal failed');
+        }
+
+        alert(data.message || 'Withdrawal successful!');
+        fetchRealUserBalance();
+
+    } catch (error) {
+        hideModal();
+        alert(`Withdrawal Error: ${error.message}`);
+    }
+  }
+
+  // Investment Button Handlers
+  document.querySelectorAll('.invest-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const planId = btn.dataset.plan; 
+      const minAmount = parseFloat(btn.dataset.min);
+      const maxAmount = parseFloat(btn.dataset.max);
+
+      const amountString = prompt(`Enter amount to invest in ${planId} plan ($${minAmount} - $${maxAmount}):`);
+      if (!amountString) return;
+
+      const investAmount = parseFloat(amountString);
+      if (isNaN(investAmount) || investAmount < minAmount || investAmount > maxAmount) {
+        alert(`Please enter a valid amount between $${minAmount} and $${maxAmount}.`);
+        return;
+      }
+
+      showModal('Processing Investment...', 'Please wait while we set up your investment plan.');
+      try {
+        const response = await fetch(`${DASH_API_BASE_URL}/investments`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ planId, amount: investAmount })
+        });
+
+        const data = await response.json();
+        hideModal();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Investment failed');
+        }
+
+        alert(data.message || 'Investment successful!');
+        fetchRealUserBalance();
+
+      } catch (error) {
+        hideModal();
+        alert(`Investment Error: ${error.message}`);
+      }
+    });
+  });
+
   fetchRealUserBalance();
-  loadActiveInvestments();
 });
 // --- END OF SIMPLIFIED dashboard.js ---
