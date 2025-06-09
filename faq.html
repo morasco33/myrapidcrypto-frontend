@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>rapidcrypto - FAQ</title>
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <!-- You might want a specific faq.css or use a general styles.css -->
+  <link rel="stylesheet" href="dashboard.css" /> <!-- Re-using dashboard.css for similar card/layout styles, or create faq.css -->
+  
+  <style>
+    /* Specific styles for FAQ page */
+    .faq-container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .faq-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .faq-header h1 {
+      font-size: 2.5rem;
+      color: #333; /* Or your primary theme color */
+      margin-bottom: 0.5rem;
+    }
+
+    .faq-header p {
+      font-size: 1.1rem;
+      color: #666;
+    }
+
+    .faq-item {
+      background-color: #fff; /* Similar to your cards */
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      overflow: hidden; /* For transition smoothness */
+    }
+
+    .faq-question {
+      padding: 1rem 1.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e0e0e0; /* Separator, only visible when answer is hidden */
+    }
+    .faq-item.open .faq-question {
+        border-bottom-color: #e0e0e0; /* Keep border when open */
+    }
+
+
+    .faq-question .toggle-icon {
+      font-size: 1rem;
+      transition: transform 0.3s ease;
+    }
+    
+    .faq-item.open .faq-question .toggle-icon {
+      transform: rotate(45deg); /* Example: rotate a '+' to 'x' */
+    }
+
+
+    .faq-answer {
+      padding: 0 1.5rem; /* Initial padding for transition */
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #555;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease-out, padding 0.4s ease-out; /* Smooth transition */
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 1000px; /* Large enough to accommodate content */
+      padding-top: 1rem;
+      padding-bottom: 1.5rem;
+    }
+    
+    /* Optional: Style for links within answers */
+    .faq-answer a {
+        color: #007bff; /* Your link color */
+        text-decoration: none;
+    }
+    .faq-answer a:hover {
+        text-decoration: underline;
+    }
+
+    /* Adjust nav if needed */
+    header nav ul a[href="faq.html"].active { /* If you add "active" class via JS */
+        color: #007bff; /* Example active color */
+        font-weight: bold;
+    }
+
+  </style>
+
+  <!-- Inline script for public pages to ensure visibility immediately -->
+  <script>
+    (function() {
+      console.log('PUBLIC PAGE INLINE SCRIPT (FAQ): Making page visible.');
+      document.documentElement.style.visibility = 'visible';
+      document.documentElement.style.opacity = '1';
+    })();
+  </script>
+</head>
+<body>
+
+  <header>
+    <nav>
+      <div class="logo">rapidcrypto</div>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li> 
+        <li><a href="wallet.html">Wallet</a></li>
+        <li><a href="transactions.html">Transactions</a></li>
+        <li><a href="faq.html" id="faqNavlink">FAQ</a></li> <!-- Added FAQ link -->
+        <!-- Auth.js will hide/show login/register or logout based on auth state -->
+        <li><a href="login.html">Login</a></li>
+        <li><a href="register.html">Register</a></li>
+        <li><a href="#" id="logoutBtn" class="btn" style="display:none;">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="faq-container">
+    <div class="faq-header">
+      <h1>Frequently Asked Questions</h1>
+      <p>Find answers to common questions about rapidcrypto and cryptocurrency investments.</p>
+    </div>
+
+    <div class="faq-section">
+      <!-- General Questions -->
+      <div class="faq-item">
+        <div class="faq-question">
+          What is rapidcrypto?
+          <span class="toggle-icon"><i class="fas fa-plus"></i></span>
+        </div>
+        <div class="faq-answer">
+          <p>rapidcrypto is a platform designed to help users engage with cryptocurrency investments. We offer various investment plans tailored to different risk appetites and financial goals, aiming to simplify the process of growing your digital assets.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          How do I get started with rapidcrypto?
+          <span class="toggle-icon"><i class="fas fa-plus"></i></span>
+        </div>
+        <div class="faq-answer">
+          <p>Getting started is easy! First, you'll need to <a href="register.html">create an account</a>. After verifying your email, you can explore our investment plans, deposit funds into your main balance, and then choose a plan to invest in. Make sure to also set up your withdrawal PIN for security.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          Is my investment secure?
+          <span class="toggle-icon"><i class="fas fa-plus"></i></span>
+        </div>
+        <div class="faq-answer">
+          <p>We take security very seriously. Our platform employs various security measures to protect your account and data, including password hashing, email verification, and withdrawal PINs. All investments carry no risk, especially in the volatile cryptocurrency market. We encourage you to invest with confidence and understanding. We do not store your raw passwords or PINs.</p>
+        </div>
+      </div>
+
+      <!-- Account & Security Questions -->
+      <div class="faq-item">
+        <div class="faq-question">
+          How do I verify my email address?
+          <span class="toggle-icon"><i class="fas fa-plus"></i></span>
+        </div>
+        <div class="faq-answer">
+          <p>After registering, you will receive an email with a verification link. Click on this link to verify your email address. If you don't receive the email, please check your spam or junk folder. You can also request a new verification link from the login page if your email is unverified.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          What is a withdrawal PIN and why do I need it?
+          <span class="toggle-icon"><i class="fas fa-plus"></i></span>
+        </div>
+        <div class="faq-answer">
+          <p>The withdrawal PIN is a 5-digit security code that you set up in your account settings. It's required for authorizing withdrawals from your investment plans to your main balance, adding an extra layer of security to protect your funds.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          I forgot my password. What should I do?
+          <span class="toggle-icon"><i class="fas fa-plus"></i></span>
+        </div>
+        <div class="faq-answer">
+          <p>If you've forgotten your password, you can use the "Forgot Password?" link on the login page. You'll be guided through the process of resetting your password via email. (Note: This functionality would need to be implemented in your backend and frontend).</p>
+        </div>
+      </div>
+
+      <!-- Investment Questions -->
+      <div class="faq-item">
+        <div class="faq-question">
+          How do the investment plans work?
+          <span class="toggle-icon"><i class="fas fa-plus"></i></span>
+        </div>
+        <div class="faq-answer">
+          <p>Each investment plan (e.g., Silver, Gold) has a defined profit rate, investment period, and maturity period. When you invest, your funds are locked into the plan. Interest accrues to the plan's value based on its terms. After the withdrawal lock period and potentially the maturity date, you can withdraw the principal and earned profits back to your main account balance.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          How do I deposit funds?
+          <span class="toggle-icon"><i class="fas fa-plus"></i></span>
+        </div>
+        <div class="faq-answer">
+          <p>Currently, our platform simulates a main balance. To "deposit," you would typically start with an initial balance upon registration (as per current mock setup) or through administrative actions. For real-world deposits, we would integrate with cryptocurrency payment gateways. For now, focus on investing from your available simulated balance.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <div class="faq-question">
+          How can I withdraw my profits or principal?
+          <span class="toggle-icon"><i class="fas fa-plus"></i></span>
+        </div>
+        <div class="faq-answer">
+          <p>Once an investment plan has passed its withdrawal unlock time (and ideally matured for full profits), you can initiate a withdrawal from that specific plan using your secure withdrawal PIN. The funds (principal + accrued profits) will be transferred to your main account balance. From there, you could theoretically withdraw to an external wallet (this part is not fully implemented in the current code).</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-question">
+          What are the risks involved?
+          <span class="toggle-icon"><i class="fas fa-plus"></i></span>
+        </div>
+        <div class="faq-answer">
+          <p>Cryptocurrency investments are inherently volatile and carry a significant risk of loss. The value of cryptocurrencies can fluctuate widely. While rapidcrypto aims to provide structured investment opportunities, we cannot guarantee profits or protect against market downturns. Please invest only what you can afford to lose and do your own research (DYOR).</p>
+        </div>
+      </div>
+      
+    </div> <!-- .faq-section -->
+  </main>
+  
+  <script>
+    // Global API base URL (though not strictly needed for static FAQ content, good for consistency if auth.js uses it)
+    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com/api";
+  </script>
+
+  <!-- auth.js for updating nav based on login state -->
+  <script src="auth.js"></script> 
+
+  <script>
+    // Simple accordion functionality for FAQ items
+    document.addEventListener('DOMContentLoaded', () => {
+      const faqItems = document.querySelectorAll('.faq-item');
+      const faqNavlink = document.getElementById('faqNavlink');
+
+      if (faqNavlink) { // Add "active" class to FAQ nav link
+        faqNavlink.classList.add('active');
+      }
+
+      faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        const toggleIcon = question.querySelector('.toggle-icon i');
+
+        question.addEventListener('click', () => {
+          const isOpen = item.classList.contains('open');
+          
+          // Optional: Close all other open items for a traditional accordion
+          // faqItems.forEach(otherItem => {
+          //   if (otherItem !== item && otherItem.classList.contains('open')) {
+          //     otherItem.classList.remove('open');
+          //     otherItem.querySelector('.toggle-icon i').classList.remove('fa-minus');
+          //     otherItem.querySelector('.toggle-icon i').classList.add('fa-plus');
+          //   }
+          // });
+
+          item.classList.toggle('open');
+          if (item.classList.contains('open')) {
+            if(toggleIcon) {
+                toggleIcon.classList.remove('fa-plus');
+                toggleIcon.classList.add('fa-minus'); // Change to minus or different icon when open
+            }
+          } else {
+            if(toggleIcon) {
+                toggleIcon.classList.remove('fa-minus');
+                toggleIcon.classList.add('fa-plus');
+            }
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
