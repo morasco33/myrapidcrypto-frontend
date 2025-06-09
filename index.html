@@ -27,7 +27,10 @@
 
   <header>
     <nav>
-      <div class="logo">Rapidcrypto</div>
+      <div class="logo">RapidCrypto</div>
+      <a href="index.html">
+        <img src="logo.png" alt="RapidCrypto Logo">
+      </a>      
       <ul id="mainNavUl">
         <li><a href="index.html">Home</a></li>
         <li><a href="dashboard.html" class="auth-required">Dashboard</a></li>
@@ -141,9 +144,7 @@
     <div class="container">
       <div class="footer-content">
         <div class="footer-column about-column">
-          <a href="index.html">
-            <img src="images/logo.png" alt="RapidCrypto Logo">
-          </a>
+          <h3>RapidCrypto</h3>
           <p>The most trusted cryptocurrency platform for secure trading, investment, and portfolio management.</p>
           <div class="social-links">
             <a href="https://twitter.com/" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
@@ -180,7 +181,7 @@
         </div>
       </div>
       <div class="copyright">
-        <p id="copyrightYearText">© 2021 Rapi. All rights reserved.</p>
+        <p id="copyrightYearText">© 2021 RapidCrypto. All rights reserved.</p>
       </div>
     </div>
   </footer>
@@ -206,7 +207,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       // Copyright year
       document.getElementById('copyrightYearText').textContent = 
-        `© ${new Date().getFullYear()} RapidWealthHub. All rights reserved.`;
+       // `© ${new Date().getFullYear()} RapidWealthHub. All rights reserved.`;
 
       // Mobile menu toggle
       const mobileMenuToggle = document.getElementById('mobileMenuToggle');
