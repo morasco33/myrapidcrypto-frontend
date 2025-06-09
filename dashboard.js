@@ -90,10 +90,11 @@ document.addEventListener('DOMContentLoaded', () => {
           modalBody.innerHTML = ''; 
           modalBody.appendChild(bodyContent);
       }
-      modal.style.display = 'flex';
+      modal.classList.add('active');
+
   }
   function hideModal() {
-      if (modal) modal.style.display = 'none';
+      modal.classList.remove('active');
   }
   if (modalCloseBtn) modalCloseBtn.addEventListener('click', hideModal);
   if (modal) {
