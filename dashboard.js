@@ -152,41 +152,47 @@ if (mainWithdrawButton) {
 
   // --- Investment Plan Data Fetch ---
   // ... (Keep your fetchInvestmentPlans function and its call)
-  async function fetchInvestmentPlans() {
+  async function fetchRealUserBalance() {
     try {
-      const response = await fetch(`${DASH_API_BASE_URL}/investment-plans`, {
-        headers: { 'Authorization': `Bearer ${authToken}` }
+      const response = await fetch(`${DASH_API_BASE_URL}/user/profile`, {
+        headers: { Authorization: `Bearer ${authToken}` },
       });
   
-      if (!response.ok) {
-        let errorMsg = `Failed to fetch investments: ${response.statusText} (${response.status})`;
-  
-        if (response.status === 401) {
-          alert('Session expired. Redirecting to login...');
-          window.location.href = 'login.html?reason=session_expired';
-          return;
-        }
-  
-        try {
-          const errData = await response.json();
-          errorMsg = errData.message || errorMsg;
-        } catch (_) {}
-  
-        throw new Error(errorMsg);
-      }
-  
       const data = await response.json();
-      if (data.success && data.plans) {
-        console.log("DASHBOARD.JS: Fetched investment plans:", data.plans);
-        // Do something with the plans here if needed
-      } else {
-        console.error("DASHBOARD.JS: Failed to parse investment plans:", data.message || "Unknown error");
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to load user profile');
       }
   
-    } catch (error) {
-      console.error("DASHBOARD.JS: Error fetching investment plans:", error);
+      const balance = data.user.balance || 0;
+      const assets = data.user.assets || [];
+  
+      // Update UI
+      const balanceEl = document.getElementById('availableBalance');
+      const portfolioValueEl = document.getElementById('portfolioValue');
+      if (balanceEl) balanceEl.textContent = `$${balance.toFixed(2)}`;
+      if (portfolioValueEl) portfolioValueEl.textContent = `$${balance.toFixed(2)}`;
+  
+      const container = document.getElementById('assetsList');
+      if (container) {
+        container.innerHTML = '';
+        if (assets.length > 0) {
+          assets.forEach((asset) => {
+            const div = document.createElement('div');
+            div.className = 'asset-item';
+            div.innerHTML = `<strong>${asset.symbol}:</strong> ${asset.amount}`;
+            container.appendChild(div);
+          });
+        } else {
+          container.innerHTML = '<p>No assets available.</p>';
+        }
+      }
+  
+    } catch (err) {
+      console.error('DASHBOARD.JS: Error loading user balance:', err.message);
+      document.getElementById('availableBalance').textContent = '$0.00';
     }
   }
+  
   
   // --- Active Investments Fetch ---
   // ... (Keep your loadActiveInvestments function and its call)
