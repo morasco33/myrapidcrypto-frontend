@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchRealUserBalance() {
     try {
-      const response = await fetch(`${DASH_API_BASE_URL}/profile`, {
+      const response = await fetch(`${DASH_API_BASE_URL}/user/profile`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
 
@@ -135,8 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
           container.innerHTML = '<p>No assets available.</p>';
         }
       }
-
-      await loadActiveInvestments();
 
     } catch (err) {
       console.error('DASHBOARD.JS: Error loading user balance:', err.message);
@@ -182,4 +180,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
     } catch (err) {
-      consol
+      console.error('DASHBOARD.JS: Failed to load active investments:', err);
+    }
+  }
+
+  fetchRealUserBalance();
+  loadActiveInvestments();
+});
+// --- END OF SIMPLIFIED dashboard.js ---
