@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function fetchRealUserBalance() {
     try {
-      const response = await fetch(`${DASH_API_BASE_URL}/user/profile`, {
+      const response = await fetch(`${DASH_API_BASE_URL}/profile`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
 
@@ -181,77 +181,5 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
 
-        document.querySelectorAll('.withdraw-btn-plan').forEach(btn => {
-          btn.addEventListener('click', handlePlanWithdrawClick);
-        });
-
     } catch (err) {
-      console.error('DASHBOARD.JS: Failed to load active investments:', err);
-    }
-  }
-
-  async function handlePlanWithdrawClick(event) { 
-    const investmentId = event.target.dataset.investmentId;
-    console.log(`DASHBOARD.JS: Withdraw button clicked for investment ID: ${investmentId}`);
-    const withdrawalPin = prompt("Enter your 5-digit withdrawal PIN:");
-
-    if (!withdrawalPin || !/^\d{5}$/.test(withdrawalPin)) {
-        alert("Invalid PIN format. Please enter a 5-digit PIN.");
-        return;
-    }
-
-    showModal('Processing Withdrawal...', 'Please wait...');
-    try {
-        const response = await fetch(`${DASH_API_BASE_URL}/investments/${investmentId}/withdraw`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ withdrawalPin })
-        });
-        const data = await response.json();
-        hideModal();
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || `Withdrawal failed.`);
-        }
-
-        alert(data.message || "Withdrawal successful!");
-        fetchRealUserBalance();
-
-    } catch (error) {
-        hideModal();
-        alert(`Withdrawal Error: ${error.message}`);
-        console.error("DASHBOARD.JS: Withdrawal error:", error);
-    }
-  }
-
-  fetchRealUserBalance();
-
-  const portfolioCtx = document.getElementById('portfolioChart')?.getContext('2d');
-  if (portfolioCtx) {
-    new Chart(portfolioCtx, {
-      type: 'line',
-      data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-        datasets: [{ label: 'Portfolio Value', data: [65, 59, 80, 81], tension: 0.1 }]
-      },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
-  }
-
-  const marketTrendsCtx = document.getElementById('marketTrendsChart')?.getContext('2d');
-  if (marketTrendsCtx) {
-    new Chart(marketTrendsCtx, {
-      type: 'bar',
-      data: {
-        labels: ['BTC', 'ETH', 'SOL', 'DOGE'],
-        datasets: [{ label: 'Price Change (24h %)', data: [2.5, -1.2, 5.0, 0.5], backgroundColor:['green','red','green','green'] }]
-      },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
-  }
-
-});
-// --- END OF SIMPLIFIED dashboard.js ---
+      consol
