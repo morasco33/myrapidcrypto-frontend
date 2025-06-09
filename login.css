@@ -361,3 +361,55 @@ nav a:hover {
     color: #856404;
     border: 1px solid #ffeeba;
 }
+/* Add these to your login.css */
+
+.resend-section-wrapper {
+    margin-top: 10px;
+    margin-bottom: 20px; /* Increased slightly for better spacing */
+    text-align: center;
+}
+
+.resend-info-text {
+    margin-bottom: 8px; /* Adjusted margin */
+    font-size: 0.9em;
+    color: #5a5a5a; /* Consistent with other paragraph text */
+}
+
+/* .link-button is already styled */
+
+.resend-specific-message { /* For specific styling of the resend message if needed */
+    font-size: 0.9em;
+    margin-top: 8px; /* Adjusted margin */
+    min-height: 1.2em; /* Ensures space is reserved */
+}
+
+/* Ensure .form-message base styles are solid.
+   Your login.css has duplicate .form-message. The second one is more complete.
+   It would be good to consolidate them. Example consolidation:
+*/
+/* Consolidated .form-message at the end of login.css */
+/* Remove any other .form-message definitions before this block */
+.form-message {
+    padding: 10px;
+    margin-bottom: 15px; /* Default margin-bottom */
+    border-radius: 4px;
+    font-size: 0.9em;
+    text-align: center;
+    min-height: 1.2em; /* Reserve space */
+    border: 1px solid transparent; /* Base for border consistency */
+}
+.form-message.success {
+    background-color: #e6ffed;
+    color: #28a745;
+    border-color: #5cb85c; /* Use border-color instead of full border */
+}
+.form-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb; /* Use border-color */
+}
+.form-message.warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-color: #ffeeba; /* Use border-color */
+}

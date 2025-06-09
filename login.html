@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rapidcrypto - Login</title>
+  <title>RapidWealthHub - Login</title> <!-- Changed for consistency, adjust if needed -->
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="login.css" />
 
   <script>
-    const token = localStorage.getItem('cryptohub_auth_token');
+    const token = localStorage.getItem('cryptohub_auth_token'); // Assuming cryptohub_auth_token is correct
     if (token) {
       document.documentElement.style.visibility = 'hidden';
       document.documentElement.style.opacity = '0';
@@ -21,7 +21,7 @@
 <body>
   <header>
     <nav>
-      <div class="logo">Rapidcrypto</div>
+      <div class="logo">RapidWealthHub</div> <!-- Changed for consistency, adjust if needed -->
       <ul>
         <li><a href="index.html">Home</a></li>
         <li><a href="register.html">Register</a></li>
@@ -33,7 +33,7 @@
     <div class="login-card">
       <div class="login-header">
         <h2>Welcome Back</h2>
-        <p>Sign in to access your Rapidcrypto account</p>
+        <p>Sign in to access your RapidWealthHub account</p> <!-- Changed for consistency -->
       </div>
 
       <form id="loginForm" class="login-form" novalidate>
@@ -54,10 +54,11 @@
 
         <div id="loginMessage" class="form-message" style="min-height:1.5em; margin-bottom:1rem;"></div>
 
-        <div id="resendVerificationSection" style="display:none; margin-top:10px; margin-bottom:15px; text-align:center;">
-          <p style="margin-bottom:5px; font-size:0.9em;">Your email address appears to be unverified.</p>
+        <!-- Modified resendVerificationSection to use classes more -->
+        <div id="resendVerificationSection" class="resend-section-wrapper" style="display:none;">
+          <p class="resend-info-text">Your email address appears to be unverified.</p>
           <button type="button" id="resendVerificationBtn" class="link-button">Resend Verification Link</button>
-          <div id="resendMessage" class="form-message" style="font-size:0.9em; margin-top:5px; min-height:1.2em;"></div>
+          <div id="resendMessage" class="form-message resend-specific-message"></div>
         </div>
 
         <div class="login-actions">
@@ -67,6 +68,23 @@
         </div>
       </form>
 
+      <!-- ADDED SOCIAL LOGIN SECTION AS PER login.css -->
+      <div class="social-login">
+        <div class="social-divider">Or continue with</div>
+        <div class="social-buttons">
+          <button class="social-btn" aria-label="Login with Google">
+            <i class="fab fa-google"></i>
+          </button>
+          <button class="social-btn" aria-label="Login with Facebook">
+            <i class="fab fa-facebook-f"></i>
+          </button>
+          <button class="social-btn" aria-label="Login with Apple">
+            <i class="fab fa-apple"></i>
+          </button>
+        </div>
+      </div>
+      <!-- END OF ADDED SOCIAL LOGIN SECTION -->
+
       <div class="login-footer">
         <p>Don't have an account? <a href="register.html">Create one</a></p>
         <p><a href="forgot-password.html">Forgot password?</a></p>
@@ -75,6 +93,14 @@
   </main>
 
   <script>
+    // Consider using the GLOBAL_KEYS approach from register.html for consistency
+    // if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    //   window.GLOBAL_KEYS = { API_BASE_URL: "http://localhost:3001/api" };
+    // } else {
+    //   window.GLOBAL_KEYS = { API_BASE_URL: "https://rapidcrypto-backend.onrender.com/api" };
+    // }
+    // window.API_BASE_URL = window.GLOBAL_KEYS.API_BASE_URL;
+    // For now, keeping your original script:
     window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com/api"; 
   </script>
   <script src="auth.js" defer></script>
