@@ -1,375 +1,355 @@
-// --- START OF SIMPLIFIED dashboard.js ---
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DASHBOARD.JS: DOMContentLoaded");
 
-  // Constants for localStorage keys - ensure these match auth.js and login.js
-  const USER_INFO_KEY_FOR_DASH = 'cryptohub_user_info'; 
-  const AUTH_TOKEN_KEY_FOR_DASH = 'cryptohub_auth_token'; 
+  // Constants for localStorage keys
+  const USER_INFO_KEY = 'cryptohub_user_info'; 
+  const AUTH_TOKEN_KEY = 'cryptohub_auth_token'; 
 
   // Retrieve auth token and user info
-  const authToken = localStorage.getItem(AUTH_TOKEN_KEY_FOR_DASH);
-  const userInfoString = localStorage.getItem(USER_INFO_KEY_FOR_DASH);
+  const authToken = localStorage.getItem(AUTH_TOKEN_KEY);
+  const userInfoString = localStorage.getItem(USER_INFO_KEY);
 
-  // At this point, the inline script in dashboard.html's <head> AND auth.js's finalizePageSetupBasedOnAuth
-  // should have already ensured that if these are missing, the user would have been redirected.
-  // If we reach here, we assume the token and user info SHOULD exist.
-  // A failure here indicates a deeper problem or an unexpected state.
-
+  // Authentication check
   if (!authToken || !userInfoString) {
-    console.error("DASHBOARD.JS: CRITICAL - Auth token or user info missing DESPITE earlier checks. This shouldn't happen. Halting dashboard script.");
-    // Display an error message to the user on the dashboard itself, as redirecting again might perpetuate a loop if the root cause isn't fixed.
+    console.error("CRITICAL: Auth token or user info missing");
     const mainContent = document.querySelector('main');
     if (mainContent) {
-        mainContent.innerHTML = `<h1>Authentication Error</h1><p>Could not load dashboard. Your session may be invalid. Please try <a href="login.html?action=relogin">logging in again</a>.</p>`;
+      mainContent.innerHTML = `
+        <div class="auth-error">
+          <h1>Authentication Error</h1>
+          <p>Could not load dashboard. Please <a href="login.html">login again</a>.</p>
+        </div>
+      `;
     }
-    // Remove the loading spinner if it's still there, as we are stopping.
-    const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
-    if (loadingSpinnerOverlay) loadingSpinnerOverlay.style.display = 'none';
+    document.querySelector('.loading-spinner-overlay')?.remove();
     document.body.classList.remove('auth-loading');
-    document.documentElement.style.visibility = 'visible'; // Ensure page is visible to show error
-    document.documentElement.style.opacity = '1';
-    return; // Stop further execution of dashboard.js
+    return;
   }
 
+  // Parse user info
   let user;
   try {
     user = JSON.parse(userInfoString);
+    if (!user?._id) throw new Error("Invalid user data");
   } catch (e) {
-    console.error("DASHBOARD.JS: CRITICAL - Failed to parse user info from localStorage.", e);
-    // Similar error display as above
-    const mainContent = document.querySelector('main');
-    if (mainContent) mainContent.innerHTML = `<h1>Data Error</h1><p>Could not load user data. Please try <a href="login.html?action=relogin">logging in again</a>.</p>`;
-    const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
-    if (loadingSpinnerOverlay) loadingSpinnerOverlay.style.display = 'none';
-    document.body.classList.remove('auth-loading');
-    document.documentElement.style.visibility = 'visible';
-    document.documentElement.style.opacity = '1';
+    console.error("Failed to parse user info:", e);
+    document.querySelector('main').innerHTML = `
+      <div class="data-error">
+        <h1>Data Error</h1>
+        <p>Invalid user data. Please <a href="login.html">login again</a>.</p>
+      </div>
+    `;
     return;
   }
 
-  // Ensure user object has an identifier (e.g., _id from your backend)
-  if (!user || !user._id) { 
-    console.error("DASHBOARD.JS: CRITICAL - User info object is invalid or missing essential ID.", user);
-    const mainContent = document.querySelector('main');
-    if (mainContent) mainContent.innerHTML = `<h1>User Data Error</h1><p>User information is incomplete. Please try <a href="login.html?action=relogin">logging in again</a>.</p>`;
-    const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
-    if (loadingSpinnerOverlay) loadingSpinnerOverlay.style.display = 'none';
-    document.body.classList.remove('auth-loading');
-    document.documentElement.style.visibility = 'visible';
-    document.documentElement.style.opacity = '1';
-    return;
-  }
-  
-  // If all checks pass, proceed with dashboard setup
-  console.log("DASHBOARD.JS: User confirmed and data parsed. User:", user.username || user.email);
+  // API Configuration
+  const API_BASE_URL = window.API_BASE_URL || 'https://rapidcrypto-backend.onrender.com/api';
+
+  // UI Elements
   const userNameEl = document.getElementById('userName');
   if (userNameEl) {
     userNameEl.textContent = user.username || user.email || 'User';
-  } else {
-    console.warn("DASHBOARD.JS: userName element not found.");
   }
 
-  const DASH_API_BASE_URL = window.API_BASE_URL || 'https://rapidcrypto-backend.onrender.com/api';
-
-  // --- Modal Functions ---
-  // ... (Keep your modal functions: showModal, hideModal, and their event listeners)
+  // ----------------------------
+  // MODAL SYSTEM
+  // ----------------------------
   const modal = document.getElementById('appModal');
   const modalTitle = document.getElementById('modalTitle');
   const modalBody = document.getElementById('modalBody');
-  const modalCloseBtn = document.getElementById('modalCloseBtn');
-  
-  function showModal(title, bodyContent = '', footerContent = '') {
-      if (!modal || !modalTitle || !modalBody) {
-          console.error("Modal elements not found for showModal");
-          return;
-      }
-      modalTitle.textContent = title;
-      if (typeof bodyContent === 'string') {
-          modalBody.innerHTML = bodyContent;
-      } else if (bodyContent instanceof HTMLElement) {
-          modalBody.innerHTML = ''; 
-          modalBody.appendChild(bodyContent);
-      }
-      modal.classList.add('active');
 
+  function showModal(title, content = '') {
+    if (!modal || !modalTitle || !modalBody) return;
+    modalTitle.textContent = title;
+    modalBody.innerHTML = content;
+    modal.classList.add('active');
   }
+
   function hideModal() {
-      modal.classList.remove('active');
-  }
-  if (modalCloseBtn) modalCloseBtn.addEventListener('click', hideModal);
-  if (modal) {
-    modal.addEventListener('click', (event) => {
-        if (event.target === modal) { hideModal(); }
-    });
+    modal?.classList.remove('active');
   }
 
-  // --- Event Listeners for Quick Actions ---
-  const mainDepositButton = document.getElementById('mainDepositBtn');
-if (mainDepositButton) {
-  mainDepositButton.addEventListener('click', () => {
-    window.location.href = 'deposit.html'; // or 'wallet.html' if that's your deposit page
+  document.getElementById('modalCloseBtn')?.addEventListener('click', hideModal);
+  modal?.addEventListener('click', (e) => {
+    if (e.target === modal) hideModal();
   });
-}
 
-const mainWithdrawButton = document.getElementById('mainWithdrawBtn');
-if (mainWithdrawButton) {
-  mainWithdrawButton.addEventListener('click', () => {
-    window.location.href = 'withdraw.html'; // or any valid withdraw page
+  // ----------------------------
+  // QUICK ACTION BUTTONS
+  // ----------------------------
+  document.getElementById('mainDepositBtn')?.addEventListener('click', () => {
+    window.location.href = 'deposit.html';
   });
-}
 
-  // --- Balance and Asset Rendering ---
-  // ... (Keep your renderAssets function and its call, but consider fetching REAL balance from backend)
-  // For now, using mock:
-  const balances = JSON.parse(localStorage.getItem('cryptohub_balances_mock') || '{}');
-  if (!balances[user._id]) { 
-    balances[user._id] = { USD: 0, BTC: 0, ETH: 0, USDT: 0 };
-    localStorage.setItem('cryptohub_balances_mock', JSON.stringify(balances));
-  }
-  function renderAssets() { 
-    const container = document.getElementById('assetsList');
-    if (!container) return;
-    const userBalances = balances[user._id] || { USD: 0 }; 
-    let totalUSD = 0;
-    container.innerHTML = '';
+  document.getElementById('mainWithdrawBtn')?.addEventListener('click', () => {
+    window.location.href = 'withdraw.html';
+  });
 
-    Object.entries(userBalances).forEach(([currency, amount]) => {
-      const el = document.createElement('div');
-      el.className = 'asset-item';
-      const numericAmount = parseFloat(amount);
-      el.innerHTML = `<strong>${currency}:</strong> $${isNaN(numericAmount) ? '0.00' : numericAmount.toFixed(2)}`;
-      container.appendChild(el);
-      if (!isNaN(numericAmount)) totalUSD += numericAmount;
-    });
-    
-    const balanceEl = document.querySelector('#availableBalance'); // Ensure this ID exists
-    const portfolioValueEl = document.getElementById('portfolioValue');
-
-    if (balanceEl) balanceEl.textContent = `$${totalUSD.toFixed(2)}`;
-    if (portfolioValueEl) portfolioValueEl.textContent = `$${totalUSD.toFixed(2)}`;
-  }
-  renderAssets();
-
-  // --- Investment Plan Data Fetch ---
-  // ... (Keep your fetchInvestmentPlans function and its call)
-  async function fetchRealUserBalance() {
+  // ----------------------------
+  // ASSET MANAGEMENT
+  // ----------------------------
+  async function loadAssets() {
     try {
-      const response = await fetch(`${DASH_API_BASE_URL}/user/profile`, {
-        headers: { Authorization: `Bearer ${authToken}` },
+      const response = await fetch(`${API_BASE_URL}/user/profile`, {
+        headers: { Authorization: `Bearer ${authToken}` }
       });
-  
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Failed to load user profile');
-      }
-  
-      const balance = data.user.balance || 0;
-      const assets = data.user.assets || [];
-  
-      // Update UI
-      const balanceEl = document.getElementById('availableBalance');
-      const portfolioValueEl = document.getElementById('portfolioValue');
-      if (balanceEl) balanceEl.textContent = `$${balance.toFixed(2)}`;
-      if (portfolioValueEl) portfolioValueEl.textContent = `$${balance.toFixed(2)}`;
-  
+
+      if (!response.ok) throw new Error('Failed to fetch assets');
+      
+      const { success, user: userData } = await response.json();
+      if (!success) throw new Error('Invalid response');
+
+      // Update balance displays
+      const balance = userData.balance || 0;
+      document.getElementById('availableBalance').textContent = `$${balance.toFixed(2)}`;
+      document.getElementById('portfolioValue').textContent = `$${balance.toFixed(2)}`;
+
+      // Render asset list
       const container = document.getElementById('assetsList');
       if (container) {
         container.innerHTML = '';
-        if (assets.length > 0) {
-          assets.forEach((asset) => {
-            const div = document.createElement('div');
-            div.className = 'asset-item';
-            div.innerHTML = `<strong>${asset.symbol}:</strong> ${asset.amount}`;
-            container.appendChild(div);
+        
+        // Always show USD balance
+        const usdEl = document.createElement('div');
+        usdEl.className = 'asset-item';
+        usdEl.innerHTML = `<strong>USD:</strong> $${balance.toFixed(2)}`;
+        container.appendChild(usdEl);
+
+        // Show other assets if available
+        if (userData.assets?.length > 0) {
+          userData.assets.forEach(asset => {
+            const el = document.createElement('div');
+            el.className = 'asset-item';
+            el.innerHTML = `<strong>${asset.symbol}:</strong> ${parseFloat(asset.amount).toFixed(8)}`;
+            container.appendChild(el);
           });
-        } else {
-          container.innerHTML = '<p>No assets available.</p>';
         }
       }
-  
-    } catch (err) {
-      console.error('DASHBOARD.JS: Error loading user balance:', err.message);
-      document.getElementById('availableBalance').textContent = '$0.00';
+    } catch (error) {
+      console.error('Error loading assets:', error);
+      document.getElementById('assetsList').innerHTML = `
+        <div class="error-message">Failed to load assets. Please try again later.</div>
+      `;
     }
   }
-  
-  
-  // --- Active Investments Fetch ---
-  // ... (Keep your loadActiveInvestments function and its call)
-  async function loadActiveInvestments() { 
-    const investmentDetailsContainers = document.querySelectorAll('.investment-details-container');
-    investmentDetailsContainers.forEach(c => c.innerHTML = '<p>Loading active investments for this plan...</p>');
-    
+
+  // ----------------------------
+  // INVESTMENT SYSTEM
+  // ----------------------------
+  async function loadActiveInvestments() {
+    const containers = document.querySelectorAll('.investment-details-container');
+    containers.forEach(c => c.innerHTML = '<p>Loading investments...</p>');
+
     try {
-        const response = await fetch(`${DASH_API_BASE_URL}/investments`, {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${authToken}`, 'Content-Type': 'application/json' }
-        });
-        if (!response.ok) {
-            let errorMsg = `Failed to fetch investments: ${response.statusText} (${response.status})`;
-            try { const errData = await response.json(); errorMsg = errData.message || errorMsg; } catch (_) {}
-            throw new Error(errorMsg);
-        }
-        const data = await response.json();
+      const response = await fetch(`${API_BASE_URL}/investments`, {
+        headers: { Authorization: `Bearer ${authToken}` }
+      });
 
-        if (data.success && Array.isArray(data.investments)) {
-            console.log("DASHBOARD.JS: Active investments:", data.investments);
-            investmentDetailsContainers.forEach(c => c.innerHTML = ''); 
+      if (!response.ok) throw new Error('Failed to fetch investments');
+      
+      const { success, investments } = await response.json();
+      if (!success) throw new Error('Invalid response');
 
-            data.investments.forEach(inv => {
-                const planCard = document.querySelector(`.investment-options[data-plan-id="${inv.planId}"]`);
-                if (planCard) {
-                    const container = planCard.querySelector('.investment-details-container');
-                    if (container) {
-                        const el = document.createElement('div');
-                        el.className = 'investment-details';
-                        el.innerHTML = `
-                        <p><strong>Active: ${inv.planName}</strong></p>
-                        <p>Invested: $${inv.initialAmount.toFixed(2)} | Current Value: $${inv.currentValue.toFixed(2)}</p>
-                        <p>Status: ${inv.status} | Matures: ${new Date(inv.maturityDate).toLocaleDateString()}</p>
-                        ${
-                        (inv.status === 'active' || inv.status === 'matured') && new Date() >= new Date(inv.withdrawalUnlockTime)
-                        ? `<button class="withdraw-btn-plan" data-investment-id="${inv._id}">Withdraw</button>`
-                        : `<small>Locked until ${new Date(inv.withdrawalUnlockTime).toLocaleDateString()}</small>`
-                        }
-                        `;
-                        container.appendChild(el);   
-                    }
+      containers.forEach(c => c.innerHTML = '');
+
+      if (investments?.length > 0) {
+        investments.forEach(investment => {
+          const container = document.querySelector(`[data-plan-id="${investment.planId}"] .investment-details-container`);
+          if (container) {
+            const canWithdraw = investment.status === 'active' && 
+                              new Date() >= new Date(investment.withdrawalUnlockTime);
+
+            container.innerHTML = `
+              <div class="investment-details">
+                <p><strong>${investment.planName}</strong></p>
+                <p>Amount: $${investment.initialAmount.toFixed(2)}</p>
+                <p>Current: $${investment.currentValue.toFixed(2)}</p>
+                <p>Status: ${investment.status}</p>
+                <p>Matures: ${new Date(investment.maturityDate).toLocaleDateString()}</p>
+                ${canWithdraw 
+                  ? `<button class="withdraw-btn-plan" data-investment-id="${investment._id}">Withdraw</button>`
+                  : `<small>Locked until ${new Date(investment.withdrawalUnlockTime).toLocaleDateString()}</small>`
                 }
-            });
-            document.querySelectorAll('.withdraw-btn-plan').forEach(btn => {
-                btn.addEventListener('click', handlePlanWithdrawClick);
-            });
-        } else {
-            investmentDetailsContainers.forEach(c => c.innerHTML = `<p>${data.message || 'No active investments or failed to load.'}</p>`);
-        }
-    } catch (err) {
-        console.error('DASHBOARD.JS: Failed to load active investments:', err);
-        investmentDetailsContainers.forEach(c => c.innerHTML = `<p style="color:red;">Insufficient balance please deposit to invest: ${err.message}</p>`);
+              </div>
+            `;
+          }
+        });
+
+        // Add event listeners to new withdraw buttons
+        document.querySelectorAll('.withdraw-btn-plan').forEach(btn => {
+          btn.addEventListener('click', handleWithdrawal);
+        });
+      } else {
+        containers.forEach(c => c.innerHTML = '<p>No active investments found.</p>');
+      }
+    } catch (error) {
+      console.error('Error loading investments:', error);
+      containers.forEach(c => c.innerHTML = `
+        <div class="error-message">Failed to load investments: ${error.message}</div>
+      `);
     }
   }
-  loadActiveInvestments();
 
-  // --- Handle Investment Button Clicks ---
-  // ... (Keep your investment button click handler)
+  // Investment button handler
   document.querySelectorAll('.invest-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
-      const planId = btn.dataset.plan; 
+      const planId = btn.dataset.plan;
       const minAmount = parseFloat(btn.dataset.min);
       const maxAmount = parseFloat(btn.dataset.max);
-      
-      console.log(`DASHBOARD.JS: Invest button clicked for plan: ${planId}`);
-      const amountString = prompt(`Enter amount to invest in ${planId} plan ($${minAmount} - $${maxAmount}):`);
-      if (!amountString) { console.log("DASHBOARD.JS: Investment cancelled by user."); return; }
 
-      const investAmount = parseFloat(amountString);
+      const amount = prompt(`Enter amount ($${minAmount}-$${maxAmount}):`);
+      if (!amount) return;
 
-      if (isNaN(investAmount) || investAmount < minAmount || investAmount > maxAmount) {
-        alert(`Please enter a valid amount between $${minAmount} and $${maxAmount}.`);
+      const numericAmount = parseFloat(amount);
+      if (isNaN(numericAmount) || numericAmount < minAmount || numericAmount > maxAmount) {
+        alert(`Please enter amount between $${minAmount} and $${maxAmount}`);
         return;
       }
-      
-      console.log(`DASHBOARD.JS: Attempting to invest $${investAmount} in plan ${planId}`);
+
       try {
-        showModal('Processing Investment...', 'Please wait while we set up your investment plan.');
-        const response = await fetch(`${DASH_API_BASE_URL}/investments`, {
+        showModal('Processing', 'Creating your investment...');
+        
+        const response = await fetch(`${API_BASE_URL}/investments`, {
           method: 'POST',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${authToken}`
-           },
+          },
           body: JSON.stringify({
-            planId: planId, 
-            amount: investAmount
+            planId,
+            amount: numericAmount
           })
         });
-        
-        const data = await response.json(); // Always try to parse
-        hideModal(); 
 
-        if (!response.ok) { // Check response.ok for HTTP errors (4xx, 5xx)
-            console.error("DASHBOARD.JS: Investment API call HTTP error.", {status: response.status, responseData: data});
-            throw new Error(data.message || `Investment request failed with status ${response.status}.`);
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || 'Investment failed');
         }
-        if (!data.success) { // Check the success flag in the JSON payload
-             console.error("DASHBOARD.JS: Investment API call returned success:false.", {responseData: data});
-            throw new Error(data.message || "Investment processing failed on server.");
-        }
-        
-        alert(data.message || 'Investment successful!');
-        if (data.newBalance !== undefined) {
-          document.getElementById('availableBalance').textContent = `$${data.newBalance.toFixed(2)}`;
-          document.getElementById('portfolioValue').textContent = `$${data.newBalance.toFixed(2)}`;
-        }        
-            // Example for mock balance:
-            // balances[user._id].USD = data.newBalance;
-            // localStorage.setItem('cryptohub_balances_mock', JSON.stringify(balances));
-            // renderAssets();
-        loadActiveInvestments(); 
-      } catch(error) {
-        hideModal(); 
-        alert(`Investment Error: ${error.message}`);
-        console.error("DASHBOARD.JS: Catch block for investment error:", error);
-        if (error.message && error.message.toLowerCase().includes("unexpected server error")) {
-            alert("An unexpected error occurred on the server. Please check server logs or contact support.");
-        }
+
+        alert('Investment created successfully!');
+        await Promise.all([loadAssets(), loadActiveInvestments()]);
+      } catch (error) {
+        alert(`Investment error: ${error.message}`);
+        console.error('Investment error:', error);
+      } finally {
+        hideModal();
       }
     });
   });
 
-  // --- Handle Plan Withdrawal Click ---
-  // ... (Keep your withdrawal click handler)
-  async function handlePlanWithdrawClick(event) { 
+  // Withdrawal handler
+  async function handleWithdrawal(event) {
     const investmentId = event.target.dataset.investmentId;
-    console.log(`DASHBOARD.JS: Withdraw button clicked for investment ID: ${investmentId}`);
-    const withdrawalPin = prompt("Enter your 5-digit withdrawal PIN:");
-
-    if (!withdrawalPin || !/^\d{5}$/.test(withdrawalPin)) {
-        alert("Invalid PIN format. Please enter a 5-digit PIN.");
-        return;
+    const pin = prompt('Enter your 5-digit withdrawal PIN:');
+    
+    if (!pin || !/^\d{5}$/.test(pin)) {
+      alert('Please enter a valid 5-digit PIN');
+      return;
     }
 
-    showModal('Processing Withdrawal...', 'Please wait...');
     try {
-        const response = await fetch(`${DASH_API_BASE_URL}/investments/${investmentId}/withdraw`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
-            body: JSON.stringify({ withdrawalPin })
-        });
-        const data = await response.json(); // Always parse
-        hideModal();
+      showModal('Processing', 'Processing withdrawal...');
+      
+      const response = await fetch(`${API_BASE_URL}/investments/${investmentId}/withdraw`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ withdrawalPin: pin })
+      });
 
-        if (!response.ok) {
-             console.error("DASHBOARD.JS: Withdrawal API call HTTP error.", {status: response.status, responseData: data});
-            throw new Error(data.message || `Withdrawal request failed with status ${response.status}.`);
-        }
-        if(!data.success) {
-            console.error("DASHBOARD.JS: Withdrawal API call returned success:false.", {responseData: data});
-            throw new Error(data.message || "Withdrawal processing failed on server.");
-        }
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Withdrawal failed');
+      }
 
-        alert(data.message || "Withdrawal successful!");
-        if(data.newBalance !== undefined) {
-             console.log("New balance from server after withdrawal:", data.newBalance);
-            // Update displayed balance
-        }
-        loadActiveInvestments(); 
+      alert('Withdrawal successful!');
+      await Promise.all([loadAssets(), loadActiveInvestments()]);
     } catch (error) {
-        hideModal();
-        alert(`Withdrawal Error: ${error.message}`);
-        console.error("DASHBOARD.JS: Catch block for withdrawal error:", error);
+      alert(`Withdrawal error: ${error.message}`);
+      console.error('Withdrawal error:', error);
+    } finally {
+      hideModal();
     }
   }
-  
-  // --- Chart.js Examples ---
-  // ... (Keep your Chart.js setup)
-  const portfolioCtx = document.getElementById('portfolioChart')?.getContext('2d');
-  if (portfolioCtx) { new Chart(portfolioCtx, { type: 'line', data: { labels: ['Jan', 'Feb', 'Mar', 'Apr'], datasets: [{ label: 'Portfolio Value', data: [65, 59, 80, 81], tension: 0.1 }] }, options: { responsive: true, maintainAspectRatio: false } }); }
-  const marketTrendsCtx = document.getElementById('marketTrendsChart')?.getContext('2d');
-  if (marketTrendsCtx) { new Chart(marketTrendsCtx, { type: 'bar', data: { labels: ['BTC', 'ETH', 'SOL', 'DOGE'], datasets: [{ label: 'Price Change (24h %)', data: [2.5, -1.2, 5.0, 0.5], backgroundColor:['green','red','green','green'] }] }, options: { responsive: true, maintainAspectRatio: false } });}
 
+  // ----------------------------
+  // MARKET TRENDS CHARTS
+  // ----------------------------
+  function initializeCharts() {
+    // Portfolio Chart
+    const portfolioCtx = document.getElementById('portfolioChart')?.getContext('2d');
+    if (portfolioCtx) {
+      new Chart(portfolioCtx, {
+        type: 'line',
+        data: {
+          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+          datasets: [{
+            label: 'Portfolio Value',
+            data: [5000, 7500, 8200, 9300, 10500, 12000],
+            borderColor: '#4CAF50',
+            tension: 0.1,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          }
+        }
+      });
+    }
+
+    // Market Trends Chart
+    const marketCtx = document.getElementById('marketTrendsChart')?.getContext('2d');
+    if (marketCtx) {
+      new Chart(marketCtx, {
+        type: 'bar',
+        data: {
+          labels: ['BTC', 'ETH', 'SOL', 'XRP', 'ADA'],
+          datasets: [{
+            label: '24h Change (%)',
+            data: [2.5, -1.2, 5.0, 0.8, -0.5],
+            backgroundColor: [
+              '#4CAF50', '#F44336', '#4CAF50', '#4CAF50', '#F44336'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+  }
+
+  // ----------------------------
+  // INITIALIZE DASHBOARD
+  // ----------------------------
+  async function initializeDashboard() {
+    try {
+      await Promise.all([
+        loadAssets(),
+        loadActiveInvestments()
+      ]);
+      initializeCharts();
+    } catch (error) {
+      console.error('Dashboard initialization error:', error);
+    } finally {
+      // Remove loading spinner
+      document.querySelector('.loading-spinner-overlay')?.remove();
+      document.body.classList.remove('auth-loading');
+    }
+  }
+
+  initializeDashboard();
 });
-// --- END OF SIMPLIFIED dashboard.js ---do not compromise it pls 
