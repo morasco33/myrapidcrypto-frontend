@@ -6,14 +6,37 @@
   <title>Admin Dashboard | RapidCrypto</title>
   <link rel="stylesheet" href="dashboard.css" />
   <style>
-    .user-item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-    .asset-field { display: flex; gap: 8px; margin-bottom: 5px; }
-    .asset-field input { width: 100px; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f4f7f6; }
+    main { max-width: 1000px; margin: 20px auto; padding: 20px; }
+    h1, h2, h3, h4 { color: #333; }
+    section { background-color: #fff; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    button { cursor: pointer; padding: 10px 15px; border-radius: 5px; border: 1px solid transparent; margin-right: 8px; font-weight: 500; transition: all 0.2s ease-in-out; }
+    button:hover { opacity: 0.9; }
+    .btn-approve { background-color: #28a745; color: white; }
+    .btn-edit { background-color: #007bff; color: white; }
+    .btn-delete { background-color: #dc3545; color: white; }
+    .btn-resend { background-color: #ffc107; color: black; }
+    .btn-save { background-color: #17a2b8; color: white; }
+    .btn-cancel { background-color: #6c757d; color: white; }
+    .btn-add-asset { background-color: #5a6268; color: white; margin-top: 10px; }
+    .user-item, .investment-item { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+    .asset-field { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+    .asset-field input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    #searchEmail { padding: 10px; width: 300px; border-radius: 5px; border: 1px solid #ccc; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; justify-content: center; align-items: center; }
+    .modal-content { background: white; padding: 25px; border-radius: 8px; width: 90%; max-width: 550px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    .modal-content label { display: block; margin-bottom: 12px; font-weight: bold; }
+    .modal-content input[type="text"], .modal-content input[type="number"], .modal-content input[type="datetime-local"], .modal-content select { width: calc(100% - 16px); padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+    .modal-footer { margin-top: 25px; text-align: right; }
+    #header { display: flex; justify-content: space-between; align-items: center; }
   </style>
 </head>
 <body>
   <main>
-    <h1>Admin Dashboard</h1>
+    <div id="header">
+        <h1>Admin Dashboard</h1>
+        <button id="logoutBtn" class="btn-delete">Logout</button>
+    </div>
 
     <section id="pendingUsers">
       <h2>Users Pending Approval</h2>
@@ -23,174 +46,291 @@
     <section>
       <h2>Find & Update User</h2>
       <input type="email" id="searchEmail" placeholder="Enter user email" />
-      <button id="searchUserBtn">Search</button>
+      <button id="searchUserBtn" class="btn-edit">Search</button>
       <div id="userDetails"></div>
+      <div id="userInvestmentsContainer"></div>
     </section>
   </main>
 
-  <!-- Edit Modal -->
-  <div id="editModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:white; border:1px solid #ccc; padding:20px; z-index:1000;">
-    <h3>Edit User</h3>
-    <label>Balance: <input type="number" id="editBalance" step="0.01" /></label>
-    <div id="assetInputs"></div>
-    <button id="saveChangesBtn">Save</button>
-    <button onclick="document.getElementById('editModal').style.display='none'">Cancel</button>
+  <!-- User Edit Modal -->
+  <div id="userEditModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Edit User: <span id="editingUserEmail"></span></h3>
+      <label>Username: <input type="text" id="editUsername" /></label>
+      <label>Balance: <input type="number" id="editBalance" step="0.01" /></label>
+      <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+        <label>Is Admin: <input type="checkbox" id="editIsAdmin" /></label>
+        <label>Verified: <input type="checkbox" id="editVerified" /></label>
+        <label>Approved: <input type="checkbox" id="editAdminApproved" /></label>
+      </div>
+      <hr><h4>Assets</h4>
+      <div id="assetInputs"></div>
+      <button id="addAssetBtn" class="btn-add-asset">Add Asset</button>
+      <div class="modal-footer">
+        <button id="saveUserChangesBtn" class="btn-save">Save User</button>
+        <button class="cancel-btn btn-cancel">Cancel</button>
+      </div>
+    </div>
   </div>
 
+  <!-- Investment Edit Modal -->
+  <div id="investmentEditModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Edit Investment</h3>
+      <input type="hidden" id="editingInvestmentId" />
+      <label>Initial Amount: <input type="number" id="editInitialAmount" step="0.01" /></label>
+      <label>Current Value: <input type="number" id="editCurrentValue" step="0.01" /></label>
+      <label>Status:
+        <select id="editInvestmentStatus">
+          <option value="active">active</option>
+          <option value="matured">matured</option>
+          <option value="withdrawn_early">withdrawn_early</option>
+          <option value="withdrawn_matured">withdrawn_matured</option>
+          <option value="cancelled">cancelled</option>
+        </select>
+      </label>
+      <label>Maturity Date: <input type="datetime-local" id="editMaturityDate" /></label>
+      <label>Withdrawal Unlock Time: <input type="datetime-local" id="editUnlockTime" /></label>
+      <div class="modal-footer">
+        <button id="saveInvestmentChangesBtn" class="btn-save">Save Investment</button>
+        <button class="cancel-btn btn-cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+
   <script>
-    const ADMIN_AUTH_TOKEN = localStorage.getItem('admin_auth_token');
-    const API_BASE = 'https://rapidcrypto-backend.onrender.com/api';
-    let editingUserId = null;
+    // --- SETUP ---
+    const ADMIN_AUTH_TOKEN = localStorage.getItem('cryptohub_auth_token');
+    const API_BASE = window.API_BASE_URL || 'https://rapidcrypto-backend.onrender.com/api';
+    let currentUserId = null; // Store the ID of the user being viewed/edited
 
-    async function fetchPendingUsers() {
-      const userList = document.getElementById('userList');
-      try {
-        const res = await fetch(`${API_BASE}/admin/pending-users`, {
-          headers: { Authorization: `Bearer ${ADMIN_AUTH_TOKEN}` }
-        });
+    // --- DOM Elements ---
+    const userListDiv = document.getElementById('userList');
+    const userDetailsDiv = document.getElementById('userDetails');
+    const investmentsContainer = document.getElementById('userInvestmentsContainer');
+    const userEditModal = document.getElementById('userEditModal');
+    const investmentEditModal = document.getElementById('investmentEditModal');
+
+    // --- AUTHENTICATION CHECK ---
+    if (!ADMIN_AUTH_TOKEN) {
+        document.body.innerHTML = '<h1>Access Denied</h1><p>You must be logged in as an admin. No authentication token found. Please <a href="login.html">log in</a>.</p>';
+        throw new Error("Admin Auth Token not found.");
+    }
+    
+    // --- API HELPER ---
+    async function fetchApi(endpoint, options = {}) {
+        const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ADMIN_AUTH_TOKEN}`, ...options.headers };
+        const res = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
         const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.message);
+        if (!res.ok || !data.success) throw new Error(data.message || `API request failed: ${res.statusText}`);
+        return data;
+    }
 
-        if (data.users.length === 0) {
-          userList.innerHTML = '<p>No users pending approval.</p>';
-          return;
+    // --- RENDER FUNCTIONS ---
+    function renderUser(user) {
+        currentUserId = user._id; // Set the current user ID
+        userDetailsDiv.innerHTML = `
+            <div class="user-item" data-user-id="${user._id}" data-user-email="${user.email}">
+                <p><strong>Username:</strong> ${user.username} (${user.email})</p>
+                <p><strong>Balance:</strong> $${(user.balance || 0).toFixed(2)}</p>
+                <p><strong>Status:</strong> ${user.verified ? 'Verified' : 'Not Verified'} | ${user.adminApproved ? 'Approved' : 'Pending Approval'} | ${user.isAdmin ? 'Admin' : 'User'}</p>
+                <button class="approve-btn btn-approve">Approve</button>
+                <button class="edit-user-btn btn-edit">Edit User</button>
+                <button class="resend-btn btn-resend">Resend Verification</button>
+            </div>
+        `;
+        fetchUserInvestments(user._id);
+    }
+    
+    function renderInvestment(inv) {
+        return `
+            <div class="investment-item" data-investment-id="${inv._id}">
+                <p><strong>${inv.planName}</strong> (Status: ${inv.status})</p>
+                <p>Initial: $${inv.initialAmount.toFixed(2)} | Current: $${inv.currentValue.toFixed(2)}</p>
+                <p><small>Matures: ${new Date(inv.maturityDate).toLocaleString()}</small></p>
+                <button class="edit-investment-btn btn-edit">Edit</button>
+                <button class="delete-investment-btn btn-delete">Delete</button>
+            </div>
+        `;
+    }
+
+    // --- DATA FETCHING FUNCTIONS ---
+    async function fetchPendingUsers() {
+        try {
+            const data = await fetchApi('/admin/pending-users');
+            userListDiv.innerHTML = data.users.length ? data.users.map(u => `
+                <div class="user-item" data-user-id="${u._id}" data-user-email="${u.email}">
+                    <p><strong>${u.username}</strong> (${u.email})</p>
+                    <button class="approve-btn btn-approve">Approve</button>
+                </div>
+            `).join('') : '<p>No users pending approval.</p>';
+        } catch (err) {
+            userListDiv.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
         }
-
-        userList.innerHTML = '';
-        data.users.forEach(user => {
-          const div = document.createElement('div');
-          div.className = 'user-item';
-          div.innerHTML = `
-            <p><strong>${user.username}</strong> (${user.email})</p>
-            <button data-id="${user._id}" class="approve-btn">Approve</button>
-            <button data-id="${user._id}" data-email="${user.email}" class="edit-btn">Edit</button>
-            <button data-id="${user._id}" class="resend-btn">Resend Verification</button>
-          `;
-          userList.appendChild(div);
-        });
-
-        addEventListeners();
-      } catch (err) {
-        userList.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
-      }
     }
 
-    function addEventListeners() {
-      document.querySelectorAll('.approve-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const userId = btn.dataset.id;
-          try {
-            const res = await fetch(`${API_BASE}/admin/approve-user/${userId}`, {
-              method: 'POST',
-              headers: { Authorization: `Bearer ${ADMIN_AUTH_TOKEN}` }
-            });
-            const result = await res.json();
-            if (!res.ok || !result.success) throw new Error(result.message);
-            alert('User approved.');
-            fetchPendingUsers();
-          } catch (err) {
-            alert(`Error approving user: ${err.message}`);
-          }
-        });
-      });
-
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          editingUserId = btn.dataset.id;
-          const email = btn.dataset.email;
-          try {
-            const res = await fetch(`${API_BASE}/admin/user-by-email?email=${encodeURIComponent(email)}`, {
-              headers: { Authorization: `Bearer ${ADMIN_AUTH_TOKEN}` }
-            });
-            const data = await res.json();
-            if (!res.ok || !data.success) throw new Error(data.message);
-
-            document.getElementById('editBalance').value = data.user.balance;
-            const assetInputs = document.getElementById('assetInputs');
-            assetInputs.innerHTML = '';
-            (data.user.assets || []).forEach(asset => {
-              const div = document.createElement('div');
-              div.className = 'asset-field';
-              div.innerHTML = `
-                <input type="text" value="${asset.symbol}" disabled />
-                <input type="number" value="${asset.amount}" data-symbol="${asset.symbol}" step="0.0001" />
-              `;
-              assetInputs.appendChild(div);
-            });
-
-            document.getElementById('editModal').style.display = 'block';
-          } catch (err) {
-            alert('Error loading user: ' + err.message);
-          }
-        });
-      });
-
-      document.querySelectorAll('.resend-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const userId = btn.dataset.id;
-          try {
-            const res = await fetch(`${API_BASE}/admin/resend-verification/${userId}`, {
-              method: 'POST',
-              headers: { Authorization: `Bearer ${ADMIN_AUTH_TOKEN}` }
-            });
-            const result = await res.json();
-            if (!res.ok || !result.success) throw new Error(result.message);
-            alert('Verification email resent.');
-          } catch (err) {
-            alert(`Error resending: ${err.message}`);
-          }
-        });
-      });
+    async function fetchUserInvestments(userId) {
+        investmentsContainer.innerHTML = '<h4>User Investments</h4><p>Loading investments...</p>';
+        try {
+            const data = await fetchApi(`/admin/user-investments/${userId}`);
+            investmentsContainer.innerHTML = '<h4>User Investments</h4>' + (data.investments.length ? data.investments.map(renderInvestment).join('') : '<p>No investments found for this user.</p>');
+        } catch (err) {
+            investmentsContainer.innerHTML = `<h4>User Investments</h4><p style="color:red;">Error loading investments: ${err.message}</p>`;
+        }
     }
+
+    // --- MODAL FUNCTIONS ---
+    function showUserEditModal(user) {
+        document.getElementById('editingUserEmail').textContent = user.email;
+        document.getElementById('editUsername').value = user.username;
+        document.getElementById('editBalance').value = (user.balance || 0).toFixed(2);
+        document.getElementById('editIsAdmin').checked = user.isAdmin;
+        document.getElementById('editVerified').checked = user.verified;
+        document.getElementById('editAdminApproved').checked = user.adminApproved;
+        const assetInputsContainer = document.getElementById('assetInputs');
+        assetInputsContainer.innerHTML = '';
+        (user.assets || []).forEach(asset => assetInputsContainer.appendChild(createAssetInput(asset.symbol, asset.amount)));
+        userEditModal.style.display = 'flex';
+    }
+    
+    function showInvestmentEditModal(inv) {
+        document.getElementById('editingInvestmentId').value = inv._id;
+        document.getElementById('editInitialAmount').value = inv.initialAmount.toFixed(2);
+        document.getElementById('editCurrentValue').value = inv.currentValue.toFixed(2);
+        document.getElementById('editInvestmentStatus').value = inv.status;
+        // Dates need to be formatted for datetime-local input
+        document.getElementById('editMaturityDate').value = new Date(inv.maturityDate).toISOString().slice(0, 16);
+        document.getElementById('editUnlockTime').value = new Date(inv.withdrawalUnlockTime).toISOString().slice(0, 16);
+        investmentEditModal.style.display = 'flex';
+    }
+    
+    function createAssetInput(symbol = '', amount = 0) {
+        const div = document.createElement('div');
+        div.className = 'asset-field';
+        div.innerHTML = `<input type="text" class="asset-symbol" placeholder="Symbol (e.g., BTC)" value="${symbol}" /><input type="number" class="asset-amount" placeholder="Amount" value="${amount}" step="any" />`;
+        return div;
+    }
+    
+    // --- EVENT LISTENERS ---
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        if (confirm('Are you sure you want to logout?')) {
+            localStorage.removeItem('cryptohub_auth_token');
+            window.location.href = 'login.html';
+        }
+    });
 
     document.getElementById('searchUserBtn').addEventListener('click', async () => {
-      const email = document.getElementById('searchEmail').value.trim();
-      if (!email) return alert('Please enter an email.');
-      try {
-        const res = await fetch(`${API_BASE}/admin/user-by-email?email=${encodeURIComponent(email)}`, {
-          headers: { Authorization: `Bearer ${ADMIN_AUTH_TOKEN}` }
-        });
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.message);
-
-        const details = document.getElementById('userDetails');
-        details.innerHTML = `
-          <p><strong>${data.user.username}</strong> (${data.user.email})</p>
-          <p>Balance: $${data.user.balance.toFixed(2)}</p>
-          <button data-id="${data.user._id}" data-email="${data.user.email}" class="edit-btn">Edit</button>
-        `;
-        addEventListeners();
-      } catch (err) {
-        document.getElementById('userDetails').innerHTML = `<p style="color:red;">${err.message}</p>`;
-      }
+        const email = document.getElementById('searchEmail').value.trim();
+        if (!email) return alert('Please enter an email.');
+        investmentsContainer.innerHTML = '';
+        try {
+            const data = await fetchApi(`/admin/user-by-email?email=${encodeURIComponent(email)}`);
+            renderUser(data.user);
+        } catch (err) {
+            userDetailsDiv.innerHTML = `<p style="color:red;">${err.message}</p>`;
+        }
     });
 
-    document.getElementById('saveChangesBtn').addEventListener('click', async () => {
-      const newBalance = parseFloat(document.getElementById('editBalance').value);
-      const assetInputs = document.querySelectorAll('#assetInputs input[type="number"]');
-      const assets = Array.from(assetInputs).map(input => ({
-        symbol: input.dataset.symbol,
-        amount: parseFloat(input.value) || 0
-      }));
+    // --- Modal and Dynamic Button Listeners (Event Delegation) ---
+    document.body.addEventListener('click', async (e) => {
+        const userItem = e.target.closest('.user-item');
+        
+        // Modal cancel buttons
+        if (e.target.matches('.cancel-btn')) {
+            e.target.closest('.modal-overlay').style.display = 'none';
+        }
+        
+        // --- User Management ---
+        if (e.target.matches('.approve-btn') && userItem) {
+            if (confirm(`Approve user ${userItem.dataset.userEmail}?`)) {
+                try {
+                    await fetchApi(`/admin/approve-user/${userItem.dataset.userId}`, { method: 'POST' });
+                    alert('User approved.');
+                    fetchPendingUsers();
+                } catch (err) { alert(`Error: ${err.message}`); }
+            }
+        }
+        if (e.target.matches('.edit-user-btn') && userItem) {
+            try {
+                const data = await fetchApi(`/admin/user-by-email?email=${encodeURIComponent(userItem.dataset.userEmail)}`);
+                showUserEditModal(data.user);
+            } catch (err) { alert(`Error loading user: ${err.message}`); }
+        }
+        if (e.target.matches('.resend-btn') && userItem) {
+            try {
+                await fetchApi(`/admin/resend-verification/${userItem.dataset.userId}`, { method: 'POST' });
+                alert('Verification email resent.');
+            } catch (err) { alert(`Error: ${err.message}`); }
+        }
 
-      try {
-        const res = await fetch(`${API_BASE}/admin/update-user/${editingUserId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${ADMIN_AUTH_TOKEN}`
-          },
-          body: JSON.stringify({ balance: newBalance, assets })
-        });
-        const data = await res.json();
-        if (!res.ok || !data.success) throw new Error(data.message);
-        alert('User updated.');
-        document.getElementById('editModal').style.display = 'none';
-      } catch (err) {
-        alert('Error saving changes: ' + err.message);
-      }
+        // --- Investment Management ---
+        const investmentItem = e.target.closest('.investment-item');
+        if (e.target.matches('.delete-investment-btn') && investmentItem) {
+            const invId = investmentItem.dataset.investmentId;
+            if (confirm('Are you sure you want to permanently delete this investment? This cannot be undone.')) {
+                try {
+                    await fetchApi(`/admin/investments/${invId}`, { method: 'DELETE' });
+                    alert('Investment deleted.');
+                    investmentItem.remove(); // Remove from view instantly
+                } catch (err) { alert(`Error deleting investment: ${err.message}`); }
+            }
+        }
+        if (e.target.matches('.edit-investment-btn') && investmentItem) {
+            const invId = investmentItem.dataset.investmentId;
+            // We need the full investment object to populate the modal, so we'll re-fetch it
+            const investmentsData = await fetchApi(`/admin/user-investments/${currentUserId}`);
+            const investmentToEdit = investmentsData.investments.find(i => i._id === invId);
+            if (investmentToEdit) {
+                showInvestmentEditModal(investmentToEdit);
+            }
+        }
+    });
+    
+    // --- Modal Save Buttons ---
+    document.getElementById('addAssetBtn').addEventListener('click', () => {
+        document.getElementById('assetInputs').appendChild(createAssetInput());
     });
 
+    document.getElementById('saveUserChangesBtn').addEventListener('click', async () => {
+        const payload = {
+            username: document.getElementById('editUsername').value,
+            balance: parseFloat(document.getElementById('editBalance').value),
+            isAdmin: document.getElementById('editIsAdmin').checked,
+            verified: document.getElementById('editVerified').checked,
+            adminApproved: document.getElementById('editAdminApproved').checked,
+            assets: Array.from(document.querySelectorAll('#assetInputs .asset-field')).map(field => ({
+                symbol: field.querySelector('.asset-symbol').value.trim(),
+                amount: parseFloat(field.querySelector('.asset-amount').value) || 0
+            })).filter(a => a.symbol)
+        };
+        try {
+            const data = await fetchApi(`/admin/update-user/${currentUserId}`, { method: 'POST', body: JSON.stringify(payload) });
+            alert('User updated.');
+            userEditModal.style.display = 'none';
+            renderUser(data.user); // Re-render the user details with fresh data
+            fetchPendingUsers();
+        } catch (err) { alert(`Error saving user: ${err.message}`); }
+    });
+
+    document.getElementById('saveInvestmentChangesBtn').addEventListener('click', async () => {
+        const investmentId = document.getElementById('editingInvestmentId').value;
+        const payload = {
+            initialAmount: parseFloat(document.getElementById('editInitialAmount').value),
+            currentValue: parseFloat(document.getElementById('editCurrentValue').value),
+            status: document.getElementById('editInvestmentStatus').value,
+            maturityDate: new Date(document.getElementById('editMaturityDate').value).toISOString(),
+            withdrawalUnlockTime: new Date(document.getElementById('editUnlockTime').value).toISOString(),
+        };
+        try {
+            await fetchApi(`/admin/investments/${investmentId}`, { method: 'POST', body: JSON.stringify(payload) });
+            alert('Investment updated.');
+            investmentEditModal.style.display = 'none';
+            fetchUserInvestments(currentUserId); // Refresh the investments list
+        } catch (err) { alert(`Error saving investment: ${err.message}`); }
+    });
+
+    // --- INITIAL LOAD ---
     fetchPendingUsers();
   </script>
 </body>
