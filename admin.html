@@ -4,7 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard | RapidCrypto</title>
-  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .user-item { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    .asset-field { display: flex; gap: 8px; margin-bottom: 5px; }
+    .asset-field input { width: 100px; }
+  </style>
 </head>
 <body>
   <main>
@@ -15,17 +20,27 @@
       <div id="userList">Loading...</div>
     </section>
 
-    <section id="searchUser">
-      <h2>Search & Manage User</h2>
-      <input type="email" id="emailSearch" placeholder="Enter user email" />
-      <button id="searchBtn">Search</button>
-      <div id="searchResult"></div>
+    <section>
+      <h2>Find & Update User</h2>
+      <input type="email" id="searchEmail" placeholder="Enter user email" />
+      <button id="searchUserBtn">Search</button>
+      <div id="userDetails"></div>
     </section>
   </main>
+
+  <!-- Edit Modal -->
+  <div id="editModal" style="display:none; position:fixed; top:10%; left:50%; transform:translateX(-50%); background:white; border:1px solid #ccc; padding:20px; z-index:1000;">
+    <h3>Edit User</h3>
+    <label>Balance: <input type="number" id="editBalance" step="0.01" /></label>
+    <div id="assetInputs"></div>
+    <button id="saveChangesBtn">Save</button>
+    <button onclick="document.getElementById('editModal').style.display='none'">Cancel</button>
+  </div>
 
   <script>
     const ADMIN_AUTH_TOKEN = localStorage.getItem('admin_auth_token');
     const API_BASE = 'https://rapidcrypto-backend.onrender.com/api';
+    let editingUserId = null;
 
     async function fetchPendingUsers() {
       const userList = document.getElementById('userList');
@@ -48,91 +63,134 @@
           div.innerHTML = `
             <p><strong>${user.username}</strong> (${user.email})</p>
             <button data-id="${user._id}" class="approve-btn">Approve</button>
+            <button data-id="${user._id}" data-email="${user.email}" class="edit-btn">Edit</button>
+            <button data-id="${user._id}" class="resend-btn">Resend Verification</button>
           `;
           userList.appendChild(div);
         });
 
-        document.querySelectorAll('.approve-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const userId = btn.dataset.id;
-            try {
-              const res = await fetch(`${API_BASE}/admin/approve-user/${userId}`, {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${ADMIN_AUTH_TOKEN}` }
-              });
-              const result = await res.json();
-              if (!res.ok || !result.success) throw new Error(result.message);
-              alert('User approved.');
-              fetchPendingUsers();
-            } catch (err) {
-              alert(`Error approving user: ${err.message}`);
-            }
-          });
-        });
-
+        addEventListeners();
       } catch (err) {
         userList.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
       }
     }
 
-    async function searchUserByEmail() {
-      const email = document.getElementById('emailSearch').value.trim();
-      const searchResult = document.getElementById('searchResult');
-      if (!email) return alert("Enter a valid email");
+    function addEventListeners() {
+      document.querySelectorAll('.approve-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.dataset.id;
+          try {
+            const res = await fetch(`${API_BASE}/admin/approve-user/${userId}`, {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${ADMIN_AUTH_TOKEN}` }
+            });
+            const result = await res.json();
+            if (!res.ok || !result.success) throw new Error(result.message);
+            alert('User approved.');
+            fetchPendingUsers();
+          } catch (err) {
+            alert(`Error approving user: ${err.message}`);
+          }
+        });
+      });
+
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          editingUserId = btn.dataset.id;
+          const email = btn.dataset.email;
+          try {
+            const res = await fetch(`${API_BASE}/admin/user-by-email?email=${encodeURIComponent(email)}`, {
+              headers: { Authorization: `Bearer ${ADMIN_AUTH_TOKEN}` }
+            });
+            const data = await res.json();
+            if (!res.ok || !data.success) throw new Error(data.message);
+
+            document.getElementById('editBalance').value = data.user.balance;
+            const assetInputs = document.getElementById('assetInputs');
+            assetInputs.innerHTML = '';
+            (data.user.assets || []).forEach(asset => {
+              const div = document.createElement('div');
+              div.className = 'asset-field';
+              div.innerHTML = `
+                <input type="text" value="${asset.symbol}" disabled />
+                <input type="number" value="${asset.amount}" data-symbol="${asset.symbol}" step="0.0001" />
+              `;
+              assetInputs.appendChild(div);
+            });
+
+            document.getElementById('editModal').style.display = 'block';
+          } catch (err) {
+            alert('Error loading user: ' + err.message);
+          }
+        });
+      });
+
+      document.querySelectorAll('.resend-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const userId = btn.dataset.id;
+          try {
+            const res = await fetch(`${API_BASE}/admin/resend-verification/${userId}`, {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${ADMIN_AUTH_TOKEN}` }
+            });
+            const result = await res.json();
+            if (!res.ok || !result.success) throw new Error(result.message);
+            alert('Verification email resent.');
+          } catch (err) {
+            alert(`Error resending: ${err.message}`);
+          }
+        });
+      });
+    }
+
+    document.getElementById('searchUserBtn').addEventListener('click', async () => {
+      const email = document.getElementById('searchEmail').value.trim();
+      if (!email) return alert('Please enter an email.');
       try {
-        searchResult.innerHTML = 'Searching...';
         const res = await fetch(`${API_BASE}/admin/user-by-email?email=${encodeURIComponent(email)}`, {
           headers: { Authorization: `Bearer ${ADMIN_AUTH_TOKEN}` }
         });
         const data = await res.json();
         if (!res.ok || !data.success) throw new Error(data.message);
 
-        const user = data.user;
-        searchResult.innerHTML = `
-          <p><strong>${user.username}</strong> (${user.email})</p>
-          <label>Balance: <input type="number" id="balanceInput" value="${user.balance}" /></label><br>
-          <label>Assets (comma-separated): <input type="text" id="assetInput" placeholder="BTC:0.5, ETH:1.2" /></label><br>
-          <button id="updateUserBtn">Update</button>
-          <button id="resendVerification">Resend Verification</button>
+        const details = document.getElementById('userDetails');
+        details.innerHTML = `
+          <p><strong>${data.user.username}</strong> (${data.user.email})</p>
+          <p>Balance: $${data.user.balance.toFixed(2)}</p>
+          <button data-id="${data.user._id}" data-email="${data.user.email}" class="edit-btn">Edit</button>
         `;
-
-        document.getElementById('updateUserBtn').addEventListener('click', async () => {
-          const balance = parseFloat(document.getElementById('balanceInput').value);
-          const assetStr = document.getElementById('assetInput').value.trim();
-          const assets = assetStr.split(',').map(s => {
-            const [symbol, amount] = s.trim().split(':');
-            return { symbol: symbol.trim(), amount: parseFloat(amount.trim()) };
-          });
-
-          const res = await fetch(`${API_BASE}/admin/update-user/${user._id}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${ADMIN_AUTH_TOKEN}`
-            },
-            body: JSON.stringify({ balance, assets })
-          });
-          const result = await res.json();
-          if (!res.ok || !result.success) throw new Error(result.message);
-          alert("User updated.");
-        });
-
-        document.getElementById('resendVerification').addEventListener('click', async () => {
-          const res = await fetch(`${API_BASE}/admin/resend-verification/${user._id}`, {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${ADMIN_AUTH_TOKEN}` }
-          });
-          const result = await res.json();
-          if (!res.ok || !result.success) throw new Error(result.message);
-          alert("Verification email resent.");
-        });
-
+        addEventListeners();
       } catch (err) {
-        searchResult.innerHTML = `<p style="color:red;">${err.message}</p>`;
+        document.getElementById('userDetails').innerHTML = `<p style="color:red;">${err.message}</p>`;
       }
-    }
+    });
 
-    document.getElementById('searchBtn').addEventListener('click', searchUserByEmail);
+    document.getElementById('saveChangesBtn').addEventListener('click', async () => {
+      const newBalance = parseFloat(document.getElementById('editBalance').value);
+      const assetInputs = document.querySelectorAll('#assetInputs input[type="number"]');
+      const assets = Array.from(assetInputs).map(input => ({
+        symbol: input.dataset.symbol,
+        amount: parseFloat(input.value) || 0
+      }));
+
+      try {
+        const res = await fetch(`${API_BASE}/admin/update-user/${editingUserId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${ADMIN_AUTH_TOKEN}`
+          },
+          body: JSON.stringify({ balance: newBalance, assets })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) throw new Error(data.message);
+        alert('User updated.');
+        document.getElementById('editModal').style.display = 'none';
+      } catch (err) {
+        alert('Error saving changes: ' + err.message);
+      }
+    });
+
     fetchPendingUsers();
   </script>
 </body>
