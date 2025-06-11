@@ -1,4 +1,4 @@
-// --- START OF dashboard.js (Full Version with Modified PIN Prompt) ---
+// --- START OF dashboard.js (Corrected Navigation for Quick Actions) ---
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DASHBOARD.JS: DOMContentLoaded");
 
@@ -81,49 +81,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- ✨ MODIFIED: Event Listeners for Quick Actions (Deposit/Withdraw main balance) ---
+  // --- ✨ CORRECTED: Event Listeners for Quick Actions to Navigate to Pages ---
   const mainDepositButton = document.getElementById('mainDepositBtn');
   if (mainDepositButton) {
-    mainDepositButton.addEventListener('click', async () => {
-      console.log('DASHBOARD.JS: Main Deposit Button Clicked');
-      
-      const amountString = prompt("Enter amount to deposit (this is a simulation):");
-      if (amountString === null) {
-          console.log("DASHBOARD.JS: Deposit cancelled by user.");
-          return;
-      }
-      
-      const depositAmount = parseFloat(amountString);
-      if (isNaN(depositAmount) || depositAmount <= 0) {
-          alert("Please enter a valid positive number for the deposit amount.");
-          return;
-      }
-
-      showModal('Processing Deposit...', 'Please wait...');
-      try {
-          const response = await fetch(`${DASH_API_BASE_URL}/deposit`, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${authToken}`
-              },
-              body: JSON.stringify({ amount: depositAmount })
-          });
-          const data = await response.json();
-          hideModal();
-
-          if (!response.ok || !data.success) {
-              throw new Error(data.message || `Deposit failed with status ${response.status}.`);
-          }
-
-          alert(data.message || "Deposit successful!");
-          await fetchRealUserProfileData(); // Refresh balance on dashboard
-
-      } catch (error) {
-          hideModal();
-          alert(`Deposit Error: ${error.message}`);
-          console.error("DASHBOARD.JS: Catch block for main deposit error:", error);
-      }
+    mainDepositButton.addEventListener('click', () => {
+      console.log('DASHBOARD.JS: Main Deposit Button Clicked, navigating to deposit.html');
+      window.location.href = 'deposit.html'; // Navigate to the deposit page
     });
   } else {
       console.warn('DASHBOARD.JS: mainDepositBtn not found.');
@@ -131,59 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const mainWithdrawButton = document.getElementById('mainWithdrawBtn');
   if (mainWithdrawButton) {
-    mainWithdrawButton.addEventListener('click', async () => {
-      console.log('DASHBOARD.JS: Main Withdraw Button Clicked');
-
-      const amountString = prompt("Enter amount to withdraw from your main balance:");
-      if (amountString === null) {
-          console.log("DASHBOARD.JS: Withdrawal cancelled by user.");
-          return;
-      }
-
-      const withdrawAmount = parseFloat(amountString);
-      if (isNaN(withdrawAmount) || withdrawAmount <= 0) {
-          alert("Please enter a valid positive number for the withdrawal amount.");
-          return;
-      }
-
-      const withdrawalPin = prompt("Enter the 5-digit PIN to confirm withdrawal. If you don't know the PIN, please contact an administrator.");
-      if (withdrawalPin === null) {
-          console.log("DASHBOARD.JS: Withdrawal PIN entry cancelled.");
-          return;
-      }
-      if (!/^\d{5}$/.test(withdrawalPin)) {
-          alert("Invalid PIN format. Please enter a 5-digit PIN.");
-          return;
-      }
-
-      showModal('Processing Withdrawal...', 'Please wait...');
-      try {
-          const response = await fetch(`${DASH_API_BASE_URL}/withdraw`, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${authToken}`
-              },
-              body: JSON.stringify({ 
-                  amount: withdrawAmount,
-                  withdrawalPin: withdrawalPin 
-              })
-          });
-          const data = await response.json();
-          hideModal();
-
-          if (!response.ok || !data.success) {
-              throw new Error(data.message || `Withdrawal failed with status ${response.status}.`);
-          }
-
-          alert(data.message || "Withdrawal successful!");
-          await fetchRealUserProfileData(); // Refresh balance on dashboard
-
-      } catch (error) {
-          hideModal();
-          alert(`Withdrawal Error: ${error.message}`);
-          console.error("DASHBOARD.JS: Catch block for main withdrawal error:", error);
-      }
+    mainWithdrawButton.addEventListener('click', () => {
+      console.log('DASHBOARD.JS: Main Withdraw Button Clicked, navigating to withdraw.html');
+      window.location.href = 'withdraw.html'; // Navigate to the withdraw page
     });
   } else {
       console.warn('DASHBOARD.JS: mainWithdrawBtn not found.');
@@ -480,4 +393,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeDashboard();
 
 });
-// --- END OF dashboard.js (Full Version with Modified PIN Prompt) ---
+// --- END OF dashboard.js (Corrected Navigation for Quick Actions) ---
