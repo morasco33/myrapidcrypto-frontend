@@ -669,3 +669,8 @@ body.auth-loading .loading-spinner-overlay { /* Optional: Full page loading spin
     /* Add a background to the card if it's not dark, e.g., */
     /* background-color: #333; (on the .premium-plan / .platinum-plan card itself) */
 }
+/* Example */
+.logo-container {
+  background-image: url('images/logo.svg');
+  /* other styles... */
+}
