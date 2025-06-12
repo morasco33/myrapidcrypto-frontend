@@ -1,4 +1,3 @@
-// transactions.js
 document.addEventListener('DOMContentLoaded', async () => {
     console.log("DEBUG [transactions.js]: DOMContentLoaded event fired.");
 
