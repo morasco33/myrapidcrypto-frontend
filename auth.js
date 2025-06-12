@@ -31,6 +31,14 @@ function finalizePageSetupBasedOnAuth() {
     const authPagePaths = ['/login.html', '/register.html'];
 
     console.log(`AUTH.JS (finalize): Current page: ${currentPagePath}, Token found: ${!!token}`);
+    if (window.REQUIRES_AUTH) {
+        const token = sessionStorage.getItem('cryptohub_auth_token');
+        if (!token) {
+          const currentPath = window.location.pathname;
+          window.location.href = 'login.html?redirectTo=' + encodeURIComponent(currentPath);
+        }
+      }
+      
 
     let allowPageRender = true; // Assume true initially
 
