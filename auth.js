@@ -27,18 +27,7 @@ function finalizePageSetupBasedOnAuth() {
     const body = document.body;
     const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
     const currentPagePath = window.location.pathname;
-    const protectedPages = ['dashboard', 'transactions', 'withdraw', 'deposit', 'profile'];
-
-const currentPath = window.location.pathname;
-
-const isProtected = protectedPages.some(page => currentPath.includes(page));
-
-if (isProtected) {
-  const token = sessionStorage.getItem('cryptohub_auth_token');
-  if (!token) {
-    window.location.href = 'login.html?redirectTo=' + encodeURIComponent(currentPath);
-  }
-}
+    const protectedPagesPaths = ['/dashboard.html', '/wallet.html', '/transactions.html', '/transfer.html'];
     const authPagePaths = ['/login.html', '/register.html'];
 
     console.log(`AUTH.JS (finalize): Current page: ${currentPagePath}, Token found: ${!!token}`);
