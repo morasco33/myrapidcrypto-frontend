@@ -53,7 +53,11 @@
     </main>
 
     <script>
-      window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com";
+      window.APP_KEYS = {
+    API_BASE_URL: 'https://rapidcrypto-backend.onrender.com/api',
+    AUTH_TOKEN_KEY: 'cryptohub_auth_token',
+    USER_INFO_KEY: 'cryptohub_user_info'
+  };
     </script>
 
     <script src="auth.js"defer></script>
