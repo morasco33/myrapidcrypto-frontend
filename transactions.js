@@ -29,8 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // --- Get auth token from sessionStorage (align with login.js recommendation) ---
-    const authToken = sessionStorage.getItem(AUTH_TOKEN_KEY) || localStorage.getItem(AUTH_TOKEN_KEY);
-
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
     if (!authToken) {
         console.log("DEBUG [transactions.js]: User not authenticated, redirecting to login.");
         // Redirect to login, passing current page for redirection after login
@@ -43,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         logoutButton.addEventListener('click', (e) => {
             e.preventDefault();
             console.log("DEBUG [transactions.js]: Logout clicked.");
-            sessionStorage.removeItem(AUTH_TOKEN_KEY);
+            //sessionStorage.removeItem(AUTH_TOKEN_KEY);
             // Clear other relevant sessionStorage or localStorage items
             sessionStorage.removeItem(window.APP_KEYS?.USER_INFO_KEY || 'cryptohub_user_info'); // Use the correct user info key
             localStorage.removeItem(TRANSACTIONS_CACHE_KEY);

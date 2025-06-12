@@ -142,10 +142,10 @@
         
         // Optional: Set a temporary flag for this script's own redirect logic if needed,
         // but primary state is now in localStorage for auth.js
-        sessionStorage.setItem(CONFIG.LOGIN_SESSION_CHECK_KEY, JSON.stringify({
+        //sessionStorage.setItem(CONFIG.LOGIN_SESSION_CHECK_KEY, JSON.stringify({
             loggedIn: true,
-            expires: Date.now() + CONFIG.SESSION_TIMEOUT_MS
-        }));
+            //expires: Date.now() + CONFIG.SESSION_TIMEOUT_MS
+        //}));
 
         displayStatus('Authentication successful. Redirecting...', elements.loginMessage);
         redirectToDashboard();

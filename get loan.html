@@ -152,6 +152,9 @@
                         errorMessageDiv.textContent = "Could not calculate payment. Please check your inputs (e.g., interest rate cannot be 0 if loan amount > 0).";
                         errorMessageDiv.style.display = 'block';
                     }
+                    const AUTH_TOKEN_KEY = 'cryptohub_auth_token';
+                    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+
                 });
             }
         });
