@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
     // --- Get auth token from sessionStorage (align with login.js recommendation) ---
-    const authToken = sessionStorage.getItem(AUTH_TOKEN_KEY);
+    const authToken = sessionStorage.getItem(AUTH_TOKEN_KEY) || localStorage.getItem(AUTH_TOKEN_KEY);
 
     if (!authToken) {
         console.log("DEBUG [transactions.js]: User not authenticated, redirecting to login.");
