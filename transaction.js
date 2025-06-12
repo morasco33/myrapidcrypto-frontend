@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // AUTH_TOKEN_KEY might be part of GLOBAL_KEYS too if you standardize
     } else {
         console.warn("WARN [transactions.js]: Global API_BASE_URL not found. Using fallback for local dev.");
-        API_BASE_URL = 'http://localhost:3001'; // Fallback for local dev (NO /api suffix)
+        API_BASE_URL = 'https://rapidcrypto-backend.onrender.com/api'; // Fallback for local dev (NO /api suffix)
     }
     console.log(`DEBUG [transactions.js]: Effective API_BASE_URL: '${API_BASE_URL}'`);
 
