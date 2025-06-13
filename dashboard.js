@@ -2,15 +2,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DASHBOARD.JS: DOMContentLoaded");
 
-  /*
-  ========================================================================================
-  == MODIFICATION TO FIX REDIRECT LOOP                                                  ==
-  == The entire block of code below has been commented out to stop it from conflicting  ==
-  == with the main `auth.js` script. This is the ONLY change needed to fix the problem. ==
-  == ALL your other functions (`fetchRealUserProfileData`, `loadActiveInvestments`, etc.) ==
-  == are still here and will work correctly. Your code has not been removed.            ==
-  ========================================================================================
-
   const USER_INFO_KEY_FOR_DASH = 'cryptohub_user_info';
   const AUTH_TOKEN_KEY_FOR_DASH = 'cryptohub_auth_token';
 
@@ -49,20 +40,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.documentElement.style.opacity = '1';
     return;
   }
-  
-  // This line is no longer needed because fetchRealUserProfileData will set the username.
-  // console.log("DASHBOARD.JS: User confirmed and data parsed. User:", user.username || user.email);
-  // const userNameEl = document.getElementById('userName');
-  // if (userNameEl) {
-  //  userNameEl.textContent = user.username || user.email || 'User';
-  // } else {
-  //  console.warn("DASHBOARD.JS: userName element not found.");
-  // }
-  */
-  
-  // --- The rest of your code is UNCHANGED and will now run correctly ---
 
-  const authToken = localStorage.getItem('cryptohub_auth_token'); // We still need this for API calls.
+  console.log("DASHBOARD.JS: User confirmed and data parsed. User:", user.username || user.email);
+  const userNameEl = document.getElementById('userName');
+  if (userNameEl) {
+    userNameEl.textContent = user.username || user.email || 'User';
+  } else {
+    console.warn("DASHBOARD.JS: userName element not found.");
+  }
+
   const DASH_API_BASE_URL = window.API_BASE_URL || 'https://rapidcrypto-backend.onrender.com/api';
 
   // --- Modal Functions ---
@@ -133,47 +119,47 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) {
         throw new Error(data.message || `Failed to load user profile (HTTP ${response.status})`);
       }
-      // This check needs to look for the `profileData` object from our server.js change
-      if(!data.success || !data.profileData) {
+      if(!data.success) {
         throw new Error(data.message || 'Failed to load user profile (API Error)');
       }
 
-      // Using profileData as the main object
-      const profile = data.profileData;
-      console.log("DASHBOARD.JS: User profile data received:", profile);
+      console.log("DASHBOARD.JS: User profile data received:", data.user);
 
-      // Set the username from the fresh API data
-      const userNameEl = document.getElementById('userName');
-      if (userNameEl) {
-        userNameEl.textContent = profile.username || 'User';
-      }
-
-      // Use the correct properties from the API response
-      const mainUSDBalance = profile.mainUSDBalance || 0;
-      const totalPortfolioValue = profile.totalPortfolioValueUSD || mainUSDBalance;
+      const fetchedUser = data.user;
+      const balance = fetchedUser.balance !== undefined ? fetchedUser.balance : 0;
       
       const balanceEl = document.getElementById('availableBalance');
       const portfolioValueEl = document.getElementById('portfolioValue');
       
-      if (balanceEl) balanceEl.textContent = `$${parseFloat(mainUSDBalance).toFixed(2)}`;
-      if (portfolioValueEl) portfolioValueEl.textContent = `$${parseFloat(totalPortfolioValue).toFixed(2)}`;
+      if (balanceEl) balanceEl.textContent = `$${parseFloat(balance).toFixed(2)}`;
+      if (portfolioValueEl) portfolioValueEl.textContent = `$${parseFloat(balance).toFixed(2)}`;
 
       // ========================== ASSET DISPLAY LOGIC START ==========================
       const assetsContainer = document.getElementById('assetsList');
       if (assetsContainer) {
         assetsContainer.innerHTML = ''; // Clear previous assets
 
+        // 1. Define the assets we ALWAYS want to display.
         const displayAssetSymbols = ['BTC', 'USDT', 'ETH'];
-        const userAssets = profile.assets || [];
+
+        // 2. Get the assets from the API and create a lookup map for efficiency.
+        // This makes it easy to find the balance for a specific symbol.
+        const userAssets = fetchedUser.assets || [];
         const assetBalanceMap = new Map(
             userAssets.map(asset => [asset.symbol.toUpperCase(), asset.amount])
         );
 
+        // 3. Loop through our defined list of symbols, not the list from the API.
         displayAssetSymbols.forEach(symbol => {
+          // Get the balance from our map, or default to 0 if it's not found.
           const amount = assetBalanceMap.get(symbol) || 0;
+          
           const div = document.createElement('div');
           div.className = 'asset-item';
+          
+          // Use the correct number of decimal places based on the asset type.
           const formattedAmount = parseFloat(amount).toFixed(symbol === 'BTC' || symbol === 'ETH' ? 8 : 2);
+
           div.innerHTML = `<strong>${symbol}:</strong> ${formattedAmount}`;
           assetsContainer.appendChild(div);
         });
@@ -412,9 +398,9 @@ document.addEventListener('DOMContentLoaded', () => {
     await fetchRealUserProfileData(); 
     await loadActiveInvestments();
 
-    // This part is handled by auth.js but it's safe to keep as a final check
     const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
     if (loadingSpinnerOverlay) {
+        console.log("DASHBOARD.JS: Hiding loading spinner after initial data load attempt.");
         loadingSpinnerOverlay.style.display = 'none';
     }
     document.body.classList.remove('auth-loading'); 
