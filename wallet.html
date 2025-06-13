@@ -3,12 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Rapidcrypto - Wallet</title>
+  <title>My Wallet - RapidWealthHub</title>
+  
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
   <link rel="stylesheet" href="wallet.css"/>
+  <link rel="stylesheet" href="dashboard.css" /> <!-- Also include dashboard CSS for consistency -->
+
+  <!-- ADDED: This style prevents the page from flashing before auth.js runs -->
+  <style>
+    html { visibility: hidden; opacity: 0; }
+  </style>
 </head>
-<body>
+<!-- ADDED: The `auth-loading` class for your script -->
+<body class="auth-loading">
+
+  <!-- ADDED: The loading spinner overlay -->
+  <div class="loading-spinner-overlay">
+      <div class="auth-spinner"></div>
+  </div>
+
   <header>
     <nav>
       <div class="logo">Rapidcrypto</div>
@@ -17,9 +31,10 @@
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="wallet.html" class="active">Wallet</a></li>
         <li><a href="transactions.html">Transactions</a></li>
-        <li><a href="login.html" style="display: none;">Login</a></li>
-        <li><a href="register.html" style="display: none;">Register</a></li>
-        <li><a href="#" id="logoutBtn" class="btn" style="display: none;">Logout</a></li>
+        <!-- These will be hidden/shown by auth.js -->
+        <li><a href="login.html">Login</a></li>
+        <li><a href="register.html">Register</a></li>
+        <li><a href="#" id="logoutBtn" class="btn">Logout</a></li>
       </ul>
     </nav>
   </header>
@@ -50,71 +65,37 @@
             </thead>
             <tbody>
               <tr>
-                <td>
-                  <div class="asset-info">
-                    <!-- MODIFIED: Changed to local image path -->
-                    <img src="images/btc.png" alt="Bitcoin" class="asset-icon">
-                    Bitcoin (BTC)
-                  </div>
-                </td>
-                <td data-asset-balance="btc">0.0000 BTC</td>
-                <td data-asset-value="btc">$0.00</td>
+                <td><div class="asset-info"><img src="images/btc.png" alt="Bitcoin" class="asset-icon"> Bitcoin (BTC)</div></td>
+                <td data-asset-balance="btc">Loading...</td>
+                <td data-asset-value="btc">Loading...</td>
               </tr>
               <tr>
-                <td>
-                  <div class="asset-info">
-                    <!-- MODIFIED: Changed to local image path -->
-                    <img src="images/eth.png" alt="Ethereum" class="asset-icon">
-                    Ethereum (ETH)
-                  </div>
-                </td>
-                <td data-asset-balance="eth">0.0000 ETH</td>
-                <td data-asset-value="eth">$0.00</td>
+                <td><div class="asset-info"><img src="images/eth.png" alt="Ethereum" class="asset-icon"> Ethereum (ETH)</div></td>
+                <td data-asset-balance="eth">Loading...</td>
+                <td data-asset-value="eth">Loading...</td>
               </tr>
               <tr>
-                <td>
-                  <div class="asset-info">
-                    <!-- MODIFIED: Changed to local image path -->
-                    <img src="images/ada.png" alt="Cardano" class="asset-icon">
-                    Cardano (ADA)
-                  </div>
-                </td>
-                <td data-asset-balance="ada">0.0000 ADA</td>
-                <td data-asset-value="ada">$0.00</td>
+                <td><div class="asset-info"><img src="images/ada.png" alt="Cardano" class="asset-icon"> Cardano (ADA)</div></td>
+                <td data-asset-balance="ada">Loading...</td>
+                <td data-asset-value="ada">Loading...</td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-
-      <!-- REMOVED: Entire deposit address card section -->
-      <!--
-      <div class="card address-card">
-        <h3><i class="fas fa-university"></i> Deposit Wallet Address</h3>
-        <p style="text-align: center; font-size: 0.9em; color: #777;">This is a shared deposit address for simplicity. In a real system, each user might have unique addresses per asset.</p>
-        <div class="address-container">
-          <div class="address-box">
-            <i class="fas fa-wallet"></i>
-            <span id="sharedAddress">3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5</span>
-          </div>
-          <button class="action-btn copy-btn" id="copyAddressBtn">
-            <i class="fas fa-copy"></i> Copy Address
-          </button>
-        </div>
-        <div style="margin-top: 15px; text-align: center;">
-          <img id="walletQrCode" src="https://api.qrserver.com/v1/create-qr-code/?data=3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5&size=150x150" alt="QR Code for Deposit Address">
-        </div>
-      </div>
-      -->
     </section>
   </main>
   
+  <!-- ============================================= -->
+  <!--               SCRIPTS                         -->
+  <!-- ============================================= -->
   <script>
+    // ADDED: This flag tells auth.js that this page is protected.
+    window.REQUIRES_AUTH = true; 
     window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com/api";
   </script>
-  <!-- External scripts -->
-  <script src="auth.js"></script>
-  <script src="script.js"></script>
-  <script src="wallet.js"></script>
+  <!-- ADDED `defer` to scripts for better loading performance -->
+  <script src="auth.js" defer></script>
+  <script src="wallet.js" defer></script>
 </body>
 </html>

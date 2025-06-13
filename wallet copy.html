@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rapidcrypto - Wallet</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <link rel="stylesheet" href="wallet.css"/>
+</head>
+<body>
+  <header>
+    <nav>
+      <div class="logo">Rapidcrypto</div>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="wallet.html" class="active">Wallet</a></li>
+        <li><a href="transactions.html">Transactions</a></li>
+        <li><a href="login.html" style="display: none;">Login</a></li>
+        <li><a href="register.html" style="display: none;">Register</a></li>
+        <li><a href="#" id="logoutBtn" class="btn" style="display: none;">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section class="wallet">
+      <h1>Welcome, <span id="userName">User</span></h1>
+
+      <div class="wallet-actions">
+        <a href="transfer.html" class="action-btn send-btn" id="sendBtn">
+          <i class="fas fa-paper-plane action-icon"></i> Send
+        </a>
+        <a href="receive.html" class="action-btn receive-btn" id="receiveBtn">
+          <i class="fas fa-qrcode action-icon"></i> Receive
+        </a>
+      </div>
+
+      <div class="card balances-card">
+        <h3><i class="fas fa-coins"></i> Your Balances</h3>
+        <div class="table-container">
+          <table id="balancesTable">
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Balance</th>
+                <th>Value (USD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="asset-info">
+                    <!-- MODIFIED: Changed to local image path -->
+                    <img src="images/btc.png" alt="Bitcoin" class="asset-icon">
+                    Bitcoin (BTC)
+                  </div>
+                </td>
+                <td data-asset-balance="btc">0.0000 BTC</td>
+                <td data-asset-value="btc">$0.00</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="asset-info">
+                    <!-- MODIFIED: Changed to local image path -->
+                    <img src="images/eth.png" alt="Ethereum" class="asset-icon">
+                    Ethereum (ETH)
+                  </div>
+                </td>
+                <td data-asset-balance="eth">0.0000 ETH</td>
+                <td data-asset-value="eth">$0.00</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="asset-info">
+                    <!-- MODIFIED: Changed to local image path -->
+                    <img src="images/ada.png" alt="Cardano" class="asset-icon">
+                    Cardano (ADA)
+                  </div>
+                </td>
+                <td data-asset-balance="ada">0.0000 ADA</td>
+                <td data-asset-value="ada">$0.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- REMOVED: Entire deposit address card section -->
+      <!--
+      <div class="card address-card">
+        <h3><i class="fas fa-university"></i> Deposit Wallet Address</h3>
+        <p style="text-align: center; font-size: 0.9em; color: #777;">This is a shared deposit address for simplicity. In a real system, each user might have unique addresses per asset.</p>
+        <div class="address-container">
+          <div class="address-box">
+            <i class="fas fa-wallet"></i>
+            <span id="sharedAddress">3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5</span>
+          </div>
+          <button class="action-btn copy-btn" id="copyAddressBtn">
+            <i class="fas fa-copy"></i> Copy Address
+          </button>
+        </div>
+        <div style="margin-top: 15px; text-align: center;">
+          <img id="walletQrCode" src="https://api.qrserver.com/v1/create-qr-code/?data=3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5&size=150x150" alt="QR Code for Deposit Address">
+        </div>
+      </div>
+      -->
+    </section>
+  </main>
+  
+  <script>
+    window.API_BASE_URL = "https://rapidcrypto-backend.onrender.com/api";
+  </script>
+  <!-- External scripts -->
+  <script src="auth.js"></script>
+  <script src="script.js"></script>
+  <script src="wallet.js"></script>
+</body>
+</html>

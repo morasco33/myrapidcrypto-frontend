@@ -1,62 +1,91 @@
-// --- START OF FIXED auth.js ---
+// --- START OF MODIFIED auth.js ---
+
+// Define constants for keys and URLs used throughout the script.
 const AUTH_API_BASE_URL = window.API_BASE_URL || 'https://rapidcrypto-backend.onrender.com/api';
 const AUTH_TOKEN_KEY = 'cryptohub_auth_token';
 const USER_INFO_KEY = 'cryptohub_user_info';
 
+/**
+ * This is the main function that runs when the page loads.
+ * It handles all authentication, routing, and initial UI setup.
+ */
 document.addEventListener('DOMContentLoaded', function () {
-  console.log("AUTH.JS: DOMContentLoaded");
+    console.log("AUTH.JS: DOMContentLoaded. Starting authentication check.");
 
-  finalizePageSetupBasedOnAuth();
+    // --- 1. DEFINE PAGE ROUTES ---
+    const currentPagePath = window.location.pathname;
+    // Pages that require a user to be logged in.
+    const protectedPagesPaths = ['/dashboard.html', '/wallet.html', '/transactions.html', '/transfer.html', '/deposit.html', '/receive.html'];
+    // Pages for logging in or registering.
+    const authPagePaths = ['/login.html', '/register.html'];
 
-  const logoutButton = document.getElementById('logoutBtn');
-  if (logoutButton) logoutButton.addEventListener('click', handleLogout);
+    // --- 2. GET AUTHENTICATION STATUS ---
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
 
-  const currentPagePath = window.location.pathname;
-  if (currentPagePath.endsWith('/register.html') && document.getElementById('registerForm')) {
-    document.getElementById('registerForm').addEventListener('submit', handleAuthJsRegister);
-  }
+    // --- 3. CORE ROUTING LOGIC ---
+
+    // RULE A: If the user is on a protected page BUT has NO token...
+    if (protectedPagesPaths.some(path => currentPagePath.endsWith(path)) && !token) {
+        console.warn("AUTH.JS: Access Denied. No token for a protected page. Redirecting to login.");
+        // ...redirect them to the login page and stop all further script execution.
+        window.location.replace('login.html'); // Use .replace() to prevent "back" button issues.
+        return; 
+    }
+
+    // RULE B: If the user is on a login/register page BUT ALREADY HAS a token...
+    if (authPagePaths.some(path => currentPagePath.endsWith(path)) && token) {
+        console.log("AUTH.JS: User is already logged in. Redirecting to dashboard.");
+        // ...redirect them to the dashboard and stop all further script execution.
+        window.location.replace('dashboard.html');
+        return;
+    }
+
+    // --- 4. IF NO REDIRECTION, RENDER THE PAGE ---
+    // If the script reaches this point, the user is allowed to be on the current page.
+    console.log("AUTH.JS: Access Granted. Rendering page.");
+    renderPageContent();
+
+    // --- 5. SETUP PAGE-SPECIFIC EVENT LISTENERS ---
+    // Universal listeners
+    const logoutButton = document.getElementById('logoutBtn');
+    if (logoutButton) logoutButton.addEventListener('click', handleLogout);
+
+    // Registration form listener (only for register.html)
+    if (currentPagePath.endsWith('/register.html')) {
+        const registerForm = document.getElementById('registerForm');
+        if (registerForm) {
+            registerForm.addEventListener('submit', handleAuthJsRegister);
+        }
+    }
 });
 
-function finalizePageSetupBasedOnAuth() {
-  console.log("AUTH.JS: finalizePageSetupBasedOnAuth running");
-  const token = localStorage.getItem(AUTH_TOKEN_KEY);
-  const body = document.body;
-  const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
-  const currentPagePath = window.location.pathname;
-  const protectedPagesPaths = ['/dashboard.html', '/wallet.html', '/transactions.html', '/transfer.html'];
-  const authPagePaths = ['/login.html', '/register.html'];
 
-  let allowPageRender = true;
+/**
+ * Makes the page content visible and updates the navigation bar.
+ */
+function renderPageContent() {
+    // Make the page visible
+    document.documentElement.style.visibility = 'visible';
+    document.documentElement.style.opacity = '1';
 
-  if (window.REQUIRES_AUTH || protectedPagesPaths.includes(currentPagePath)) {
-    if (!token) {
-      console.warn("AUTH.JS: Protected page but no token. Redirecting to login.");
-      allowPageRender = false;
-      if (loadingSpinnerOverlay) loadingSpinnerOverlay.style.display = 'none';
-      window.location.href = 'login.html?redirectTo=' + encodeURIComponent(currentPagePath);
-      return;
+    // Hide the loading spinner
+    const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
+    if (loadingSpinnerOverlay) {
+        loadingSpinnerOverlay.style.display = 'none';
     }
-  } else if (authPagePaths.includes(currentPagePath) && token) {
-    console.log("AUTH.JS: Already logged in and on login/register page. Redirecting to dashboard.");
-    allowPageRender = false;
-    if (loadingSpinnerOverlay) loadingSpinnerOverlay.style.display = 'none';
-    window.location.replace('dashboard.html');
-    return;
-  }
+    
+    // Remove the loading class from the body
+    document.body.classList.remove('auth-loading');
 
-  if (allowPageRender) {
-    if (document.documentElement.style.visibility === 'hidden') {
-      document.documentElement.style.visibility = 'visible';
-      document.documentElement.style.opacity = '1';
-    }
-    if (body.classList.contains('auth-loading')) {
-      body.classList.remove('auth-loading');
-    }
-    if (loadingSpinnerOverlay) loadingSpinnerOverlay.style.display = 'none';
-    updateNavFooterBasedOnAuth();
-  }
+    // Update navigation links to show/hide based on login status
+    updateNavBasedOnAuth();
 }
 
+
+/**
+ * Handles the user registration form submission.
+ * (This function is unchanged from your original file).
+ */
 async function handleAuthJsRegister(e) {
   e.preventDefault();
   const form = e.target;
@@ -72,12 +101,10 @@ async function handleAuthJsRegister(e) {
     showAlert("All fields are required.", 'error', alertContainer);
     return;
   }
-
   if (password !== confirmPassword) {
     showAlert("Passwords do not match.", 'error', alertContainer);
     return;
   }
-
   if (password.length < 6) {
     showAlert("Password must be at least 6 characters.", 'error', alertContainer);
     return;
@@ -85,7 +112,6 @@ async function handleAuthJsRegister(e) {
 
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
-
   try {
     const res = await fetch(`${AUTH_API_BASE_URL}/register`, {
       method: 'POST',
@@ -105,26 +131,36 @@ async function handleAuthJsRegister(e) {
   }
 }
 
-function updateNavFooterBasedOnAuth() {
+/**
+ * Shows or hides navigation links depending on the user's login status.
+ */
+function updateNavBasedOnAuth() {
   const token = localStorage.getItem(AUTH_TOKEN_KEY);
   const navUl = document.querySelector('header nav ul');
   if (!navUl) return;
 
-  const showWhenLoggedIn = navUl.querySelectorAll('a[href="dashboard.html"], a[href="wallet.html"], a[href="transactions.html"], #logoutBtn');
-  const showWhenLoggedOut = navUl.querySelectorAll('a[href="login.html"], a[href="register.html"]');
+  const loggedInLinks = navUl.querySelectorAll('a[href="dashboard.html"], a[href="wallet.html"], a[href="transactions.html"], #logoutBtn');
+  const loggedOutLinks = navUl.querySelectorAll('a[href="login.html"], a[href="register.html"]');
 
-  showWhenLoggedIn.forEach(el => { if (el?.parentElement) el.parentElement.style.display = token ? '' : 'none'; });
-  showWhenLoggedOut.forEach(el => { if (el?.parentElement) el.parentElement.style.display = token ? 'none' : ''; });
+  loggedInLinks.forEach(el => { if (el?.parentElement) el.parentElement.style.display = token ? 'list-item' : 'none'; });
+  loggedOutLinks.forEach(el => { if (el?.parentElement) el.parentElement.style.display = token ? 'none' : 'list-item'; });
 }
 
+/**
+ * Logs the user out by clearing localStorage and redirecting to the home page.
+ */
 function handleLogout() {
   console.log("AUTH.JS: Logging out...");
   localStorage.removeItem(AUTH_TOKEN_KEY);
   localStorage.removeItem(USER_INFO_KEY);
-  updateNavFooterBasedOnAuth();
+  // Redirect to a public page like index.html after logout.
   window.location.replace('index.html');
 }
 
+/**
+ * A utility function to display temporary alerts to the user.
+ * (This function is unchanged from your original file).
+ */
 function showAlert(message, type = 'info', targetElement = null) {
   const existingAlert = document.querySelector('.app-global-alert');
   if (existingAlert) existingAlert.remove();
@@ -145,10 +181,11 @@ function showAlert(message, type = 'info', targetElement = null) {
   } else {
     document.body.insertBefore(alertDiv, document.body.firstChild);
   }
-
+  
   setTimeout(() => {
+    alertDiv.style.transition = 'opacity 0.5s ease';
     alertDiv.style.opacity = '0';
     setTimeout(() => alertDiv.remove(), 500);
   }, 4500);
 }
-// --- END OF FIXED auth.js ---
+// --- END OF MODIFIED auth.js ---
