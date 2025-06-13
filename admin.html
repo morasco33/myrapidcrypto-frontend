@@ -67,7 +67,7 @@
     </section>
   </main>
 
-  <!-- ======================= FULLY CORRECTED MODAL ======================= -->
+  <!-- ======================= THE MODAL WHERE EDITING HAPPENS ======================= -->
   <div id="editUserModal" class="modal">
     <div class="modal-content">
       <span class="modal-close" onclick="closeModal('editUserModal')">×</span>
@@ -98,6 +98,7 @@
       
       <hr>
 
+      <!-- THIS IS THE SECTION WITH THE EDITABLE ASSET FIELDS -->
       <h3>Credit Crypto Assets (Enter amount to ADD)</h3>
       <p><small>Current user asset balances:</small></p>
       <div id="editUserCurrentAssets" class="asset-balance-grid"></div>
@@ -114,6 +115,7 @@
         <label for="addUsdtInput">Add USDT Amount:</label>
         <input type="number" id="addUsdtInput" step="any" placeholder="e.g., 500">
       </div>
+      <!-- END OF THE ASSET SECTION -->
 
       <button id="saveUserChangesBtn">Save Changes</button>
       <div id="editUserModalMessage" class="info-text"></div>
