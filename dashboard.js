@@ -1,55 +1,46 @@
-// --- START OF dashboard.js (Corrected) ---
+// --- START OF dashboard.js (Modified to show specific assets) ---
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DASHBOARD.JS: DOMContentLoaded");
 
-  // --- 1. DEFINE KEYS AND GET AUTH DATA ---
-  // These keys must match the ones used in auth.js and other scripts.
   const USER_INFO_KEY_FOR_DASH = 'cryptohub_user_info';
   const AUTH_TOKEN_KEY_FOR_DASH = 'cryptohub_auth_token';
 
   const authToken = localStorage.getItem(AUTH_TOKEN_KEY_FOR_DASH);
   const userInfoString = localStorage.getItem(USER_INFO_KEY_FOR_DASH);
 
-  // --- 2. CRITICAL AUTHENTICATION CHECK ---
-  // If the user somehow gets to the dashboard page without a token or user info,
-  // they must be redirected to the login page immediately. This prevents unauthenticated access.
   if (!authToken || !userInfoString) {
     console.error("DASHBOARD.JS: CRITICAL - Auth token or user info missing. Redirecting to login.");
     window.location.href = 'login.html?reason=session_expired_dashboard_check';
-    return; // Stop all further script execution on this page.
+    return;
   }
 
-  // --- 3. PARSE USER DATA ---
   let user;
   try {
     user = JSON.parse(userInfoString);
   } catch (e) {
-    // This handles cases where the localStorage data is corrupted.
     console.error("DASHBOARD.JS: CRITICAL - Failed to parse user info from localStorage.", e);
     const mainContent = document.querySelector('main');
     if (mainContent) mainContent.innerHTML = `<h1>Data Error</h1><p>Could not load user data. Please try <a href="login.html?action=relogin">logging in again</a>.</p>`;
-    // Manually unhide the page to show the error.
-    document.querySelector('.loading-spinner-overlay')?.style.display = 'none';
+    const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
+    if (loadingSpinnerOverlay) loadingSpinnerOverlay.style.display = 'none';
     document.body.classList.remove('auth-loading');
     document.documentElement.style.visibility = 'visible';
     document.documentElement.style.opacity = '1';
     return;
   }
 
-  // Ensure the parsed user object has the necessary data (_id).
   if (!user || !user._id) {
     console.error("DASHBOARD.JS: CRITICAL - User info object is invalid or missing essential ID.", user);
     const mainContent = document.querySelector('main');
     if (mainContent) mainContent.innerHTML = `<h1>User Data Error</h1><p>User information is incomplete. Please try <a href="login.html?action=relogin">logging in again</a>.</p>`;
-    // Manually unhide the page to show the error.
-    document.querySelector('.loading-spinner-overlay')?.style.display = 'none';
+    const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
+    if (loadingSpinnerOverlay) loadingSpinnerOverlay.style.display = 'none';
     document.body.classList.remove('auth-loading');
     document.documentElement.style.visibility = 'visible';
     document.documentElement.style.opacity = '1';
     return;
   }
-  
-  // --- 4. INITIALIZE UI WITH BASIC INFO ---
+
   console.log("DASHBOARD.JS: User confirmed and data parsed. User:", user.username || user.email);
   const userNameEl = document.getElementById('userName');
   if (userNameEl) {
@@ -91,14 +82,25 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // --- Event Listeners for Quick Actions to Navigate to Pages ---
-  document.getElementById('mainDepositBtn')?.addEventListener('click', () => {
-    console.log('DASHBOARD.JS: Main Deposit Button Clicked, navigating to deposit.html');
-    window.location.href = 'deposit.html';
-  });
-  document.getElementById('mainWithdrawBtn')?.addEventListener('click', () => {
-    console.log('DASHBOARD.JS: Main Withdraw Button Clicked, navigating to withdraw.html');
-    window.location.href = 'withdraw.html';
-  });
+  const mainDepositButton = document.getElementById('mainDepositBtn');
+  if (mainDepositButton) {
+    mainDepositButton.addEventListener('click', () => {
+      console.log('DASHBOARD.JS: Main Deposit Button Clicked, navigating to deposit.html');
+      window.location.href = 'deposit.html'; // Navigate to the deposit page
+    });
+  } else {
+      console.warn('DASHBOARD.JS: mainDepositBtn not found.');
+  }
+
+  const mainWithdrawButton = document.getElementById('mainWithdrawBtn');
+  if (mainWithdrawButton) {
+    mainWithdrawButton.addEventListener('click', () => {
+      console.log('DASHBOARD.JS: Main Withdraw Button Clicked, navigating to withdraw.html');
+      window.location.href = 'withdraw.html'; // Navigate to the withdraw page
+    });
+  } else {
+      console.warn('DASHBOARD.JS: mainWithdrawBtn not found.');
+  }
 
   // --- Fetch Real User Profile Data (Balance, Assets) ---
   async function fetchRealUserProfileData() {
@@ -132,34 +134,37 @@ document.addEventListener('DOMContentLoaded', () => {
       if (balanceEl) balanceEl.textContent = `$${parseFloat(balance).toFixed(2)}`;
       if (portfolioValueEl) portfolioValueEl.textContent = `$${parseFloat(balance).toFixed(2)}`;
 
-      // ========================== ASSET DISPLAY LOGIC START (CORRECTED) ==========================
+      // ========================== ASSET DISPLAY LOGIC START ==========================
       const assetsContainer = document.getElementById('assetsList');
       if (assetsContainer) {
-          assetsContainer.innerHTML = ''; // Clear previous assets, if any
+        assetsContainer.innerHTML = ''; // Clear previous assets
 
-          const userAssets = fetchedUser.assets || [];
+        // 1. Define the assets we ALWAYS want to display.
+        const displayAssetSymbols = ['BTC', 'USDT', 'ETH'];
 
-          if (userAssets.length > 0) {
-              // Loop through all assets returned from the API, not a hardcoded list.
-              userAssets.forEach(asset => {
-                  const div = document.createElement('div');
-                  div.className = 'asset-item';
-                  
-                  const symbol = asset.symbol.toUpperCase();
-                  const amount = asset.amount || 0;
-                  
-                  // Use a more robust rule for formatting decimal places.
-                  const formattedAmount = parseFloat(amount).toFixed(symbol === 'BTC' || symbol === 'ETH' ? 8 : 2);
+        // 2. Get the assets from the API and create a lookup map for efficiency.
+        // This makes it easy to find the balance for a specific symbol.
+        const userAssets = fetchedUser.assets || [];
+        const assetBalanceMap = new Map(
+            userAssets.map(asset => [asset.symbol.toUpperCase(), asset.amount])
+        );
 
-                  div.innerHTML = `<strong>${symbol}:</strong> ${formattedAmount}`;
-                  assetsContainer.appendChild(div);
-              });
-          } else {
-              // If the user has no assets, show a helpful message.
-              assetsContainer.innerHTML = '<p class="info-text" style="padding: 10px 0;">No assets found in your portfolio.</p>';
-          }
+        // 3. Loop through our defined list of symbols, not the list from the API.
+        displayAssetSymbols.forEach(symbol => {
+          // Get the balance from our map, or default to 0 if it's not found.
+          const amount = assetBalanceMap.get(symbol) || 0;
+          
+          const div = document.createElement('div');
+          div.className = 'asset-item';
+          
+          // Use the correct number of decimal places based on the asset type.
+          const formattedAmount = parseFloat(amount).toFixed(symbol === 'BTC' || symbol === 'ETH' ? 8 : 2);
+
+          div.innerHTML = `<strong>${symbol}:</strong> ${formattedAmount}`;
+          assetsContainer.appendChild(div);
+        });
       }
-      // =========================== ASSET DISPLAY LOGIC END (CORRECTED) ===========================
+      // =========================== ASSET DISPLAY LOGIC END ===========================
 
     } catch (err) {
       console.error('DASHBOARD.JS: Error loading user profile data:', err.message);
@@ -311,6 +316,9 @@ document.addEventListener('DOMContentLoaded', () => {
         hideModal();
         alert(`Investment Error: ${error.message}`);
         console.error("DASHBOARD.JS: Catch block for investment error:", error);
+        if (error.message && error.message.toLowerCase().includes("unexpected server error")) {
+            alert("An unexpected error occurred on the server. Please check server logs or contact support.");
+        }
       }
     });
   });
@@ -387,13 +395,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- Initial Dashboard Data Load ---
   async function initializeDashboard() {
     console.log("DASHBOARD.JS: Initializing dashboard data...");
-    // Fetch data from the server
     await fetchRealUserProfileData(); 
     await loadActiveInvestments();
 
-    // Once all data fetching is attempted, hide the loader and show the page
     const loadingSpinnerOverlay = document.querySelector('.loading-spinner-overlay');
     if (loadingSpinnerOverlay) {
+        console.log("DASHBOARD.JS: Hiding loading spinner after initial data load attempt.");
         loadingSpinnerOverlay.style.display = 'none';
     }
     document.body.classList.remove('auth-loading'); 
@@ -406,4 +413,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeDashboard();
 
 });
-// --- END OF dashboard.js (Corrected) ---
+// --- END OF dashboard.js (Modified to show specific assets) ---
