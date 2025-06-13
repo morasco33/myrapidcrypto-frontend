@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard | RapidCrypto</title>
-  <link rel="stylesheet" href="dashboard.css" /> <!-- Make sure you have this CSS file -->
+  <link rel="stylesheet" href="dashboard.css" />
   <style>
     body { font-family: sans-serif; margin: 0; background-color: #f4f7f6; color: #333; }
     main { max-width: 1200px; margin: 20px auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -62,17 +62,11 @@
     </section>
 
     <section id="allUsersSection">
-        <h2>All Users (Paginated - Example)</h2>
-        <div id="allUsersList">Loading users...</div>
-        <div id="paginationControls">
-            <button id="prevPageBtn" disabled>Previous</button>
-            <span id="currentPageSpan">Page: 1</span>
-            <button id="nextPageBtn">Next</button>
-        </div>
+        <h2>All Users (Example)</h2>
+        <div id="allUsersList">This section can be developed further.</div>
     </section>
   </main>
 
-  <!-- ======================= MODIFIED MODAL START ======================= -->
   <div id="editUserModal" class="modal">
     <div class="modal-content">
       <span class="modal-close" onclick="closeModal('editUserModal')">×</span>
@@ -105,9 +99,7 @@
 
       <h3>Credit Crypto Assets (Enter amount to ADD)</h3>
       <p><small>Current user asset balances:</small></p>
-      <div id="editUserCurrentAssets" class="asset-balance-grid">
-        <!-- Current balances will be populated here by JS -->
-      </div>
+      <div id="editUserCurrentAssets" class="asset-balance-grid"></div>
       
       <div>
         <label for="addBtcInput">Add BTC Amount:</label>
@@ -126,14 +118,12 @@
       <div id="editUserModalMessage" class="info-text"></div>
     </div>
   </div>
-  <!-- ======================== MODIFIED MODAL END ======================== -->
 
 
   <script>
     const AUTH_TOKEN_KEY = 'cryptohub_auth_token';
     const ADMIN_AUTH_TOKEN = localStorage.getItem(AUTH_TOKEN_KEY);
     const API_BASE_URL = window.API_BASE_URL || 'https://rapidcrypto-backend.onrender.com/api';
-
 
     // UI Elements
     const searchEmailInput = document.getElementById('searchEmailInput');
@@ -153,8 +143,6 @@
     const editIsAdminApprovedCheckbox = document.getElementById('editIsAdminApprovedCheckbox');
     const saveUserChangesBtn = document.getElementById('saveUserChangesBtn');
     const editUserModalMessage = document.getElementById('editUserModalMessage');
-    
-    // --- NEW CRYPTO INPUT ELEMENTS ---
     const editUserCurrentAssetsDiv = document.getElementById('editUserCurrentAssets');
     const addBtcInput = document.getElementById('addBtcInput');
     const addEthInput = document.getElementById('addEthInput');
@@ -168,7 +156,7 @@
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) modal.style.display = 'none';
-        if (modalId === 'editUserModal') editUserModalMessage.textContent = ''; // Clear message on close
+        if (modalId === 'editUserModal') editUserModalMessage.textContent = '';
     }
 
     async function apiCall(endpoint, method = 'GET', body = null, token = ADMIN_AUTH_TOKEN) {
@@ -188,7 +176,6 @@
         }
         return data;
     }
-
 
     async function fetchPendingUsers() {
       pendingUsersList.innerHTML = '<p class="loading-text">Loading pending users...</p>';
@@ -213,16 +200,11 @@
           pendingUsersList.appendChild(div);
         });
 
-        pendingUsersList.querySelectorAll('.approve-btn').forEach(btn => {
-          btn.addEventListener('click', handleApproveUser);
-        });
-        pendingUsersList.querySelectorAll('.resend-verification-btn').forEach(btn => {
-          btn.addEventListener('click', handleResendVerification);
-        });
+        pendingUsersList.querySelectorAll('.approve-btn').forEach(btn => btn.addEventListener('click', handleApproveUser));
+        pendingUsersList.querySelectorAll('.resend-verification-btn').forEach(btn => btn.addEventListener('click', handleResendVerification));
 
       } catch (err) {
         pendingUsersList.innerHTML = `<p class="error-text">Error fetching pending users: ${err.message}</p>`;
-        console.error("fetchPendingUsers error:", err);
       }
     }
 
@@ -234,8 +216,7 @@
             alert(result.message || 'User approved successfully.');
             fetchPendingUsers();
             if (searchResultDisplay.innerHTML.includes(userId)) {
-                const currentSearchEmail = searchEmailInput.value;
-                if (currentSearchEmail) searchUserByEmail(currentSearchEmail);
+                searchUserByEmail(searchEmailInput.value);
             }
         } catch (err) {
             alert(`Error approving user: ${err.message}`);
@@ -267,21 +248,20 @@
             <p><strong>Is Admin:</strong> ${user.isAdmin ? 'Yes' : 'No'}</p>
             <p><strong>Joined:</strong> ${new Date(user.createdAt).toLocaleString()}</p>
             <hr>
-            <button data-userid="${user._id}" class="edit-user-btn edit-btn">Edit User</button>
+            <button data-user='${JSON.stringify(user)}' class="edit-user-btn edit-btn">Edit User</button>
             ${!user.verified ? `<button data-userid="${user._id}" class="resend-verification-btn action-btn">Resend Verification</button>` : ''}
             ${!user.adminApproved && user.verified ? `<button data-userid="${user._id}" class="approve-btn">Approve User</button>` : ''}
-          </div>
-        `;
-        searchResultDisplay.querySelector('.edit-user-btn')?.addEventListener('click', (e) => openEditUserModal(user));
-        searchResultDisplay.querySelector('.resend-verification-btn')?.addEventListener('click', handleResendVerification);
-        searchResultDisplay.querySelector('.approve-btn')?.addEventListener('click', handleApproveUser);
+          </div>`;
+
+        searchResultDisplay.querySelector('.edit-user-btn')?.addEventListener('click', (e) => openEditUserModal(JSON.parse(e.target.dataset.user)));
+        searchResultDisplay.querySelector('.resend-verification-btn')?.addEventListener('click', (e) => handleResendVerification(e.target.dataset.userid));
+        searchResultDisplay.querySelector('.approve-btn')?.addEventListener('click', (e) => handleApproveUser({ target: { dataset: { id: e.target.dataset.userid } } }));
 
       } catch (err) {
         searchResultDisplay.innerHTML = `<p class="error-text">Search failed: ${err.message}</p>`;
       }
     }
 
-    // --- MODIFIED to handle new crypto fields ---
     function openEditUserModal(user) {
         editUserIdInput.value = user._id;
         editUserEmailSpan.textContent = user.email;
@@ -291,12 +271,10 @@
         editIsVerifiedCheckbox.checked = user.verified || false;
         editIsAdminApprovedCheckbox.checked = user.adminApproved || false;
         
-        // Clear crypto credit fields every time modal is opened
         addBtcInput.value = '';
         addEthInput.value = '';
         addUsdtInput.value = '';
         
-        // Display current crypto balances for admin's reference
         editUserCurrentAssetsDiv.innerHTML = '';
         const assets = user.assets || [];
         if (assets.length > 0) {
@@ -314,34 +292,25 @@
         showModal('editUserModal');
     }
 
-    // --- MODIFIED to send new crypto data ---
     async function handleSaveUserChanges() {
         const userId = editUserIdInput.value;
-        
-        // Prepare the payload for standard user fields
         const payload = {
             username: editUsernameInput.value.trim(),
             balance: parseFloat(editBalanceInput.value),
             isAdmin: editIsAdminCheckbox.checked,
             verified: editIsVerifiedCheckbox.checked,
             adminApproved: editIsAdminApprovedCheckbox.checked,
-            // --- NEW ---
-            // This object will contain the amounts to credit.
-            // Your backend must be updated to handle this `assetCredits` object.
             assetCredits: {}
         };
         
-        // Read and parse amounts to add for each crypto
         const btcToAdd = parseFloat(addBtcInput.value) || 0;
         const ethToAdd = parseFloat(addEthInput.value) || 0;
         const usdtToAdd = parseFloat(addUsdtInput.value) || 0;
 
-        // Add to payload only if the value is positive
         if (btcToAdd > 0) payload.assetCredits.BTC = btcToAdd;
         if (ethToAdd > 0) payload.assetCredits.ETH = ethToAdd;
         if (usdtToAdd > 0) payload.assetCredits.USDT = usdtToAdd;
         
-        // Basic validation
         if (isNaN(payload.balance) || payload.balance < 0) {
             editUserModalMessage.textContent = 'Error: Invalid main balance amount.';
             editUserModalMessage.className = 'error-text';
@@ -357,18 +326,13 @@
         editUserModalMessage.className = 'loading-text';
 
         try {
-            // IMPORTANT: Your backend route at /admin/update-user/:userId
-            // now needs to be modified to read the `payload.assetCredits` object
-            // and update the user's `assets` array accordingly.
             const data = await apiCall(`/admin/update-user/${userId}`, 'POST', payload);
             editUserModalMessage.textContent = data.message || 'User updated successfully!';
             editUserModalMessage.className = 'info-text success';
             
             fetchPendingUsers();
             const currentSearchEmail = searchEmailInput.value;
-            if (currentSearchEmail && data.user && data.user.email === currentSearchEmail) {
-                 searchUserByEmail(currentSearchEmail);
-            } else if (currentSearchEmail) {
+            if (currentSearchEmail) {
                  searchUserByEmail(currentSearchEmail);
             }
 
@@ -379,18 +343,18 @@
         }
     }
 
-
-    async function handleResendVerification(event) {
-        const userId = event.target.dataset.id || event.target.dataset.userid;
+    async function handleResendVerification(userId) {
+        if (!userId) { // In case it's called from the event directly
+            userId = event.target.dataset.id || event.target.dataset.userid;
+        }
         if (!confirm(`Are you sure you want to resend verification email for user ID: ${userId}?`)) return;
         try {
             const result = await apiCall(`/admin/resend-verification/${userId}`, 'POST');
             alert(result.message || 'Verification email resent.');
-            const currentSearchEmail = searchEmailInput.value;
-            if (currentSearchEmail && searchResultDisplay.innerHTML.includes(userId)) {
-                 searchUserByEmail(currentSearchEmail);
+            if (searchResultDisplay.innerHTML.includes(userId)) {
+                 searchUserByEmail(searchEmailInput.value);
             }
-        } catch (err)_ {
+        } catch (err) {
             alert(`Error resending verification: ${err.message}`);
         }
     }
@@ -402,9 +366,7 @@
             return;
         }
 
-        searchUserBtn.addEventListener('click', () => {
-          searchUserByEmail(searchEmailInput.value);
-        });
+        searchUserBtn.addEventListener('click', () => searchUserByEmail(searchEmailInput.value));
         searchEmailInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') searchUserByEmail(searchEmailInput.value);
         });
