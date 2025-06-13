@@ -1,4 +1,4 @@
-// --- START OF dashboard.js (Corrected to Hide Withdrawn Investments) ---
+// --- START OF dashboard.js (Corrected to Hide Withdrawn Investments & Style Locked Text) ---
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DASHBOARD.JS: DOMContentLoaded");
 
@@ -196,16 +196,10 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (data.investments.length > 0) {
-                // ========================== FIX STARTS HERE ==========================
-                // This filter ensures that only investments with 'active' or 'matured' status
-                // are displayed. This will automatically hide any investments that have been
-                // withdrawn (e.g., status 'withdrawn_matured' or 'withdrawn_early').
                 const displayableInvestments = data.investments.filter(inv =>
                     inv.status === 'active' || inv.status === 'matured'
                 );
-                // =========================== FIX ENDS HERE ===========================
 
-                // Now, we loop over the filtered array instead of the original one.
                 displayableInvestments.forEach(inv => {
                     const planCard = document.querySelector(`.investment-options[data-plan-id="${inv.planId}"]`);
                     if (planCard) {
@@ -227,7 +221,9 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p><small>Matures: ${maturityDate} | Unlocks for Withdrawal: ${unlockDate}</small></p>
                             ${canWithdraw ? 
                                 `<button class="withdraw-btn-plan" data-investment-id="${inv._id}" style="background-color: #28a745; color:white; border:none; padding: 8px 12px; border-radius:4px; cursor:pointer;">Withdraw Funds</button>` :
-                                ( (inv.status === 'active' || inv.status === 'matured') ? `<small style="color: orange;">Withdrawal Locked until ${unlockDate}</small>` : '<small>This investment is not currently withdrawable.</small>')
+                                // ========================== STYLE CHANGE IS HERE ==========================
+                                `<small style="color: red; font-weight: bold;">Withdrawal Locked until ${unlockDate}</small>`
+                                // ==========================================================================
                             }
                             `;
                             container.appendChild(el);
@@ -403,4 +399,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeDashboard();
 
 });
-// --- END OF dashboard.js (Corrected to Hide Withdrawn Investments) ---
+// --- END OF dashboard.js (Corrected to Hide Withdrawn Investments & Style Locked Text) ---
