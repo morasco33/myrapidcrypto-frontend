@@ -1,4 +1,4 @@
-// --- START OF dashboard.js (Corrected to Hide Withdrawn Investments & Style Locked Text) ---
+// --- START OF dashboard.js (Modified to show specific assets) ---
 document.addEventListener('DOMContentLoaded', () => {
   console.log("DASHBOARD.JS: DOMContentLoaded");
 
@@ -127,29 +127,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const fetchedUser = data.user;
       const balance = fetchedUser.balance !== undefined ? fetchedUser.balance : 0;
-      const assets = fetchedUser.assets || []; 
-
+      
       const balanceEl = document.getElementById('availableBalance');
       const portfolioValueEl = document.getElementById('portfolioValue');
       
       if (balanceEl) balanceEl.textContent = `$${parseFloat(balance).toFixed(2)}`;
       if (portfolioValueEl) portfolioValueEl.textContent = `$${parseFloat(balance).toFixed(2)}`;
 
+      // ========================== ASSET DISPLAY LOGIC START ==========================
       const assetsContainer = document.getElementById('assetsList');
       if (assetsContainer) {
-        assetsContainer.innerHTML = '';
-        if (assets.length > 0) {
-          assets.forEach((asset) => {
-            const div = document.createElement('div');
-            div.className = 'asset-item';
-            const amount = parseFloat(asset.amount);
-            div.innerHTML = `<strong>${asset.symbol || asset.name}:</strong> ${isNaN(amount) ? 'N/A' : amount.toFixed(asset.symbol === 'BTC' || asset.symbol === 'ETH' ? 8 : 2)}`;
-            assetsContainer.appendChild(div);
-          });
-        } else {
-          assetsContainer.innerHTML = '<p><small>No distinct crypto assets recorded.</small></p>';
-        }
+        assetsContainer.innerHTML = ''; // Clear previous assets
+
+        // 1. Define the assets we ALWAYS want to display.
+        const displayAssetSymbols = ['BTC', 'USDT', 'ETH'];
+
+        // 2. Get the assets from the API and create a lookup map for efficiency.
+        // This makes it easy to find the balance for a specific symbol.
+        const userAssets = fetchedUser.assets || [];
+        const assetBalanceMap = new Map(
+            userAssets.map(asset => [asset.symbol.toUpperCase(), asset.amount])
+        );
+
+        // 3. Loop through our defined list of symbols, not the list from the API.
+        displayAssetSymbols.forEach(symbol => {
+          // Get the balance from our map, or default to 0 if it's not found.
+          const amount = assetBalanceMap.get(symbol) || 0;
+          
+          const div = document.createElement('div');
+          div.className = 'asset-item';
+          
+          // Use the correct number of decimal places based on the asset type.
+          const formattedAmount = parseFloat(amount).toFixed(symbol === 'BTC' || symbol === 'ETH' ? 8 : 2);
+
+          div.innerHTML = `<strong>${symbol}:</strong> ${formattedAmount}`;
+          assetsContainer.appendChild(div);
+        });
       }
+      // =========================== ASSET DISPLAY LOGIC END ===========================
+
     } catch (err) {
       console.error('DASHBOARD.JS: Error loading user profile data:', err.message);
       const balanceEl = document.getElementById('availableBalance');
@@ -221,9 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <p><small>Matures: ${maturityDate} | Unlocks for Withdrawal: ${unlockDate}</small></p>
                             ${canWithdraw ? 
                                 `<button class="withdraw-btn-plan" data-investment-id="${inv._id}" style="background-color: #28a745; color:white; border:none; padding: 8px 12px; border-radius:4px; cursor:pointer;">Withdraw Funds</button>` :
-                                // ========================== STYLE CHANGE IS HERE ==========================
                                 `<small style="color: red; font-weight: bold;">Withdrawal Locked until ${unlockDate}</small>`
-                                // ==========================================================================
                             }
                             `;
                             container.appendChild(el);
@@ -399,4 +413,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeDashboard();
 
 });
-// --- END OF dashboard.js (Corrected to Hide Withdrawn Investments & Style Locked Text) ---
+// --- END OF dashboard.js (Modified to show specific assets) ---
