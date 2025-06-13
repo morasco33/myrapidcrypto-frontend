@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard | RapidCrypto</title>
-  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="stylesheet" href="dashboard.css" /> <!-- Make sure you have this CSS file -->
   <style>
     body { font-family: sans-serif; margin: 0; background-color: #f4f7f6; color: #333; }
     main { max-width: 1200px; margin: 20px auto; padding: 20px; background-color: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -67,6 +67,7 @@
     </section>
   </main>
 
+  <!-- ======================= FULLY CORRECTED MODAL ======================= -->
   <div id="editUserModal" class="modal">
     <div class="modal-content">
       <span class="modal-close" onclick="closeModal('editUserModal')">×</span>
@@ -97,6 +98,7 @@
       
       <hr>
 
+      <!-- THIS IS THE SECTION THAT WAS MISSING FROM YOUR VIEW -->
       <h3>Credit Crypto Assets (Enter amount to ADD)</h3>
       <p><small>Current user asset balances:</small></p>
       <div id="editUserCurrentAssets" class="asset-balance-grid"></div>
@@ -113,11 +115,13 @@
         <label for="addUsdtInput">Add USDT Amount:</label>
         <input type="number" id="addUsdtInput" step="any" placeholder="e.g., 500">
       </div>
+      <!-- END OF THE MISSING SECTION -->
 
       <button id="saveUserChangesBtn">Save Changes</button>
       <div id="editUserModalMessage" class="info-text"></div>
     </div>
   </div>
+  <!-- ======================== END OF MODAL ======================== -->
 
 
   <script>
@@ -241,7 +245,7 @@
             <p><strong>ID:</strong> ${user._id}</p>
             <p><strong>Username:</strong> ${user.username}</p>
             <p><strong>Email:</strong> ${user.email}</p>
-            <p><strong>Main Balance:</strong> $${user.balance?.toFixed(2) || '0.00'}</p>
+            <p><strong>Main Balance:</strong> $${(user.balance || 0).toFixed(2)}</p>
             <p><strong>Crypto Assets:</strong></p><ul>${userAssetsHtml}</ul>
             <p><strong>Email Verified:</strong> ${user.verified ? 'Yes' : 'No'}</p>
             <p><strong>Admin Approved:</strong> ${user.adminApproved ? 'Yes' : 'No'}</p>
@@ -266,7 +270,7 @@
         editUserIdInput.value = user._id;
         editUserEmailSpan.textContent = user.email;
         editUsernameInput.value = user.username;
-        editBalanceInput.value = user.balance?.toFixed(2) || '0.00';
+        editBalanceInput.value = (user.balance || 0).toFixed(2);
         editIsAdminCheckbox.checked = user.isAdmin || false;
         editIsVerifiedCheckbox.checked = user.verified || false;
         editIsAdminApprovedCheckbox.checked = user.adminApproved || false;
@@ -344,9 +348,11 @@
     }
 
     async function handleResendVerification(userId) {
-        if (!userId) { // In case it's called from the event directly
+        if (event && event.target) {
             userId = event.target.dataset.id || event.target.dataset.userid;
         }
+        if (!userId) return; 
+
         if (!confirm(`Are you sure you want to resend verification email for user ID: ${userId}?`)) return;
         try {
             const result = await apiCall(`/admin/resend-verification/${userId}`, 'POST');
